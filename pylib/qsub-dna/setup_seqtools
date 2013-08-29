@@ -1,0 +1,40 @@
+
+
+alias python '/ifs/home/c2b2/dp_lab/bc2252/bin/python2.7'
+setenv PATH ".:/bin:/usr/bin:/usr/X11R6/bin:$PATH"
+setenv PATH "/nfs/apps/R/2.14.0/bin:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/samtools:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/samtools/bcftools:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/bwa:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/maq:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/msort:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/FastQC:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/picard:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/GATK:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/samstat:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/bedtools/bin:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/vcftools/bin:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/tabix:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/freebayes/bin:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/snpEff/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/cnD/bin/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/cnv-seq/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/tophat2/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/cufflinks/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/bowtie/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/bowtie2/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/velvet/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/oases/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/SRA/bin64/:$PATH"
+
+
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/PROGRAMS/ncbi-blast-2.2.26+/bin:$PATH"
+setenv PATH "/ifs/home/c2b2/dp_lab/bc2252/PROGRAMS/blast-2.2.26/bin:$PATH"
+
+setenv MPLCONFIGDIR "/ifs/scratch/c2b2/dp_lab/bc2252/.matplotlib/"
+setenv PERL5LIB "/ifs/home/c2b2/dp_lab/bc2252/SeqTool/vcftools/lib/perl5/site_perl"
+setenv R_LIBS "/ifs/home/c2b2/dp_lab/bc2252/Rlib/"
+#setenv BOWTIE_INDEXES "/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/"
+setenv BOWTIE2_INDEXES "/ifs/data/c2b2/dp_lab/shares/Data/Human/bowtieIndex2/"
+

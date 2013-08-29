@@ -1,0 +1,363 @@
+
+
+#tophat, output files will be located to <outputpath>/<prefix>/<sample> for each sample; mem is requested for EACH thread; for fusion search (with bowtie 1)
+tophat.GTF:
+cmd	tophat
+--library-type	fr-firststrand
+--mate-inner-dist	200
+--mate-std-dev	20
+--fusion-search
+--bowtie1
+--GTF	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
+--transcriptome-index	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/transcriptome/hg19
+--solexa1.3-quals
+-p	2
+genome	hg19
+readext	.fq.gz
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+prefix	GTF
+inputpath	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/RNASeq/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/
+overwrite	False
+mem	4G
+time	120::
+
+
+#tophat, output files will be located to <outputpath>/<prefix>/<sample> for each sample; mem is requested for EACH thread; NO FUSION search, using bowtie2
+tophat.bowtie2.GTF:
+cmd	tophat
+--library-type	fr-firststrand
+#--coverage-search
+--mate-inner-dist	200
+--mate-std-dev	20
+--GTF	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
+--transcriptome-index	/ifs/data/c2b2/dp_lab/shares/Data/Human/bowtieIndex2/transcriptome/hg19trans
+--solexa1.3-quals
+-p	1
+genome	hg19
+readext	.fq.gz
+sample	Mel19-control_sub
+#sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+prefix	GTF
+inputpath	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/RNASeq/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/
+overwrite	True
+mem	6G
+time	120::
+
+
+
+#run it without known gene models; take longer (set thread higher)
+tophat.WoGTF:	      	   	   		      
+cmd	tophat
+--library-type	fr-firststrand
+--mate-inner-dist	200
+--mate-std-dev	20
+--solexa1.3-quals
+-p	4
+genome	hg19
+readext	.fq.gz
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+prefix	WoGTF
+inputpath	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/RNASeq/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/
+overwrite	False
+mem	1.5G
+time	240::
+
+
+
+#RNA-SeQC: run RNA-SeQC on bam files
+RNA-SeQC.GTF:
+#cmd	java -Djava.io.tmpdir=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/ -Xmx8g -jar ~/SeqTool/RNA-SeQC/RNA-SeQC_v1.1.4.jar
+cmd	RNA-SeQC_v1.1.4.jar
+programpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/
+-Djava.io.tmpdir	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/ 
+-BWArRNA	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/human_all_rRNA.fasta
+-gc	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/gencode.v7.gc.txt
+-t	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/gencode.v7.annotation.gtf
+-r	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/hg19.fa
+-n	1000
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/
+prefix	RNA-SeQC_GTF
+bam	accepted_hits.reorder.addRG.filter.mdup.bam
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+overwrite	True
+mem	10G
+time	12::
+
+
+#RNA-SeQC: run RNA-SeQC on bam files
+RNA-SeQC.WoGTF:
+#cmd	java -Djava.io.tmpdir=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/ -Xmx8g -jar ~/SeqTool/RNA-SeQC/RNA-SeQC_v1.1.4.jar
+cmd	RNA-SeQC_v1.1.4.jar
+programpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/
+-Djava.io.tmpdir	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/ 
+-BWArRNA	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/human_all_rRNA.fasta
+-gc	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/gencode.v7.gc.txt
+-t	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/RNA-SeQC/gencode.v7.annotation.gtf
+-r	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/hg19.fa
+-n	1000
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/WoGTF/
+prefix	RNA-SeQC_WoGTF
+bam	accepted_hits.reorder.addRG.filter.mdup.bam
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+overwrite	True
+mem	20G
+time	48::
+
+
+#picard QC: RNASeqMetrics, MultipleMetrics, LibraryComplexity, GCBias
+picardQC.GTF:
+cmd	picardQC
+TMP_DIR	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/
+REF_FLAT	=/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/refFlat.txt
+STRAND_SPECIFICITY	=FIRST_READ_TRANSCRIPTION_STRAND
+REFERENCE_SEQUENCE	=/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/hg19.fa 
+PROGRAM	=CollectAlignmentSummaryMetrics; CollectInsertSizeMetrics; QualityScoreDistribution; MeanQualityByCycle 
+programpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/picard/
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/picardQC/
+prefix	picardQC_GTF
+bam	accepted_hits.reorder.addRG.bam
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+overwrite	True
+mem	12G
+time	24::
+
+
+#picard QC: RNASeqMetrics, MultipleMetrics, LibraryComplexity, GCBias
+picardQC.WoGTF:
+cmd	picardQC
+TMP_DIR	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/
+REF_FLAT	=/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/refFlat.txt
+STRAND_SPECIFICITY	=FIRST_READ_TRANSCRIPTION_STRAND
+REFERENCE_SEQUENCE	=/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/hg19.fa 
+PROGRAM	=CollectAlignmentSummaryMetrics; CollectInsertSizeMetrics; QualityScoreDistribution; MeanQualityByCycle 
+programpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/picard/
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/WoGTF/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/WoGTF/picardQC/
+prefix	picardQC_WoGTF
+bam	accepted_hits.reorder.addRG.bam
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+overwrite	True
+mem	12G
+time	24::
+
+
+#run RSeQC
+RSeQC.GTF:
+cmd	RSeQC
+--refgene	/ifs/data/c2b2/dp_lab/bc2252/projects/melanoma/bowtieindexes/hg19_GRCh37_Feb2009_knownGene.bed
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/RSeQC/
+programpath	/ifs/home/c2b2/dp_lab/bc2252/bin/
+prefix	RSeQC_GTF
+bam	accepted_hits.bam
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+overwrite	True
+mem	8G
+time	24::
+
+
+#run cufflinks
+cufflinks.GTF:
+cmd	cufflinks
+--library-type	fr-firststrand
+#--frag-len-mean	200
+#--frag-len-std-dev	20
+#no non-coding RNA
+#--GTF	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
+#will report non-coding RNA
+--GTF-guide	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
+--frag-bias-correct	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/hg19.fa
+--multi-read-correct
+--upper-quartile-norm
+-p	2
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+bam	accepted_hits.bam
+prefix	GTF.cuff
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/
+overwrite	True
+mem	8G
+time	240::
+
+
+
+cuffcompare.GTF:
+cmd	cuffcompare
+-r	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
+-R
+-o	GTF.cuffcmp
+-s	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/
+-C
+prefix	GTF.cuffcmp
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuff/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuffcmp/
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+gtf	transcripts.gtf
+overwrite	True
+mem	8G
+time	72::
+
+
+
+#run cuffmerge
+cuffmerge.GTF:
+cmd	cuffmerge
+--ref-gtf	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
+-o	GTF.cuffmerge
+-p	1
+--ref-sequence	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/hg19.fa
+prefix	GTF.cuffmerge
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuff/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuffmerge/
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+gtf	transcripts.gtf
+overwrite	True
+mem	12G
+time	72::
+
+
+
+cuffdiff.merge.GTF:
+cmd	cuffdiff
+--output-dir	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuffdiff/merge/
+--upper-quartile-norm
+#use this correction only once (in cufflinks)
+#--frag-bias-correct	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/hg19.fa
+--multi-read-correct
+--labels	A375-control,A375-MEKi,Mel19-control,Mel19-AKTi,Mel19-MEKi,Mel39-control,Mel39-MEKi
+-p	2
+--library-type	fr-firststrand
+--quiet	
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/
+prefix	GTF.merge.cuffdiff
+gtf	/ifs/home/c2b2/dp_lab/bc2252/scratch/melanoma/CUFF2/GTF.cuffmerge/merged.gtf
+bam	accepted_hits.bam
+overwrite	True
+mem	8G
+time	72::
+
+
+#use combined.gtf (from cuffcompare)
+cuffdiff.combine.GTF:
+cmd	cuffdiff
+--output-dir	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuffdiff/combine/
+#--upper-quartile-norm
+#use this correction only once (in cufflinks)
+#--frag-bias-correct	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/hg19.fa
+--multi-read-correct
+--labels	A375-control,A375-MEKi,Mel19-control,Mel19-AKTi,Mel19-MEKi,Mel39-control,Mel39-MEKi
+-p	2
+--library-type	fr-firststrand
+--quiet	
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/
+prefix	GTF.combine.cuffdiff
+gtf	/ifs/home/c2b2/dp_lab/bc2252/scratch/melanoma/CUFF2/GTF.cuffcmp/GTF.cuffcmp.combined.gtf
+bam	accepted_hits.bam
+overwrite	True
+mem	8G
+time	72::
+
+
+#test parameter setting
+cuffdiff.test.GTF:
+cmd	cuffdiff
+--output-dir	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF2/GTF.cuffdiff/test/
+#--upper-quartile-norm
+#use this correction only once (in cufflinks)
+#--frag-bias-correct	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/hg19.fa
+#--multi-read-correct
+--labels	A375-control,A375-MEKi,Mel19-control,Mel19-AKTi,Mel19-MEKi,Mel39-control,Mel39-MEKi
+-p	2
+--library-type	fr-firststrand
+--quiet	
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/
+prefix	GTF.test.cuffdiff
+gtf	/ifs/home/c2b2/dp_lab/bc2252/scratch/melanoma/CUFF1/GTF.cuffcmp/GTF.cuffcmp.combined.gtf
+bam	accepted_hits.bam
+overwrite	True
+mem	8G
+time	72::
+
+
+
+#use combined.gtf (from cuffcompare), run cufflinks 1
+cuffdiff1.combine.GTF:
+cmd	cuffdiff_v1
+--output-dir	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/CUFF1/GTF.cuffdiff/combine/
+#--upper-quartile-norm
+#use this correction only once (in cufflinks)
+--frag-bias-correct	/ifs/home/c2b2/dp_lab/bc2252/DATA/projects/melanoma/bowtieindexes/hg19.fa
+--multi-read-correct
+--labels	A375-control,A375-MEKi,Mel19-control,Mel19-AKTi,Mel19-MEKi,Mel39-control,Mel39-MEKi
+-p	2
+--library-type	fr-firststrand
+--quiet	
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/
+prefix	GTF.combine.cuffdiff1
+gtf	/ifs/home/c2b2/dp_lab/bc2252/scratch/melanoma/CUFF1/GTF.cuffcmp/GTF.cuffcmp.combined.gtf
+bam	accepted_hits.bam
+overwrite	True
+mem	8G
+time	72::
+
+
+
+countmismatches:
+cmd	countmismatches
+prefix	mc
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHATOUT/GTF/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/forwardQC/
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+bam	accepted_hits.reorder.addRG.bam
+overwrite	True
+mem	6G
+time	8::
+
+
+#prepare for GATK
+preGATK.GTF:
+cmd	preGATK
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/
+picardpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/picard/
+gatkpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/GATK/
+sample	Mel19-MEKi; Mel39-control
+#sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+-R	/ifs/data/c2b2/dp_lab/shares/Data/Human/bowtieIndex2/hg19.fa
+-Djava.io.tmpdir	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/ 
+-filterMBQ
+bam	accepted_hits.bam
+prefix	preGATK_GTF
+overwrite	True
+mem	10G
+time	72::
+
+
+#GATK genotyper
+GATK.genotyper.GTF:
+cmd	GATK_genotyper
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/GATK/
+gatkpath	/ifs/home/c2b2/dp_lab/bc2252/SeqTool/GATK/
+sample	A375-control; A375-MEKi; Mel19-control; Mel19-AKTi; Mel19-MEKi; Mel39-control; Mel39-MEKi
+-R	/ifs/data/c2b2/dp_lab/shares/Data/Human/bowtieIndex2/hg19.fa
+-Djava.io.tmpdir	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/ 
+-filterMBQ
+-glm	BOTH
+-stand_call_conf	30
+-stand_emit_conf	30
+-o	/ifs/scratch/c2b2/dp_lab/bc2252/melanoma/TOPHAT2/bowtie2/GTF/GATK/gatk.vcf
+bam	accepted_hits.filter.reorder.addRG.mdup.realign.bam
+prefix	GATK_Genotyper
+overwrite	True
+mem	32G
+time	240::
+
+

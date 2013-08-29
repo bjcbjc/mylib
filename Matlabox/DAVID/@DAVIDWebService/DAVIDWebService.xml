@@ -1,0 +1,1328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://service.session.sample" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax23="http://DAVID/xsd" xmlns:ax21="http://service.session.sample/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.session.sample">
+    <wsdl:documentation>DAVIDWebService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ax24="http://DAVID/xsd" xmlns:ax22="http://service.session.sample/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.session.sample">
+            <xs:import namespace="http://service.session.sample/xsd"/>
+            <xs:import namespace="http://DAVID/xsd"/>
+            <xs:element name="setCurrentSpecies">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCurrentSpeciesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCurrentPopulation">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCurrentPopulationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="Exception">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="Exception" nillable="true" type="xs:anyType"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="Exception">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="Exception" nillable="true" type="ns:Exception"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCurrentList">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCurrentListResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCategories">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCategoriesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="loadTesting">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args1" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args2" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args3" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args4" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args5" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="loadTestingResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTermClusterReport">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args1" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args2" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args3" type="xs:double"/>
+                        <xs:element minOccurs="0" name="args4" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTermClusterReportResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax22:simpleTermClusterRecord"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTableReportResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax24:tableRecord"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getSummaryReportResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax24:mainSummaryRecord"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getSpeciesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getListReportResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax24:listRecord"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getListName">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args1" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getListNameResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getGeneReportCategoriesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getGeneClusterReport">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args1" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args2" type="xs:int"/>
+                        <xs:element minOccurs="0" name="args3" type="xs:double"/>
+                        <xs:element minOccurs="0" name="args4" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getGeneClusterReportResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax22:simpleGeneClusterRecord"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDefaultCategoryNamesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCurrentSpeciesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCurrentPopulationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCurrentListResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getConversionTypesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getChartReport">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" type="xs:double"/>
+                        <xs:element minOccurs="0" name="args1" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getChartReportResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax22:simpleChartRecord"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllPopulationNamesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllListNamesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllAnnotationCategoryNamesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="authenticate">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="authenticateResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addList">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args1" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args2" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="args3" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addListResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:double"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://DAVID/xsd">
+            <xs:complexType name="tableRecord">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="annotationRecords" nillable="true" type="ax23:annotationRecord"/>
+                    <xs:element minOccurs="0" name="geneObject" nillable="true" type="ax23:geneObject"/>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="species" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="ax23:ArrayOfString"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="annotationRecord">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="category" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="terms" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="geneObject">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="categories" nillable="true" type="xs:int"/>
+                    <xs:element minOccurs="0" name="id" type="xs:int"/>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="taxId" type="xs:int"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="terms" nillable="true" type="xs:int"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ArrayOfString">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="array" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="mainSummaryRecord">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="mainCategory" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="summaryRecords" nillable="true" type="ax23:summaryRecord"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="summaryRecord">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="category" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="categoryId" type="xs:int"/>
+                    <xs:element minOccurs="0" name="count" type="xs:int"/>
+                    <xs:element minOccurs="0" name="percent" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="listRecord">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="geneObject" nillable="true" type="ax23:geneObject"/>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="species" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema xmlns:ax25="http://DAVID/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.session.sample/xsd">
+            <xs:import namespace="http://DAVID/xsd"/>
+            <xs:complexType name="simpleTermClusterRecord">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="score" type="xs:double"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="simpleChartRecords" nillable="true" type="ax21:simpleChartRecord"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="simpleChartRecord">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="EASEBonferroni" type="xs:double"/>
+                    <xs:element minOccurs="0" name="afdr" type="xs:double"/>
+                    <xs:element minOccurs="0" name="benjamini" type="xs:double"/>
+                    <xs:element minOccurs="0" name="bonferroni" type="xs:double"/>
+                    <xs:element minOccurs="0" name="categoryName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="ease" type="xs:double"/>
+                    <xs:element minOccurs="0" name="fisher" type="xs:double"/>
+                    <xs:element minOccurs="0" name="foldEnrichment" type="xs:double"/>
+                    <xs:element minOccurs="0" name="geneIds" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="id" type="xs:int"/>
+                    <xs:element minOccurs="0" name="listHits" type="xs:int"/>
+                    <xs:element minOccurs="0" name="listName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="listTotals" type="xs:int"/>
+                    <xs:element minOccurs="0" name="percent" type="xs:double"/>
+                    <xs:element minOccurs="0" name="popHits" type="xs:int"/>
+                    <xs:element minOccurs="0" name="popTotals" type="xs:int"/>
+                    <xs:element minOccurs="0" name="rfdr" type="xs:double"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="scores" nillable="true" type="xs:double"/>
+                    <xs:element minOccurs="0" name="termName" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="simpleGeneClusterRecord">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="listRecords" nillable="true" type="ax23:listRecord"/>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="score" type="xs:double"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="authenticateRequest">
+        <wsdl:part name="parameters" element="ns:authenticate"/>
+    </wsdl:message>
+    <wsdl:message name="authenticateResponse">
+        <wsdl:part name="parameters" element="ns:authenticateResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getAllPopulationNamesRequest"/>
+    <wsdl:message name="getAllPopulationNamesResponse">
+        <wsdl:part name="parameters" element="ns:getAllPopulationNamesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getGeneReportCategoriesRequest"/>
+    <wsdl:message name="getGeneReportCategoriesResponse">
+        <wsdl:part name="parameters" element="ns:getGeneReportCategoriesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getCurrentListRequest"/>
+    <wsdl:message name="getCurrentListResponse">
+        <wsdl:part name="parameters" element="ns:getCurrentListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getAllListNamesRequest"/>
+    <wsdl:message name="getAllListNamesResponse">
+        <wsdl:part name="parameters" element="ns:getAllListNamesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getDefaultCategoryNamesRequest"/>
+    <wsdl:message name="getDefaultCategoryNamesResponse">
+        <wsdl:part name="parameters" element="ns:getDefaultCategoryNamesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="setCurrentPopulationRequest">
+        <wsdl:part name="parameters" element="ns:setCurrentPopulation"/>
+    </wsdl:message>
+    <wsdl:message name="setCurrentPopulationResponse">
+        <wsdl:part name="parameters" element="ns:setCurrentPopulationResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getGeneClusterReportRequest">
+        <wsdl:part name="parameters" element="ns:getGeneClusterReport"/>
+    </wsdl:message>
+    <wsdl:message name="getGeneClusterReportResponse">
+        <wsdl:part name="parameters" element="ns:getGeneClusterReportResponse"/>
+    </wsdl:message>
+    <wsdl:message name="Exception">
+        <wsdl:part name="parameters" element="ns:Exception"/>
+    </wsdl:message>
+    <wsdl:message name="getTableReportRequest"/>
+    <wsdl:message name="getTableReportResponse">
+        <wsdl:part name="parameters" element="ns:getTableReportResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getAllAnnotationCategoryNamesRequest"/>
+    <wsdl:message name="getAllAnnotationCategoryNamesResponse">
+        <wsdl:part name="parameters" element="ns:getAllAnnotationCategoryNamesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getCurrentSpeciesRequest"/>
+    <wsdl:message name="getCurrentSpeciesResponse">
+        <wsdl:part name="parameters" element="ns:getCurrentSpeciesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getTermClusterReportRequest">
+        <wsdl:part name="parameters" element="ns:getTermClusterReport"/>
+    </wsdl:message>
+    <wsdl:message name="getTermClusterReportResponse">
+        <wsdl:part name="parameters" element="ns:getTermClusterReportResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getCurrentPopulationRequest"/>
+    <wsdl:message name="getCurrentPopulationResponse">
+        <wsdl:part name="parameters" element="ns:getCurrentPopulationResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getConversionTypesRequest"/>
+    <wsdl:message name="getConversionTypesResponse">
+        <wsdl:part name="parameters" element="ns:getConversionTypesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getListNameRequest">
+        <wsdl:part name="parameters" element="ns:getListName"/>
+    </wsdl:message>
+    <wsdl:message name="getListNameResponse">
+        <wsdl:part name="parameters" element="ns:getListNameResponse"/>
+    </wsdl:message>
+    <wsdl:message name="setCurrentSpeciesRequest">
+        <wsdl:part name="parameters" element="ns:setCurrentSpecies"/>
+    </wsdl:message>
+    <wsdl:message name="setCurrentSpeciesResponse">
+        <wsdl:part name="parameters" element="ns:setCurrentSpeciesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getChartReportRequest">
+        <wsdl:part name="parameters" element="ns:getChartReport"/>
+    </wsdl:message>
+    <wsdl:message name="getChartReportResponse">
+        <wsdl:part name="parameters" element="ns:getChartReportResponse"/>
+    </wsdl:message>
+    <wsdl:message name="setCategoriesRequest">
+        <wsdl:part name="parameters" element="ns:setCategories"/>
+    </wsdl:message>
+    <wsdl:message name="setCategoriesResponse">
+        <wsdl:part name="parameters" element="ns:setCategoriesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getListReportRequest"/>
+    <wsdl:message name="getListReportResponse">
+        <wsdl:part name="parameters" element="ns:getListReportResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getSummaryReportRequest"/>
+    <wsdl:message name="getSummaryReportResponse">
+        <wsdl:part name="parameters" element="ns:getSummaryReportResponse"/>
+    </wsdl:message>
+    <wsdl:message name="setCurrentListRequest">
+        <wsdl:part name="parameters" element="ns:setCurrentList"/>
+    </wsdl:message>
+    <wsdl:message name="setCurrentListResponse">
+        <wsdl:part name="parameters" element="ns:setCurrentListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="loadTestingRequest">
+        <wsdl:part name="parameters" element="ns:loadTesting"/>
+    </wsdl:message>
+    <wsdl:message name="loadTestingResponse">
+        <wsdl:part name="parameters" element="ns:loadTestingResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getSpeciesRequest"/>
+    <wsdl:message name="getSpeciesResponse">
+        <wsdl:part name="parameters" element="ns:getSpeciesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="addListRequest">
+        <wsdl:part name="parameters" element="ns:addList"/>
+    </wsdl:message>
+    <wsdl:message name="addListResponse">
+        <wsdl:part name="parameters" element="ns:addListResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="DAVIDWebServicePortType">
+        <wsdl:operation name="authenticate">
+            <wsdl:input message="ns:authenticateRequest" wsaw:Action="urn:authenticate"/>
+            <wsdl:output message="ns:authenticateResponse" wsaw:Action="urn:authenticateResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllPopulationNames">
+            <wsdl:input message="ns:getAllPopulationNamesRequest" wsaw:Action="urn:getAllPopulationNames"/>
+            <wsdl:output message="ns:getAllPopulationNamesResponse" wsaw:Action="urn:getAllPopulationNamesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneReportCategories">
+            <wsdl:input message="ns:getGeneReportCategoriesRequest" wsaw:Action="urn:getGeneReportCategories"/>
+            <wsdl:output message="ns:getGeneReportCategoriesResponse" wsaw:Action="urn:getGeneReportCategoriesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentList">
+            <wsdl:input message="ns:getCurrentListRequest" wsaw:Action="urn:getCurrentList"/>
+            <wsdl:output message="ns:getCurrentListResponse" wsaw:Action="urn:getCurrentListResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllListNames">
+            <wsdl:input message="ns:getAllListNamesRequest" wsaw:Action="urn:getAllListNames"/>
+            <wsdl:output message="ns:getAllListNamesResponse" wsaw:Action="urn:getAllListNamesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getDefaultCategoryNames">
+            <wsdl:input message="ns:getDefaultCategoryNamesRequest" wsaw:Action="urn:getDefaultCategoryNames"/>
+            <wsdl:output message="ns:getDefaultCategoryNamesResponse" wsaw:Action="urn:getDefaultCategoryNamesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentPopulation">
+            <wsdl:input message="ns:setCurrentPopulationRequest" wsaw:Action="urn:setCurrentPopulation"/>
+            <wsdl:output message="ns:setCurrentPopulationResponse" wsaw:Action="urn:setCurrentPopulationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneClusterReport">
+            <wsdl:input message="ns:getGeneClusterReportRequest" wsaw:Action="urn:getGeneClusterReport"/>
+            <wsdl:output message="ns:getGeneClusterReportResponse" wsaw:Action="urn:getGeneClusterReportResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:getGeneClusterReportException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getTableReport">
+            <wsdl:input message="ns:getTableReportRequest" wsaw:Action="urn:getTableReport"/>
+            <wsdl:output message="ns:getTableReportResponse" wsaw:Action="urn:getTableReportResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:getTableReportException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllAnnotationCategoryNames">
+            <wsdl:input message="ns:getAllAnnotationCategoryNamesRequest" wsaw:Action="urn:getAllAnnotationCategoryNames"/>
+            <wsdl:output message="ns:getAllAnnotationCategoryNamesResponse" wsaw:Action="urn:getAllAnnotationCategoryNamesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentSpecies">
+            <wsdl:input message="ns:getCurrentSpeciesRequest" wsaw:Action="urn:getCurrentSpecies"/>
+            <wsdl:output message="ns:getCurrentSpeciesResponse" wsaw:Action="urn:getCurrentSpeciesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getTermClusterReport">
+            <wsdl:input message="ns:getTermClusterReportRequest" wsaw:Action="urn:getTermClusterReport"/>
+            <wsdl:output message="ns:getTermClusterReportResponse" wsaw:Action="urn:getTermClusterReportResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:getTermClusterReportException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentPopulation">
+            <wsdl:input message="ns:getCurrentPopulationRequest" wsaw:Action="urn:getCurrentPopulation"/>
+            <wsdl:output message="ns:getCurrentPopulationResponse" wsaw:Action="urn:getCurrentPopulationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getConversionTypes">
+            <wsdl:input message="ns:getConversionTypesRequest" wsaw:Action="urn:getConversionTypes"/>
+            <wsdl:output message="ns:getConversionTypesResponse" wsaw:Action="urn:getConversionTypesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getListName">
+            <wsdl:input message="ns:getListNameRequest" wsaw:Action="urn:getListName"/>
+            <wsdl:output message="ns:getListNameResponse" wsaw:Action="urn:getListNameResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentSpecies">
+            <wsdl:input message="ns:setCurrentSpeciesRequest" wsaw:Action="urn:setCurrentSpecies"/>
+            <wsdl:output message="ns:setCurrentSpeciesResponse" wsaw:Action="urn:setCurrentSpeciesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getChartReport">
+            <wsdl:input message="ns:getChartReportRequest" wsaw:Action="urn:getChartReport"/>
+            <wsdl:output message="ns:getChartReportResponse" wsaw:Action="urn:getChartReportResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:getChartReportException"/>
+        </wsdl:operation>
+        <wsdl:operation name="setCategories">
+            <wsdl:input message="ns:setCategoriesRequest" wsaw:Action="urn:setCategories"/>
+            <wsdl:output message="ns:setCategoriesResponse" wsaw:Action="urn:setCategoriesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getListReport">
+            <wsdl:input message="ns:getListReportRequest" wsaw:Action="urn:getListReport"/>
+            <wsdl:output message="ns:getListReportResponse" wsaw:Action="urn:getListReportResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:getListReportException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getSummaryReport">
+            <wsdl:input message="ns:getSummaryReportRequest" wsaw:Action="urn:getSummaryReport"/>
+            <wsdl:output message="ns:getSummaryReportResponse" wsaw:Action="urn:getSummaryReportResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:getSummaryReportException"/>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentList">
+            <wsdl:input message="ns:setCurrentListRequest" wsaw:Action="urn:setCurrentList"/>
+            <wsdl:output message="ns:setCurrentListResponse" wsaw:Action="urn:setCurrentListResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:setCurrentListException"/>
+        </wsdl:operation>
+        <wsdl:operation name="loadTesting">
+            <wsdl:input message="ns:loadTestingRequest" wsaw:Action="urn:loadTesting"/>
+            <wsdl:output message="ns:loadTestingResponse" wsaw:Action="urn:loadTestingResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:loadTestingException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getSpecies">
+            <wsdl:input message="ns:getSpeciesRequest" wsaw:Action="urn:getSpecies"/>
+            <wsdl:output message="ns:getSpeciesResponse" wsaw:Action="urn:getSpeciesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="addList">
+            <wsdl:input message="ns:addListRequest" wsaw:Action="urn:addList"/>
+            <wsdl:output message="ns:addListResponse" wsaw:Action="urn:addListResponse"/>
+            <wsdl:fault message="ns:Exception" name="Exception" wsaw:Action="urn:addListException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="DAVIDWebServiceSoap11Binding" type="ns:DAVIDWebServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="authenticate">
+            <soap:operation soapAction="urn:authenticate" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneReportCategories">
+            <soap:operation soapAction="urn:getGeneReportCategories" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllPopulationNames">
+            <soap:operation soapAction="urn:getAllPopulationNames" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentList">
+            <soap:operation soapAction="urn:getCurrentList" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentPopulation">
+            <soap:operation soapAction="urn:setCurrentPopulation" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getDefaultCategoryNames">
+            <soap:operation soapAction="urn:getDefaultCategoryNames" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllListNames">
+            <soap:operation soapAction="urn:getAllListNames" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneClusterReport">
+            <soap:operation soapAction="urn:getGeneClusterReport" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getAllAnnotationCategoryNames">
+            <soap:operation soapAction="urn:getAllAnnotationCategoryNames" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTableReport">
+            <soap:operation soapAction="urn:getTableReport" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentSpecies">
+            <soap:operation soapAction="urn:getCurrentSpecies" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTermClusterReport">
+            <soap:operation soapAction="urn:getTermClusterReport" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentPopulation">
+            <soap:operation soapAction="urn:getCurrentPopulation" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getConversionTypes">
+            <soap:operation soapAction="urn:getConversionTypes" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getListName">
+            <soap:operation soapAction="urn:getListName" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentSpecies">
+            <soap:operation soapAction="urn:setCurrentSpecies" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getChartReport">
+            <soap:operation soapAction="urn:getChartReport" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="setCategories">
+            <soap:operation soapAction="urn:setCategories" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getListReport">
+            <soap:operation soapAction="urn:getListReport" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentList">
+            <soap:operation soapAction="urn:setCurrentList" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getSummaryReport">
+            <soap:operation soapAction="urn:getSummaryReport" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getSpecies">
+            <soap:operation soapAction="urn:getSpecies" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="loadTesting">
+            <soap:operation soapAction="urn:loadTesting" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addList">
+            <soap:operation soapAction="urn:addList" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DAVIDWebServiceSoap12Binding" type="ns:DAVIDWebServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="authenticate">
+            <soap12:operation soapAction="urn:authenticate" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneReportCategories">
+            <soap12:operation soapAction="urn:getGeneReportCategories" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllPopulationNames">
+            <soap12:operation soapAction="urn:getAllPopulationNames" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentList">
+            <soap12:operation soapAction="urn:getCurrentList" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentPopulation">
+            <soap12:operation soapAction="urn:setCurrentPopulation" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getDefaultCategoryNames">
+            <soap12:operation soapAction="urn:getDefaultCategoryNames" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllListNames">
+            <soap12:operation soapAction="urn:getAllListNames" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneClusterReport">
+            <soap12:operation soapAction="urn:getGeneClusterReport" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getAllAnnotationCategoryNames">
+            <soap12:operation soapAction="urn:getAllAnnotationCategoryNames" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTableReport">
+            <soap12:operation soapAction="urn:getTableReport" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentSpecies">
+            <soap12:operation soapAction="urn:getCurrentSpecies" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTermClusterReport">
+            <soap12:operation soapAction="urn:getTermClusterReport" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentPopulation">
+            <soap12:operation soapAction="urn:getCurrentPopulation" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getConversionTypes">
+            <soap12:operation soapAction="urn:getConversionTypes" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getListName">
+            <soap12:operation soapAction="urn:getListName" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentSpecies">
+            <soap12:operation soapAction="urn:setCurrentSpecies" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getChartReport">
+            <soap12:operation soapAction="urn:getChartReport" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="setCategories">
+            <soap12:operation soapAction="urn:setCategories" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getListReport">
+            <soap12:operation soapAction="urn:getListReport" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentList">
+            <soap12:operation soapAction="urn:setCurrentList" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getSummaryReport">
+            <soap12:operation soapAction="urn:getSummaryReport" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getSpecies">
+            <soap12:operation soapAction="urn:getSpecies" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="loadTesting">
+            <soap12:operation soapAction="urn:loadTesting" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addList">
+            <soap12:operation soapAction="urn:addList" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="DAVIDWebServiceHttpBinding" type="ns:DAVIDWebServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="authenticate">
+            <http:operation location="DAVIDWebService/authenticate"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="authenticate"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="authenticate"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneReportCategories">
+            <http:operation location="DAVIDWebService/getGeneReportCategories"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getGeneReportCategories"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getGeneReportCategories"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllPopulationNames">
+            <http:operation location="DAVIDWebService/getAllPopulationNames"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getAllPopulationNames"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getAllPopulationNames"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentList">
+            <http:operation location="DAVIDWebService/getCurrentList"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getCurrentList"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getCurrentList"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentPopulation">
+            <http:operation location="DAVIDWebService/setCurrentPopulation"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="setCurrentPopulation"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="setCurrentPopulation"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getDefaultCategoryNames">
+            <http:operation location="DAVIDWebService/getDefaultCategoryNames"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getDefaultCategoryNames"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getDefaultCategoryNames"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllListNames">
+            <http:operation location="DAVIDWebService/getAllListNames"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getAllListNames"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getAllListNames"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getGeneClusterReport">
+            <http:operation location="DAVIDWebService/getGeneClusterReport"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getGeneClusterReport"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getGeneClusterReport"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllAnnotationCategoryNames">
+            <http:operation location="DAVIDWebService/getAllAnnotationCategoryNames"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getAllAnnotationCategoryNames"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getAllAnnotationCategoryNames"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTableReport">
+            <http:operation location="DAVIDWebService/getTableReport"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getTableReport"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getTableReport"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentSpecies">
+            <http:operation location="DAVIDWebService/getCurrentSpecies"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getCurrentSpecies"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getCurrentSpecies"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTermClusterReport">
+            <http:operation location="DAVIDWebService/getTermClusterReport"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getTermClusterReport"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getTermClusterReport"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCurrentPopulation">
+            <http:operation location="DAVIDWebService/getCurrentPopulation"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getCurrentPopulation"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getCurrentPopulation"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getConversionTypes">
+            <http:operation location="DAVIDWebService/getConversionTypes"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getConversionTypes"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getConversionTypes"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getListName">
+            <http:operation location="DAVIDWebService/getListName"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getListName"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getListName"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentSpecies">
+            <http:operation location="DAVIDWebService/setCurrentSpecies"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="setCurrentSpecies"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="setCurrentSpecies"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getChartReport">
+            <http:operation location="DAVIDWebService/getChartReport"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getChartReport"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getChartReport"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCategories">
+            <http:operation location="DAVIDWebService/setCategories"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="setCategories"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="setCategories"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getListReport">
+            <http:operation location="DAVIDWebService/getListReport"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getListReport"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getListReport"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCurrentList">
+            <http:operation location="DAVIDWebService/setCurrentList"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="setCurrentList"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="setCurrentList"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getSummaryReport">
+            <http:operation location="DAVIDWebService/getSummaryReport"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getSummaryReport"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getSummaryReport"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getSpecies">
+            <http:operation location="DAVIDWebService/getSpecies"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="getSpecies"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="getSpecies"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="loadTesting">
+            <http:operation location="DAVIDWebService/loadTesting"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="loadTesting"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="loadTesting"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addList">
+            <http:operation location="DAVIDWebService/addList"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="addList"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="addList"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="DAVIDWebService">
+        <wsdl:port name="DAVIDWebServiceHttpSoap11Endpoint" binding="ns:DAVIDWebServiceSoap11Binding">
+            <soap:address location="http://david.abcc.ncifcrf.gov:80/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="DAVIDWebServiceHttpSoap12Endpoint" binding="ns:DAVIDWebServiceSoap12Binding">
+            <soap12:address location="http://david.abcc.ncifcrf.gov:80/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="DAVIDWebServiceHttpEndpoint" binding="ns:DAVIDWebServiceHttpBinding">
+            <http:address location="http://david.abcc.ncifcrf.gov:80/webservice/services/DAVIDWebService.DAVIDWebServiceHttpEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,1028 @@
+
+
+enTrainCCLE_cv_BOLum:
+cmd	runCV
+call	runCV
+prefix	enTrainR02Cv
+dataset	CCLE01_BOLumSplit
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+ylogtransform	false
+trainmode	true
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleCvEn/CVpararun/jobrun/
+overwrite	True
+mem	3G
+time	24::
+
+
+btEnCCLE_cv_BOLum:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	enTrainCCLE01BtCv
+dataset	CCLE01_BOLumSplit
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	NA
+algo	lasso
+ylogtransform	false
+trainmode	true
+useallexp	false
+cumulatecount	false
+samplinghead	SamplingsR02CV
+lassoparahead	lassoParaR02CCLE00Cv
+runcv	10
+iter	1
+njob	10
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleBtEn/CVrun/jobrun/
+overwrite	True
+mem	3G
+time	4::
+
+
+btSplitCCLE_cv_BOLum:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtCv
+dataset	CCLE01_BOLumSplit
+pheno	[]
+usecn	true; false
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+predList	cancerGenes
+runcv	10
+iter	10
+njob	10
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/jobrun/
+overwrite	True
+mem	4G
+time	24::
+
+
+
+btSplitCCLE_BOLum:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	Split
+dataset	CCLE01_BOLumSplit
+pheno	[]
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrap
+ylogtransform	false
+trainmode	false
+cumulatecount	false
+useallexp	false
+samplinghead	Samplings
+algo	split
+iter	10
+njob	39
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/allbt/jobrun/
+overwrite	True
+mem	4G
+time	48::
+
+
+
+btEnCCLE_cv_breastovary:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	enTrainCCLE00BtCv
+dataset	CCLE00_BreastOvary
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	NA
+algo	lasso
+ylogtransform	false
+trainmode	true
+useallexp	false
+cumulatecount	false
+samplinghead	SamplingsR02CV
+lassoparahead	lassoParaR02CCLE00Cv
+runcv	10
+iter	1
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleBtEn/CVrun/jobrun/
+overwrite	True
+mem	3G
+time	4::
+
+
+
+enTrainCCLE_cv_breastovary:
+cmd	runCV
+call	runCV
+prefix	enTrainR02Cv
+dataset	CCLE_BreastOvary; CCLE01_BreastOvary; CCLE00_BreastOvary
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+ylogtransform	false
+trainmode	true
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleCvEn/CVpararun/jobrun/
+overwrite	True
+mem	3G
+time	24::
+
+
+btmicCCLE_cv_breastovary:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	micR02BtCv
+dataset	CCLE_BreastOvary; CCLE00_BreastOvary; CCLE01_BreastOvary
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	mic
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+iter	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleMic/CVrun/jobrun/
+overwrite	True
+mem	4G
+time	48::
+
+
+btmicCCLE_All_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	micR02BtCv
+dataset	CCLE_All
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	mic
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+iter	10
+njob	10
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleMic/CVrun/jobrun/
+overwrite	True
+mem	6G
+time	48::
+
+
+btSplitCCLE_BreastOvary:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	Split
+dataset	CCLE_BreastOvary; CCLE01_BreastOvary; CCLE00_BreastOvary
+pheno	[]
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrap
+ylogtransform	false
+trainmode	false
+cumulatecount	false
+useallexp	false
+samplinghead	Samplings
+algo	split
+iter	10
+njob	20
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/allbt/jobrun/
+overwrite	True
+mem	4G
+time	48::
+
+
+btSplitCCLE_cv_breastovary:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtCv
+dataset	CCLE00_BreastOvary; CCLE01_BreastOvary; CCLE_BreastOvary
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+predList	cancerGenes; randGenes03
+runcv	10
+iter	10
+njob	2
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/jobrun/
+overwrite	True
+mem	4G
+time	24::
+
+
+btSplitCCLE00_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtCv
+dataset	CCLE00_SkinGlioma; CCLE00_BreastOvary; CCLE00_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+predList	randGenes03
+runcv	10
+iter	10
+njob	1
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/CCLE00/jobrun/
+overwrite	True
+mem	4G
+time	24::
+
+
+btSplitCCLE01_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtCv
+dataset	CCLE01_SkinGlioma; CCLE01_BreastOvary; CCLE01_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+predList	cancerGenes; randGenes03
+runcv	10
+iter	10
+njob	1
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/CCLE01/jobrun/
+overwrite	True
+mem	4G
+time	24::
+
+
+
+btSplitCCLE_linearW_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtLwCv
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstraplinear
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+iter	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/linearweight/
+overwrite	True
+mem	3G
+time	72::
+
+
+
+btSplitCCLE_cv_rand:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtCv
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+predList	randGenes01; randGenes02; randGenes03
+runcv	10
+iter	10
+njob	1
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/rand/
+overwrite	True
+mem	3G
+time	10::
+
+
+
+btmicCCLE_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	micR02BtCv
+dataset	CCLE01_SkinGlioma; CCLE01_BreastOvary; CCLE01_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	mic
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+iter	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleMic/CVrun/jobrun/
+overwrite	True
+mem	4G
+time	48::
+
+
+
+btSplitCCLE_ae:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitBt
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	false
+cumulatecount	false
+useallexp	true
+samplinghead	Samplings
+iter	10
+njob	8
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/allbt/jobrun/
+overwrite	True
+mem	8G
+time	72::
+
+
+
+
+btSplitCCLE_mut:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitBt
+dataset	CCLE_Lung
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	false
+cumulatecount	false
+useallexp	false
+samplinghead	Samplings
+iter	10
+njob	5
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/allbt/jobrun/
+overwrite	True
+mem	3G
+time	72::
+
+
+
+simEn:
+cmd	testSim
+call	testsimulation
+prefix	simSEn
+dataset	synfromsplit
+algo	lasso
+cumulatecount	false
+noiseidx	0:1:4
+njob	3
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/sim/en/
+overwrite	True
+mem	3G
+time	12::
+
+
+simSplit:
+cmd	testSim
+call	testsimulation
+prefix	simSplitTEST
+dataset	synfrombeta
+algo	split
+priormethod	bootstrap; bootstrapexpected; bayes
+transresidual	false; true
+adaptiveSigmoid	false
+splitpriornorm	false; true
+btthres	0.3; 0.5; 0.8
+cumulatecount	false
+costCoef	2
+noiseidx	0; 1; 2; 3
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/sim/splittest2/jobrun/
+overwrite	True
+mem	4G
+time	10::
+
+
+btEnCCLE_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	enTrainBtCv
+dataset	CCLE01_SkinGlioma; CCLE01_BreastOvary; CCLE01_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	NA
+algo	lasso
+ylogtransform	false
+trainmode	true
+useallexp	false
+cumulatecount	false
+samplinghead	SamplingsR02CV
+lassoparahead	lassoParaR02CCLE01Cv
+runcv	10
+iter	1
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleBtEn/CVrun/jobrun/
+overwrite	True
+mem	3G
+time	4::
+
+
+enTrainCCLE_cv:
+cmd	runCV
+call	runCV
+prefix	enTrainR02Cv
+dataset	CCLE01_Skin; CCLE01_Glioma; CCLE01_Breast; CCLE01_Ovary
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+ylogtransform	false
+trainmode	true
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+njob	2
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleCvEn/CVpararun/CCLE01/jobrun/
+overwrite	True
+mem	3G
+time	24::
+
+
+
+
+btSplitCCLE_cv:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitR02BtCv
+#dataset	CCLE_BreastOvary
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	[]
+usecn	true
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	false
+trainmode	true
+cumulatecount	false
+useallexp	false
+samplinghead	SamplingsR02CV
+runcv	10
+iter	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/CVrun/
+overwrite	True
+mem	3G
+time	72::
+
+
+
+
+btSplitCCLE_cumcount:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	splitCumBt
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary
+#dataset	CCLE_Blood
+pheno	IC50; ACT
+usecn	true; false
+useDisease	false
+combineSplit	false
+priormethod	bootstrap
+algo	split
+ylogtransform	true; false
+trainmode	false
+cumulatecount	true
+useallexp	false
+iter	10
+njob	5
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/cumcount/
+overwrite	True
+mem	6G
+time	12::
+
+
+
+btEnTrainJoe:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	enTrain
+dataset	Joe
+pheno	GI50
+usecn	true; false
+useDisease	true; false
+combineSplit	true; false
+priormethod	NA
+algo	lasso
+ylogtransform	false
+trainmode	true
+iter	1
+njob	12
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeBtEn/train/
+overwrite	True
+mem	12G
+time	6::
+
+btEnTrainCCLE:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	enTrain
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood; CCLE_Skin; CCLE_Glioma; CCLE_Breast; CCLE_Ovary
+pheno	IC50; ACT
+usecn	true; false
+useDisease	false
+combineSplit	false
+priormethod	NA
+algo	lasso
+ylogtransform	true; false
+trainmode	true
+iter	1
+njob	2
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleBtEn/train/
+overwrite	True
+mem	6G
+time	12::
+
+
+
+
+cvEnTrainJoe:
+cmd	runCV
+call	runCV
+prefix	CvEnTrain
+dataset	Joe
+pheno	GI50
+usecn	true; false
+useDisease	true; false
+combineSplit	true; false
+ylogtransform	false
+trainmode	true
+njob	10
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeCvEn/train/
+overwrite	True
+mem	6G
+time	2::
+
+
+cvEnTrainCCLE:
+cmd	runCV
+call	runCV
+prefix	CvEnTrain
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood; CCLE_Skin; CCLE_Glioma; CCLE_Breast; CCLE_Ovary
+pheno	IC50; ACT
+usecn	true; false
+useDisease	false
+combineSplit	false
+ylogtransform	true; false
+trainmode	true
+njob	2
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleCvEn/cvresult/train/
+overwrite	True
+mem	6G
+time	12::
+
+
+
+btSplitTrainJoe:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	SplitTrain
+dataset	Joe
+pheno	GI50
+usecn	true; false
+combineSplit	true; false
+useDisease	true; false
+priormethod	bootstrap; bootstrapnorm
+ylogtransform	false
+trainmode	true
+algo	split
+iter	10
+njob	12
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeSplit/train/
+overwrite	True
+mem	4G
+time	12::
+
+
+btSplitTrainCCLE:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	SplitTrain
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	IC50; ACT
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrap; bootstrapnorm
+ylogtransform	true; false
+trainmode	true
+algo	split
+iter	10
+njob	4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/train/
+overwrite	True
+mem	4G
+time	12::
+
+
+
+
+
+btSplitCCLENRMlog:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	SplitNRMlog
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary
+dataset	CCLE_Blood
+pheno	IC50
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrapnorm
+ylogtransform	true
+algo	split
+iter	10
+njob	8
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/log/
+overwrite	True
+mem	4G
+time	24::
+
+
+
+btSplitCCLENRMTrain:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	SplitNRMTrain
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	IC50; ACT
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrapnorm
+ylogtransform	false
+trainmode	true
+algo	split
+iter	10
+njob	8
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/train/
+overwrite	True
+mem	4G
+time	24::
+
+
+btSplitCCLElog:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	Splitlog
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary
+dataset	CCLE_Blood
+pheno	IC50
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrap
+ylogtransform	true
+algo	split
+iter	10
+njob	8
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/log/
+overwrite	True
+mem	4G
+time	24::
+
+
+
+btLassoJoe:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	lasso
+dataset	Joe
+pheno	GI50
+usecn	true; false
+useDisease	true; false
+combineSplit	true; false
+priormethod	NA
+algo	lasso
+iter	1
+njob	20
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeBtEn/
+overwrite	True
+mem	4G
+time	1::
+
+btLassoCCLElog:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	lassolog
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+dataset	CCLE_Skin; CCLE_Glioma; CCLE_Breast; CCLE_Ovary
+pheno	IC50
+usecn	true; false
+useDisease	false
+combineSplit	false
+priormethod	NA
+algo	lasso
+ylogtransform	true
+iter	1
+njob	4; 4; 4; 4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleBtEn/
+overwrite	True
+mem	4G
+time	4::
+
+
+
+btLassoCCLE:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	lasso
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+dataset	CCLE_Skin; CCLE_Glioma; CCLE_Breast; CCLE_Ovary
+pheno	IC50; ACT
+usecn	true; false
+useDisease	false
+combineSplit	false
+priormethod	NA
+algo	lasso
+ylogtransform	false
+iter	1
+njob	4; 4; 4; 4
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleBtEn/
+overwrite	True
+mem	4G
+time	4::
+
+
+
+cvEnJoe:
+cmd	runCV
+call	runCV
+prefix	CvEn
+dataset	Joe
+pheno	GI50
+usecn	true; false
+useDisease	true; false
+combineSplit	true; false
+njob	71
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeCvEn/
+overwrite	True
+mem	4G
+time	2::
+
+
+cvEnCCLElog:
+cmd	runCV
+call	runCV
+prefix	CvEnlog
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+dataset	CCLE_Skin; CCLE_Glioma; CCLE_Breast; CCLE_Ovary
+pheno	IC50
+usecn	true; false
+useDisease	false
+combineSplit	false
+ylogtransform	true
+njob	6; 6; 6; 6
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleCvEn/cvresult/
+overwrite	True
+mem	4G
+time	12::
+
+
+cvEnCCLE:
+cmd	runCV
+call	runCV
+prefix	CvEn
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+dataset	CCLE_Skin; CCLE_Glioma; CCLE_Breast; CCLE_Ovary
+pheno	IC50; ACT
+usecn	true; false
+useDisease	false
+combineSplit	false
+ylogtransform	false
+njob	6; 6; 6; 6
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleCvEn/cvresult/
+overwrite	True
+mem	4G
+time	12::
+
+
+
+
+btSplitCCLENRM:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	SplitNRM
+#dataset	CCLE_SkinGlioma; CCLE_BreastOvary
+dataset	CCLE_Blood
+pheno	IC50; ACT
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrapnorm
+ylogtransform	true
+algo	split
+iter	10
+njob	8
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/NRM/
+overwrite	True
+mem	4G
+time	24::
+
+
+btSplitCCLE01:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	Split
+dataset	CCLE01_SkinGlioma; CCLE01_BreastOvary; CCLE01_Blood
+pheno	[]
+usecn	true; false
+combineSplit	false
+useDisease	false
+priormethod	bootstrap
+ylogtransform	false
+trainmode	false
+cumulatecount	false
+useallexp	false
+samplinghead	Samplings
+algo	split
+iter	10
+njob	20
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/allbt/CCLE01/jobrun/
+overwrite	True
+mem	4G
+time	48::
+
+
+
+btSplitCCLE:
+cmd	runBootstrapCCLE
+call	runBootstrap
+prefix	Split
+dataset	CCLE_SkinGlioma; CCLE_BreastOvary; CCLE_Blood
+pheno	[]
+usecn	false
+combineSplit	false
+useDisease	false
+priormethod	bootstrap
+ylogtransform	false
+trainmode	false
+cumulatecount	false
+useallexp	false
+samplinghead	Samplings
+algo	split
+iter	10
+njob	20
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/ccleSplit/allbt/jobrun/
+overwrite	True
+mem	4G
+time	48::
+
+
+
+
+btSplitJoeNRM:
+cmd	runBootstrap
+call	runBootstrapNRM
+prefix	SplitNRM
+dataset	Joe
+pheno	GI50
+usecn	true; false
+combineSplit	true; false
+useDisease	true
+iter	10
+njob	71
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeSplit/useDisease/
+overwrite	True
+mem	4G
+time	6::
+
+
+btSplitJoe:
+cmd	runBootstrap
+call	runBootstrap
+prefix	Split
+dataset	Joe
+pheno	GI50
+usecn	true; false
+combineSplit	true; false
+useDisease	true
+iter	10
+njob	71
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/joeSplit/useDisease/
+overwrite	True
+mem	4G
+time	6::
+
+
+
+gseaPathway:
+cmd	gseaTestAnt2Pheno
+call	gseaTestAnt2Pheno
+prefix	gpth
+dataset	Joe; CCLE; Sanger
+pheno	GI50; IC50; AUC
+feature	array; exp; exp
+njob	30; 10; 10
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/
+overwrite	True
+mem	4G
+time	12::
+
+
+
+kmeans:
+cmd	gmfit
+call	kmeansRun
+Ks	20:5:250
+prefix	kms
+#; CNSExp.mat; LungExp.mat; GITractExp.mat; UpperAerodigestiveExp.mat
+datafn	MelanomaExp.mat; BreastExp.mat 
+inputpath	/ifs/data/c2b2/dp_lab/bc2252/projects/drug/data/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/
+overwrite	True
+mem	3G
+time	6::
+
+
+gmfit:
+cmd	gmfit
+call	gmfit
+Ks	20:5:250
+prefix	gmfit
+#; CNSExp.mat; LungExp.mat; GITractExp.mat; UpperAerodigestiveExp.mat
+datafn	MelanomaExp.mat; BreastExp.mat 
+inputpath	/ifs/data/c2b2/dp_lab/bc2252/projects/drug/data/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/drug/
+overwrite	True
+mem	3G
+time	6::
+
+
+
+

@@ -1,0 +1,135 @@
+
+DESeq.poolSample:
+cmd	DESeqPair
+prefix	deseqPoolSample
+sampletable	/ifs/data/c2b2/dp_lab/bc2252/projects/breast/RNASeq/sample_condition.txt
+ID	ID
+condition	condition
+meta	''
+group1	control; sh-control
+group2	over-RSF; sh-RSF
+template	/ifs/home/c2b2/dp_lab/bc2252/libraries/rscripts/DESeq.pairtest.template
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/count/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/DESeq/
+countfnprefix	''
+countfnsuffix	_human.reorder.bam.count
+overwrite	True
+mem	4G
+time	2::
+
+
+DESeq.sampleAndCondition:
+cmd	DESeqPair
+prefix	deseqSampleCondition
+sampletable	/ifs/data/c2b2/dp_lab/bc2252/projects/breast/RNASeq/sample_condition.txt
+ID	ID
+condition	sampleAndCondition
+meta	''
+group1	TM; TMRSF
+group2	MDA; MDARSF
+template	/ifs/home/c2b2/dp_lab/bc2252/libraries/rscripts/DESeq.pairtest.template
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/count/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/DESeq/
+countfnprefix	''
+countfnsuffix	_human.reorder.bam.count
+overwrite	True
+mem	4G
+time	2::
+
+#DESeq
+DESeq.condition:
+cmd	DESeqPair
+prefix	deseqSwitchLabel
+sampletable	/ifs/data/c2b2/dp_lab/bc2252/projects/breast/RNASeq/sample_condition.txt
+ID	ID
+condition	condition
+meta	sample; dox
+#group1	control; sh-control
+#group2	over-RSF; sh-RSF
+group1	control
+group2	over-RSF
+template	/ifs/home/c2b2/dp_lab/bc2252/libraries/rscripts/DESeq.pairtest.template
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/count/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/DESeq/
+countfnprefix	''
+countfnsuffix	_human.reorder.bam.count
+overwrite	True
+mem	4G
+time	2::
+
+#HTseq count
+HTSeqCount:
+cmd	HTSeqCount
+-s	no
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/reorder/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/count/
+GTF	/ifs/data/c2b2/dp_lab/shares/Data/iGenome/Homo_sapiens/NCBI/build37.2/Annotation/Genes/genes.gtf
+bam	=sample
+sample	JP001_human.reorder.bam; JP002_human.reorder.bam; JP003_human.reorder.bam; JP004_human.reorder.bam; JP005_human.reorder.bam; JP006_human.reorder.bam; JP007_human.reorder.bam; JP008_human.reorder.bam; JP009_human.reorder.bam; JP010_human.reorder.bam; JP011_human.reorder.bam; JP012_human.reorder.bam; JP013_human.reorder.bam; JP014_human.reorder.bam
+prefix	htCount
+overwrite	True
+mem	4G
+time	12::
+
+
+#picard QC: RNASeqMetrics, MultipleMetrics, LibraryComplexity, GCBias
+picard.reorder:
+cmd	picardReorderSam
+TMP_DIR	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/
+REFERENCE	=/ifs/data/c2b2/dp_lab/shares/Data/iGenome/Homo_sapiens/NCBI/build37.2/Sequence/WholeGenomeFasta/genome.fa
+programpath	/ifs/data/c2b2/dp_lab/shares/programs/SeqTools/picard/
+inputpath	/ifs/data/c2b2/dp_lab/shares/Data/Human/RSF1RNASeq/bam/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/reorder/
+prefix	picardReorder
+bam	=sample
+sample	JP001_human.bam; JP002_human.bam; JP003_human.bam; JP004_human.bam; JP005_human.bam; JP006_human.bam; JP007_human.bam; JP008_human.bam; JP009_human.bam; JP010_human.bam; JP011_human.bam; JP012_human.bam; JP013_human.bam; JP014_human.bam
+overwrite	True
+mem	5G
+time	24::
+
+
+#picard QC: RNASeqMetrics, MultipleMetrics, LibraryComplexity, GCBias
+picardQC:
+cmd	picardQC
+TMP_DIR	=/ifs/scratch/c2b2/dp_lab/bc2252/TMP/
+REF_FLAT	=/ifs/data/c2b2/dp_lab/shares/Data/iGenome/Homo_sapiens/NCBI/build37.2/Annotation/Genes/refFlat.txt
+STRAND_SPECIFICITY	=NONE
+REFERENCE_SEQUENCE	=/ifs/data/c2b2/dp_lab/shares/Data/iGenome/Homo_sapiens/NCBI/build37.2/Sequence/WholeGenomeFasta/genome.fa
+PROGRAM	=CollectAlignmentSummaryMetrics; CollectInsertSizeMetrics; QualityScoreDistribution; MeanQualityByCycle 
+programpath	/ifs/data/c2b2/dp_lab/shares/programs/SeqTools/picard/
+inputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/reorder/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/picardQC/
+prefix	picardQC
+bam	=sample
+sample	JP001_human.reorder.bam; JP004_human.reorder.bam; JP011_human.reorder.bam; JP012_human.reorder.bam
+#sample	JP001_human.reorder.bam; JP002_human.reorder.bam; JP003_human.reorder.bam; JP004_human.reorder.bam; JP005_human.reorder.bam; JP006_human.reorder.bam; JP007_human.reorder.bam; JP008_human.reorder.bam; JP009_human.reorder.bam; JP010_human.reorder.bam; JP011_human.reorder.bam; JP012_human.reorder.bam; JP013_human.reorder.bam; JP014_human.reorder.bam
+overwrite	True
+mem	10G
+time	24::
+
+
+#tophat, output files will be located to <outputpath>/<prefix>/<sample> for each sample; mem is requested for EACH thread; NO FUSION search, using bowtie2
+tophat.bowtie2.GTF:
+cmd	tophat
+paired	single
+--library-type	fr-unstranded
+--read-mismatches	4
+--read-edit-dist	4
+--max-multihits	10
+#--mate-inner-dist	200
+#--mate-std-dev	20
+--GTF	/ifs/data/c2b2/dp_lab/shares/Data/iGenome/Homo_sapiens/NCBI/build37.2/Annotation/Genes/genes.gtf
+--transcriptome-index	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/tophat/transindex/trans.ncbi.37.2
+-p	4
+--rg-id	JP005_ACTTGA_L007_R1_001
+--rg-sample	JP005_ACTTGA_L007_R1_001
+--rg-library	JP005_ACTTGA_L007_R1_001
+genome	genome
+readext	.fastq.gz
+sample	JP005_ACTTGA_L007_R1_001
+prefix	GTF
+inputpath	/ifs/data/c2b2/dp_lab/shares/Data/Human/RSF1RNASeq/raw/
+outputpath	/ifs/scratch/c2b2/dp_lab/bc2252/breast/RNASeq/tophat/
+overwrite	True
+mem	2G
+time	24::
