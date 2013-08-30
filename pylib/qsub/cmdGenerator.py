@@ -11,6 +11,9 @@ def checkPath(p, create=False):
             system('mkdir %s'%p.strip('='))
     return p
 
+def checkPathOnNode(p):
+    cmd = 'if [ ! -d %s ]; then \nmkdir %s\nfi'%(p,p)
+    return cmd
 
 def formatCmd(cmd, *args ):
     #args contains tuples of all parameters for a command
@@ -19,7 +22,10 @@ def formatCmd(cmd, *args ):
     #order of args should follow the order of the command 'cmd'
 
     pipeout = ''
-    cmdstr = '%s'%cmd
+    if type(cmd) == type([]):
+        cmdstr = '\n'.join(cmd)
+    else:
+        cmdstr = '%s'%cmd
     for i in args:
         if type(i) == type({}):
             if '>' in i.keys():

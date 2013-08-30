@@ -88,6 +88,7 @@ class jobManager:
 
         f.write('#$ -o %s\n'%outpathfn)
         f.write('\n')
+        f.write('echo hostname: `hostname`\n')
         for line in cmd:
             f.write('%s\n\n'%line)
             if trackcmd:
