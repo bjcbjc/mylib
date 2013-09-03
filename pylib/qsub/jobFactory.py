@@ -83,6 +83,7 @@ class jobManager:
         f.write('#$ -cwd\n')
         f.write('#$ -j y\n')
         #f.write('#$ -l mem=%s,time=%s\n'%(mem, time))
+        #f.write('#$ -l mem_free=%s'%(mem))
         for i in sgeopt:
             f.write('#$ %s\n'%i)
 
