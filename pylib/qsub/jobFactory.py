@@ -5,10 +5,10 @@
 from os import system
 from sys import exit
 import os.path
-
+import re
 
 class job:
-    def __init__(self, fn, cmd, outfn='', outpath='', sgeopt=[], mem='4G',time='8::', status=''):
+    def __init__(self, fn, cmd, outfn='', outpath='', sgeopt=[], mem='4G',time='8::', status='',sgeJob=True):
         #mem and time are required; therefore separate from sgeopt
         self.fn = fn
         self.cmd = cmd
@@ -20,6 +20,7 @@ class job:
         self.status = status #scripted, submitted, skipped
         self.fnExist = False
         self.outfnExist = False
+        self.sgeJob = sgeJob
         self.checkExists()
         return
 
@@ -45,7 +46,7 @@ class jobManager:
             self.overwrite = True
         return
 
-    def createJob(self, fn, cmd, outfn='', outpath='/nethome/bjchen/', sgeopt=[], mem='', time='', trackcmd=True, tracklen=100, quiet=False):
+    def createJob(self, fn, cmd, outfn='', outpath='/nethome/bjchen/', sgeopt=[], mem='', time='', trackcmd=True, tracklen=100, quiet=False, sgeJob=True, runOnServer=''):
         #check parameters
         if type(cmd) != type([]): cmd = [cmd]
         if outpath[-1] != '/': outpath = outpath + '/'
@@ -80,25 +81,46 @@ class jobManager:
         f = open( fn, 'w')
         f.write('#!/bin/%s\n'%(self.shell))
         #f.write('#$ -S /bin/%s\n'%(self.shell))
-        f.write('#$ -cwd\n')
-        f.write('#$ -j y\n')
-        #f.write('#$ -l mem=%s,time=%s\n'%(mem, time))
-        #f.write('#$ -l mem_free=%s'%(mem))
-        for i in sgeopt:
-            f.write('#$ %s\n'%i)
 
-        f.write('#$ -o %s\n'%outpathfn)
+        cmdtxt = ''
+        if sgeJob:
+            f.write('#$ -cwd\n')
+            f.write('#$ -j y\n')
+            #f.write('#$ -l mem=%s,time=%s\n'%(mem, time))
+            #f.write('#$ -l mem_free=%s'%(mem))
+            for i in sgeopt:
+                f.write('#$ %s\n'%i)
+
+            f.write('#$ -o %s\n'%outpathfn)
+        else:  
+            f.write('#stdout and stderr is directed to %s'%outpathfn)
+            cmdtxt = 'exec &>%s\n'%outpathfn
+
         f.write('\n')
         f.write('echo hostname: `hostname`\n')
+        
+        
         for line in cmd:
-            f.write('%s\n\n'%line)
+            cmdtxt = cmdtxt + '%s\n\n'%line
             if trackcmd:
-                f.write('echo finished %s\n\n'%line[:min(len(line),tracklen)])
-        f.write('echo Finish %s\n'%fn)
+                cmdtxt = cmdtxt + 'echo finished %s\n\n'%line[:min(len(line),tracklen)]
+        cmdtxt = cmdtxt + 'echo Finish %s\n'%fn
+
+        if runOnServer == '':
+            f.write(cmdtxt)
+        else:
+            cmdtxt = re.sub('\n+','\n', cmdtxt)
+            f.write('hostname=`hostname`\n\n')
+            f.write('if [ $hostname = "%s" ]; then\n'%(runOnServer))
+            f.write('\t%s'%(cmdtxt.replace('\n','\n\t').strip('\t')))
+            f.write('else\n')
+            f.write('\tssh %s "%s"\n'%(runOnServer, cmdtxt.replace('\n',';').replace('\\','\\\\').replace('"','\\"')))
+            f.write('fi\n')
+        
         f.close()
 
         #create a job object to keep track
-        j = job(fn, cmd, outfn, outpath, sgeopt, mem, time, status='scripted')
+        j = job(fn, cmd, outfn, outpath, sgeopt, mem, time, status='scripted', sgeJob=sgeJob)
         self.jobs.append(j)
         return 
 
@@ -125,14 +147,20 @@ class jobManager:
                     skipped.append(f)
                     job.status = 'skipped'
                 else:
-                    system('qsub %s'%f)
+                    if job.sgeJob:
+                        system('qsub %s'%f)
+                    else:
+                        system('bash %s'%f)
                     submitted.append(f)
                     job.status = 'submitted'
             else:
                 if os.path.exists(job.outpath + job.outfn):
                     print 'jobFactory.submitJob: rm -f %s'%(job.outpath+job.outfn)
                     system('rm -f %s'%(job.outpath+job.outfn))
-                system('qsub %s'%f)
+                if job.sgeJob:
+                    system('qsub %s'%f)
+                else:
+                    system('nohup bash %s >/dev/null 2>&1 &'%f)
                 submitted.append(f)
                 job.status = 'submitted'
         return submitted, skipped
