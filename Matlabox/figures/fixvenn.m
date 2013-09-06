@@ -1,9 +1,31 @@
 function [handles, setnum] = fixvenn(setdata, varargin)
-    %logicaldata: #data x #set, should be logical (or will be converted to
+    %setdata: #data x #set, should be logical (or will be converted to
     %   logical)
+    %setdata: cell arrays; each cell represents data of one set;
+    %   overlaps between sets will be computed and return in setnum
+    %   structure
     %
+    %options:
+    %   'label': cell array, names of sets for display
+    %   'color': rgb array; each row for each set
+    %   'alpha': control tranparency of the diagram, def = 0.4
+    %   'numfontsize': font size for the numbers of overlap between sets,
+    %       def = 16
+    %	'labelfontsize': font size for the labels of sets, def = 16
     %
     
+    if iscell(setdata)
+        u = setdata{1};
+        for i = 2:length(setdata)
+            u = union(u, setdata{i});
+        end
+        newsetdata = false(length(u), length(setdata));
+        for i = 1:length(setdata);
+            newsetdata(:,i) = ismember(u, setdata{i});            
+        end
+        setdata = newsetdata;
+        clear newsetdata
+    end
     if ~islogical(setdata)
         setdata = setdata ~= 0;
     end
@@ -35,7 +57,7 @@ function [handles, setnum] = venn2(setdata, varargin)
     
     t = (0:2*pi/39:2*pi);    
     offset = [0, 0; -1, 0];
-    labeloffset = [0.1, -0.1; -0.1, -0.1];
+    labeloffset = [0.1, -0.1; -0.15, -0.1];
     labelanchorpoint = [16, 25];
     numlabelpos = [0.5,0; -1.5,0; -0.5,0];
     setflag = [0,1; 1,0; 1,1];
@@ -81,8 +103,8 @@ function [handles, setnum] = venn2(setdata, varargin)
     end
     
     xlim([-2.5 1.5]);
-    ylim([-1.5 1.5]);
-%     axis square 
+    ylim([-1.5 2.5]);
+    axis square 
     axis off
     hold off
 end

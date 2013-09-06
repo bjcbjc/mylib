@@ -98,7 +98,8 @@ class jobManager:
 
         f.write('\n')
         f.write('echo hostname: `hostname`\n')
-        
+        if sgeJob:
+            f.write('echo jobID: $JOB_ID\n')
         
         for line in cmd:
             cmdtxt = cmdtxt + '%s\n\n'%line
