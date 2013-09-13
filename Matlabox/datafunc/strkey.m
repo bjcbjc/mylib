@@ -56,13 +56,20 @@ function res = strkey(varargin)
     if isempty(matname)
         matname = 'STRKEY_HASH.mat';
     end
+    matname = strtrim(matname);
+    if ~strcmp(matname(end-3:end), '.mat')
+        matname = [matname '.mat'];
+    end
+    matname = strrep(matname, '~', char(java.lang.System.getProperty('user.home')));
     
-    dbdir = strrep(mfilename('fullpath'), mfilename, '');
-    dbfilename = [dbdir matname];
+    if isempty(strfind(matname, '/'))
+        dbdir = strrep(mfilename('fullpath'), mfilename, '');
+        matname = [dbdir matname];    
+    end
         
     if isempty(STRKEY_HASH)
-        if exist(dbfilename, 'file')
-            STRKEY_HASH = loadStructData(dbfilename);
+        if exist(matname, 'file')
+            STRKEY_HASH = loadStructData(matname);
         else
             STRKEY_HASH.id = 0;
             STRKEY_HASH.key = {''};
@@ -70,11 +77,11 @@ function res = strkey(varargin)
             STRKEY_HASH.matname = matname;
         end
     end
-    
+        
     if ~strcmpi(STRKEY_HASH.matname, matname) 
         if lookup %change lookup table
-            if exist(dbname, 'file')
-                STRKEY_HASH = loadStructData(dbfilename);
+            if exist(matname, 'file')
+                STRKEY_HASH = loadStructData(matname);
             else
                 STRKEY_HASH.id = 0;
                 STRKEY_HASH.key = {''};
@@ -83,6 +90,7 @@ function res = strkey(varargin)
             end
         else %change saved filename
             STRKEY_HASH.needsave = true;
+            STRKEY_HASH.matname = matname;
         end
     end
 
@@ -119,18 +127,21 @@ function res = strkey(varargin)
         
         n = length(STRKEY_HASH.key);
         if iscellstr(str_or_num)             
-             [tf, res] = ismember(str_or_num, STRKEY_HASH.key);
-             if any(~tf(:)) && add %new key
-                 [ukey, ~, uidx] = unique(str_or_num(~tf));
-                 naddkey = length(ukey);
-                 addidx = n+1:n+naddkey;                 
-                 STRKEY_HASH.key(addidx,1) = ukey;
-                 STRKEY_HASH.id(addidx,1) = lastid+1:lastid+naddkey;
-                 STRKEY_HASH.needsave = true;
-                 res(~tf) = addidx(uidx);
-                 tf(~tf) = true;
-             end
-             res(tf) = STRKEY_HASH.id(res(tf));
+            [ukey, ~, uidx] = unique(str_or_num(:));
+            %uidx = reshape(uidx, size(str_or_num));
+            [tf, idx] = ismember(ukey, STRKEY_HASH.key);
+            if any(~tf) && add %new key                
+                naddkey = sum(~tf);
+                addidx = n+1:n+naddkey;
+                STRKEY_HASH.key(addidx,1) = ukey(~tf);
+                STRKEY_HASH.id(addidx,1) = lastid+1:lastid+naddkey;
+                STRKEY_HASH.needsave = true;
+                idx(~tf) = addidx;
+%                 res(~tf) = addidx(uidx);
+%                 tf(~tf) = true;            
+            end
+            idx(idx == 0) = 1; %for ''
+            res = reshape( STRKEY_HASH.id( idx(uidx) ), size(str_or_num) );            
         else
             [tf, idx] = ismember(str_or_num, STRKEY_HASH.id);
             if any(~tf(:))
@@ -146,7 +157,7 @@ function res = strkey(varargin)
     
     if STRKEY_HASH.needsave && ifsave
         STRKEY_HASH.needsave = false;
-        save(dbfilename, 'STRKEY_HASH');
+        save(matname, 'STRKEY_HASH');
     end
     
     
