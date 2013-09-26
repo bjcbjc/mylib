@@ -5,6 +5,41 @@ import subprocess
 import traceback
 import re
 
+# Given a bam file and reference sequences, record (1) the distribution of reads containing
+# mismatches, insertions, deletions, or soft clipping in the alignment and (2) number of
+# mismatches, insertions, deletions, or soft clipping at each base position of reads.
+#
+# For now, alignments with any bit in 0xf04 are excluded from counting. This means we only count
+# the primary alignments with properly-mapped pairs.
+#
+# The script calls samtools to calculate MD tag. Combining both CIGAR and MD, the statistics
+# are collected. (Note: in CIGAR, M can be either match or mismatches; therefore MD is needed.)
+# 
+# Required: samtools, gawk
+#
+# Input: mismatchCountByRead.py -f reference.fa -bam alignment.bam -o output.filename [-samtools path/to/samtools]
+#
+# Output: first line is the number of total counted reads. The following lines record the counts
+# of reads for each category in (1) and (2) described above. Specifically, M, I, D and S represents
+# mismatch, insertion, deletion, and soft-clipping, respectively. 'fwd' and 'rev' represents the counts are for 
+# forward reads and reverse reads, respectively. Finally, rM/rI/rD/rS records the number of reads with
+# xx number of M, I, D, or S (#1 above), whereas M/I/D/S records the positional counts (#2 above).
+# Each column represents the number of M/I/D/S (1) or the position in reads (2). Indexes of columns start from 0.
+#
+# For example, assume the read length is 5.
+#
+#    fwd-rM  100  10  5  0  0  0
+#    This means for forward reads, 100 reads have 0 mismatch, 10 have 1 mismatch, 5 have 2 mismatches, and
+#    none have more than 2 mismatches.
+#
+#    rev-D  0  0  10  7  5  0
+#    This means for reverse reads, no reads have deletion at position 1, 10 reads have deleletion at position 2,
+#    7 have deletion at position 3, 5 have deletion at position 4, and 0 have deletion at position 5. The first
+#    0 is a place holder (always zero, should be ignored).
+#    
+#
+
+# helper functions
 def cumsum(l):
     s = l[:] #make a copy
     for i in xrange(1, len(s)):
@@ -16,6 +51,7 @@ def closefiles(files):
         if f != None: f.close()
     return
 
+# set up parameters for the script
 argp = argparse.ArgumentParser(prog='mismatchCountByRead.py')
 argp.add_argument('-f', nargs='?', default='/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa', metavar='file', help='faidx-indexed reference fasta' )
 argp.add_argument('-bam', nargs='?', metavar='file', required=True, help='bam file')
@@ -28,30 +64,38 @@ if isinstance(args, tuple):
     passon = ' '.join(args[1])
     args = args[0]
 
-
+# Command string; "samtools calmd" is called, then piped to "samtools view" to print out alignment, which is piped to gawk to retain only flag-information, CIGAR, and MD. The printed information (three columns per alignment) is then piped to this python script for parsing and counting (See below).
 cmd = args.samtools + ' calmd -u ' + args.bam + ' ' + args.f + ' | ' + args.samtools + ''' view - | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { sub(/MD:Z:/,"",$NF); print and($2,0x10),$6,$NF} }' '''
 
 print 'Run command: ' + cmd
 
+# set up pipes
 samout, samerr, out = None, None, None
+
+# container for statistics to be collected
 counter = {'fwd':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[]}, 'rev':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[] }}
+
 try:
-    #decide read length first
+    # decide read length first
     sampipe = subprocess.Popen(args.samtools + ' view ' + args.bam, shell=True, stdout=subprocess.PIPE)
     seq = sampipe.stdout.readline()
     sampipe.stdout.close()
     readlength = len(seq.split('\t')[9])
 
+    # initialized counters
     for k in counter.keys():
         for token in counter[k].keys():
             counter[k][token] = [0.0]*(readlength+1)
 
-    #run samtools and pipe the output for further process (save space)
+    # run samtools and pipe the output for further process (save space)
     sampipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)#, stderr=subprocess.PIPE)
     samout = sampipe.stdout #, sampipe.stderr
 
+    # regular expression parser for CIGAR and MD
     cigarparser = re.compile('(\d+)([MIDXS\=])')
     mdparser = re.compile('(\d+)[A-Z]')
+
+    # reading piped output from the above commands; each line is "Flag  CIGAR  MD"
     line = samout.readline()
     numread = 1
     while line:
@@ -62,20 +106,20 @@ try:
             revkey = 'rev'
 
         cM = sum([ md.count(a) for a in ['A','T','C','G','N'] ]) #number of mismatches
-        parsedcigar = cigarparser.findall(cigar) # [(num, op), (num, op) ...], op:MDISX=
+        parsedcigar = cigarparser.findall(cigar) # [(num, operator), (num, operator) ...], operator: [MDISX=]
         parsedmd = mdparser.findall(md) # [num, num, ...], num of matches
-        parsedcigar = [ (int(a), b) for a, b in parsedcigar ]
+        parsedcigar = [ (int(a), b) for a, b in parsedcigar ] # conver numbers in CIGAR to integers 
 
         #exclude D for insertion positions
         parsedcigar_noD = [ l for l in parsedcigar if l[1]!='D' ]
-        cigar_num, cigar_op = zip(*parsedcigar_noD) #cigar pos needs to exclude deletion (D) in reference
-        insertion_num = [ num for num, op in zip(cigar_num, cigar_op) if op == 'I' ]
+        cigar_num, cigar_op = zip(*parsedcigar_noD) # CIGAR pos needs to exclude deletion (D) in reference, since these bases are not in the read
+        insertion_num = [ num for num, op in zip(cigar_num, cigar_op) if op == 'I' ] # number of inserted bases
         insertion_pos = [ pos for pos, op in zip(cumsum(list(cigar_num)), cigar_op) if op == 'I' ] #pos of last inserted base
 
         cigar_num, cigar_op = zip(*parsedcigar)        
-        deletion_num = [ num for num, op in parsedcigar if op == 'D']
+        deletion_num = [ num for num, op in parsedcigar if op == 'D'] # number of deleted bases (as in reference)
         deletion_pos = [ pos for pos, op in zip(cumsum(list(cigar_num)),cigar_op) if op == 'D' ]
-        deletion_pos = [ pos-num for pos, num in zip(deletion_pos, cumsum(deletion_num)) ]
+        deletion_pos = [ pos-num for pos, num in zip(deletion_pos, cumsum(deletion_num)) ] # position of deletion
 
         #read counters
         for token in ['D', 'I', 'S']: #count deletion, insertion, soft-clipping
@@ -113,6 +157,7 @@ try:
         line = samout.readline()
         numread = numread + 1
     
+    # done counting; write output
     out = open(args.o, 'w')
     out.write('%d\n'%numread)
     for direction in counter:
