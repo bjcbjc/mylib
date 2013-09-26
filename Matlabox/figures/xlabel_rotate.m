@@ -81,7 +81,7 @@ end
 % if no XTickLabel AND no XTick are defined use the current XTickLabel
 %if nargin < 3 & (~exist('XTick') | isempty(XTick)),
 % Modified with forum comment by "Nathan Pust" allow the current text labels to be used and property value pairs to be changed for those labels
-if (nargin < 3 || isempty(varargin{1})) & (~exist('XTick') | isempty(XTick)),
+if (nargin < 3 || isempty(varargin{1})) && (~exist('XTick') || isempty(XTick)),
 	xTickLabels = get(gca,'XTickLabel')  ; % use current XTickLabel
 	if ~iscell(xTickLabels)
 		% remove trailing spaces if exist (typical with auto generated XTickLabel)
@@ -95,7 +95,7 @@ varargin = varargin(2:length(varargin));
 end
 
 % if no XTick is defined use the current XTick
-if (~exist('XTick') | isempty(XTick)),
+if (~exist('XTick') || isempty(XTick)),
     XTick = get(gca,'XTick')        ; % use current XTick 
 end
 
@@ -105,7 +105,7 @@ XTick = XTick(:);
 if ~exist('xTickLabels'),
 	% Define the xtickLabels 
 	% If XtickLabel is passed as a cell array then use the text
-	if (length(varargin)>0) & (iscell(varargin{1})),
+	if ~isempty(varargin) && (iscell(varargin{1}))
         xTickLabels = varargin{1};
         varargin = varargin(2:length(varargin));
 	else

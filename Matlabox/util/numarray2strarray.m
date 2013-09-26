@@ -1,6 +1,8 @@
 function strarray = numarray2strarray(numarray)
     [m, n] = size(numarray);
-    if m > 1 && n == 1
+    if m == 1 && n > 1
+        singlecol = true;
+    elseif m > 1 && n == 1
         numarray = numarray'; %make it row
         singlecol = true;
     elseif m > 1 && n > 1 %multiple columns
