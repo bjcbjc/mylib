@@ -52,6 +52,7 @@ def closefiles(files):
         if f != None: f.close()
     return
 
+
 # set up parameters for the script
 argp = argparse.ArgumentParser(prog='mismatchCountByRead.py')
 argp.add_argument('-f', type=str, default='/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa', metavar='reference_seq', help='faidx-indexed reference fasta' )
@@ -71,7 +72,7 @@ print args
 #cmd = args.samtools + ' calmd ' + args.bam + ' ' + args.f + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { sub(/MD:Z:/,"",$NF); print and($2,0x10),$6,$NF} }' '''
 
 # filter reads first to reduce the number of warnings in log, if MD is recalculated
-cmd = args.samtools + ' view -uh -F %d '%(0xf04) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f  + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { for(i=1;i<=NF;i++) {if ($i ~ /MD:Z:/) {sub(/MD:Z:/,"",$i); print and($2,0x10),$6,$i}}} }' '''
+cmd = args.samtools + ' view -uh -F %d '%(0xf04) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f 
 
 print 'Run command: ' + cmd
 
@@ -84,16 +85,18 @@ counter = {'fwd':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS
 start = time.time()
 try:
     # decide read length first
-    if args.r == 0:
-        sampipe = subprocess.Popen(args.samtools + ' view ' + args.bam , shell=True, stdout=subprocess.PIPE)
-        samout = sampipe.stdout #, sampipe.stderr
-        readlength = len( samout.readline().split()[9] )
-        samout.close()
-    else:
-        readlength = args.r
-
     sampipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     samout = sampipe.stdout #, sampipe.stderr
+
+    line = samout.readline()
+    while line[0] == '@':
+        line = samout.readline()
+
+    # now we have the first read
+    if args.r == 0:
+        readlength = len(line.split()[9])
+    else:
+        readlength = args.r
 
     # initialized counters
     for k in counter.keys():
@@ -105,18 +108,19 @@ try:
     mdparser = re.compile('(\d+)[A-Z]')
     md_N_parser = re.compile('(?P<test>(?:\d+N)+\d+)')
 
-    line = samout.readline()
     numread = 1
     while line:
-        revCmpFlag, cigar, md = line.split()
-        md = md.upper()
+        md = line.split('MD:Z:')[1].split()[0].upper() # faster than re
+        line = line.split()
+        cigar = line[5]
+        revCmpFlag = (int(line[1]) & 0x10) > 0
 
         if cigar == '*': #not available
             line = samout.readline()
             continue
 
         revkey = 'fwd'
-        if revCmpFlag != '0':
+        if revCmpFlag:
             revkey = 'rev'
 
         if not args.n: # don't count N in MD as mismatach
