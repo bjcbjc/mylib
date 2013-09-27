@@ -15,7 +15,7 @@ import re
 # The script calls samtools to calculate MD tag. Combining both CIGAR and MD, the statistics
 # are collected. (Note: in CIGAR, M can be either match or mismatches; therefore MD is needed.)
 # 
-# Required: samtools, gawk
+# Required: samtools
 #
 # Input: mismatchCountByRead.py -f reference.fa -bam alignment.bam -o output.filename [-samtools path/to/samtools]
 #
@@ -53,19 +53,24 @@ def closefiles(files):
 
 # set up parameters for the script
 argp = argparse.ArgumentParser(prog='mismatchCountByRead.py')
-argp.add_argument('-f', nargs='?', default='/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa', metavar='file', help='faidx-indexed reference fasta' )
-argp.add_argument('-bam', nargs='?', metavar='file', required=True, help='bam file')
-argp.add_argument('-o', nargs='?', default='test.mismatch.stat', metavar='file', help='file name for the output, [<bam>.mismatch.stat]')
-argp.add_argument('-samtools', nargs='?', default='/data/NYGC/Software/samtools/samtools-0.1.19/samtools', help='samtools path, [/data/NYGC/Software/samtools/samtools-0.1.19]')
+argp.add_argument('-f', type=str, default='/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa', metavar='reference_seq', help='faidx-indexed reference fasta' )
+argp.add_argument('-bam', type=str, metavar='bam_file', required=True, help='bam file')
+argp.add_argument('-o', type=str, default='test.mismatch.stat', metavar='output_file', help='file name for the output, [<bam>.mismatch.stat]')
+argp.add_argument('-n', help='count N as mismatch if specified', action='store_true')
+argp.add_argument('-r', type=int, metavar='read_length', default=0, help='max read length; if not provided, obtained from the first read')
+argp.add_argument('-samtools', type=str, metavar='path_to_samtools',default='/data/NYGC/Software/samtools/samtools-0.1.19/samtools', help='samtools path, [/data/NYGC/Software/samtools/samtools-0.1.19]')
 
 args = argp.parse_known_args()
 passon = ''
 if isinstance(args, tuple):
     passon = ' '.join(args[1])
     args = args[0]
-
+print args
 # Command string; "samtools calmd" is called, then piped to "samtools view" to print out alignment, which is piped to gawk to retain only flag-information, CIGAR, and MD. The printed information (three columns per alignment) is then piped to this python script for parsing and counting (See below).
-cmd = args.samtools + ' calmd -u ' + args.bam + ' ' + args.f + ' | ' + args.samtools + ''' view - | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { sub(/MD:Z:/,"",$NF); print and($2,0x10),$6,$NF} }' '''
+#cmd = args.samtools + ' calmd ' + args.bam + ' ' + args.f + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { sub(/MD:Z:/,"",$NF); print and($2,0x10),$6,$NF} }' '''
+
+# filter reads first to reduce the number of warnings in log, if MD is recalculated
+cmd = args.samtools + ' view -uh -F %d '%(0xf04) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f 
 
 print 'Run command: ' + cmd
 
@@ -77,35 +82,58 @@ counter = {'fwd':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS
 
 try:
     # decide read length first
-    sampipe = subprocess.Popen(args.samtools + ' view ' + args.bam, shell=True, stdout=subprocess.PIPE)
-    seq = sampipe.stdout.readline()
-    sampipe.stdout.close()
-    readlength = len(seq.split('\t')[9])
+    sampipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    samout = sampipe.stdout #, sampipe.stderr
+
+    line = samout.readline()
+    while line[0] == '@':
+        line = samout.readline()
+
+    # now we have the first read
+    if args.r == 0:
+        readlength = len(line.split()[9])
+    else:
+        readlength = args.r
 
     # initialized counters
     for k in counter.keys():
         for token in counter[k].keys():
             counter[k][token] = [0.0]*(readlength+1)
 
-    # run samtools and pipe the output for further process (save space)
-    sampipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)#, stderr=subprocess.PIPE)
-    samout = sampipe.stdout #, sampipe.stderr
-
     # regular expression parser for CIGAR and MD
     cigarparser = re.compile('(\d+)([MIDXS\=])')
     mdparser = re.compile('(\d+)[A-Z]')
+    md_N_parser = re.compile('(?P<test>(?:\d+N)+\d+)')
 
-    # reading piped output from the above commands; each line is "Flag  CIGAR  MD"
-    line = samout.readline()
     numread = 1
     while line:
-        revCmpFlag, cigar, md = line.split() #and(rev-cmp-flag), CIGAR, MD
-        md = md.upper()
+        md = line.split('MD:Z:')[1].split()[0].upper() # faster than re
+        line = line.split()
+        cigar = line[5]
+        revCmpFlag = (int(line[1]) & 0x10) > 0
+
+        if cigar == '*': #not available
+            line = samout.readline()
+            continue
+
         revkey = 'fwd'
         if revCmpFlag != '0':
             revkey = 'rev'
 
-        cM = sum([ md.count(a) for a in ['A','T','C','G','N'] ]) #number of mismatches
+        if not args.n: # don't count N in MD as mismatach
+            strN = md_N_parser.findall(md)  # (\d+)N(\d+)N...
+            #count N as match and add it to the near-by matches (which are numbers in MD)
+            replacement = [ sum(map(int,l.split('N')))+l.count('N') for l in strN ]
+            replacement = map(str, replacement)
+
+            #strN may have duplicates, but since len(strN) should be small, loop over all
+            #the duplicated ones besides the first  will do nothing
+            for i in range(len(strN)): 
+                md = md.replace(strN[i], replacement[i])            
+            cM = sum([ md.count(a) for a in ['A','T','C','G'] ]) #number of mismatches, don't count N
+        else:
+            cM = sum([ md.count(a) for a in ['A','T','C','G','N'] ]) #number of mismatches, count N
+
         parsedcigar = cigarparser.findall(cigar) # [(num, operator), (num, operator) ...], operator: [MDISX=]
         parsedmd = mdparser.findall(md) # [num, num, ...], num of matches
         parsedcigar = [ (int(a), b) for a, b in parsedcigar ] # conver numbers in CIGAR to integers 
