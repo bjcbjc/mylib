@@ -16,7 +16,7 @@ import time
 # The script calls samtools to calculate MD tag. Combining both CIGAR and MD, the statistics
 # are collected. (Note: in CIGAR, M can be either match or mismatches; therefore MD is needed.)
 # 
-# Required: samtools
+# Required: samtools, gawk
 #
 # Input: mismatchCountByRead.py -f reference.fa -bam alignment.bam -o output.filename [-samtools path/to/samtools]
 #
@@ -67,8 +67,8 @@ if isinstance(args, tuple):
     passon = ' '.join(args[1])
     args = args[0]
 print args
-# Command string; "samtools calmd" is called, then piped to "samtools view" to print out alignment, which is piped to gawk to retain only flag-information, CIGAR, and MD. The printed information (three columns per alignment) is then piped to this python script for parsing and counting (See below).
-#cmd = args.samtools + ' calmd ' + args.bam + ' ' + args.f + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { sub(/MD:Z:/,"",$NF); print and($2,0x10),$6,$NF} }' '''
+
+# Command string; "samtools view -F" is used to filter reads and then pipe into "samtools calmd" which is piped to gawk to retain only flag-information, CIGAR, and MD. The printed information (three columns per alignment) is then piped to this python script for parsing and counting (See below). 
 
 # filter reads first to reduce the number of warnings in log, if MD is recalculated
 cmd = args.samtools + ' view -uh -F %d '%(0xf04) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f  + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { for(i=1;i<=NF;i++) {if ($i ~ /MD:Z:/) {sub(/MD:Z:/,"",$i); print and($2,0x10),$6,$i}}} }' '''
