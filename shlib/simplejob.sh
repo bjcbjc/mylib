@@ -33,9 +33,17 @@ echo "#$ -o simpjob.$tmpstr.out" >> $tmpscript
 echo "infile=\`awk \"NR==\$SGE_TASK_ID\" simpjob.$tmpstr.input\`" >> $tmpscript
 
 if [ -z "$pipeoutext" ]; then
-    echo "$cmd \$infile " >> $tmpscript
+    if [[ "$cmd" =~ "\$infile" ]]; then
+	echo "$cmd " >> $tmpscript
+    else
+	echo "$cmd \$infile " >> $tmpscript
+    fi
 else
-    echo "$cmd \$infile > \$infile$pipeoutext" >> $tmpscript
+    if [[ "$cmd" =~ "\$infile" ]]; then
+	echo "$cmd > \$infile$pipeoutext" >> $tmpscript
+    else
+	echo "$cmd \$infile > \$infile$pipeoutext" >> $tmpscript
+    fi
 fi
 
 echo "echo task \$SGE_TASK_ID done" >> $tmpscript
