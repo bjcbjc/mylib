@@ -18,7 +18,7 @@ import time
 # 
 # Required: samtools, gawk
 #
-# Input: mismatchCountByRead.py -f reference.fa -bam alignment.bam -o output.filename [-samtools path/to/samtools]
+# Input: mismatchCountByRead.py -f reference.fa -bam alignment.bam -o output.filename [-samtools path/to/samtools] [-n] [-r read_length]
 #
 # Output: first line is the number of total counted reads. The following lines record the counts
 # of reads for each category in (1) and (2) described above. Specifically, M, I, D and S represents
