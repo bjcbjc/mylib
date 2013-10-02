@@ -57,6 +57,7 @@ argp = argparse.ArgumentParser(prog='mismatchCountByRead.py')
 argp.add_argument('-f', type=str, default='/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa', metavar='reference_seq', help='faidx-indexed reference fasta' )
 argp.add_argument('-bam', type=str, metavar='bam_file', required=True, help='bam file')
 argp.add_argument('-o', type=str, default='test.mismatch.stat', metavar='output_file', help='file name for the output, [<bam>.mismatch.stat]')
+argp.add_argument('-q', type=int, metavar='min_mapq', help='min MAPQ', default=1)
 argp.add_argument('-n', help='count N as mismatch if specified', action='store_true')
 argp.add_argument('-r', type=int, metavar='read_length', default=0, help='max read length; if not provided, obtained from the first read')
 argp.add_argument('-samtools', type=str, metavar='path_to_samtools',default='/data/NYGC/Software/samtools/samtools-0.1.19/samtools', help='samtools path, [/data/NYGC/Software/samtools/samtools-0.1.19]')
@@ -71,7 +72,7 @@ print args
 # Command string; "samtools view -F" is used to filter reads and then pipe into "samtools calmd" which is piped to gawk to retain only flag-information, CIGAR, and MD. The printed information (three columns per alignment) is then piped to this python script for parsing and counting (See below). 
 
 # filter reads first to reduce the number of warnings in log, if MD is recalculated
-cmd = args.samtools + ' view -uh -F %d '%(0xf04) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f  + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { for(i=1;i<=NF;i++) {if ($i ~ /MD:Z:/) {sub(/MD:Z:/,"",$i); print and($2,0x10),$6,$i}}} }' '''
+cmd = args.samtools + ' view -uh -F %d -q %d '%(0xf04, args.q) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f  + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { for(i=1;i<=NF;i++) {if ($i ~ /MD:Z:/) {sub(/MD:Z:/,"",$i); print $2,$6,$i}}} }' '''
 
 print 'Run command: ' + cmd
 
@@ -79,7 +80,7 @@ print 'Run command: ' + cmd
 samout, samerr, out = None, None, None
 
 # container for statistics to be collected
-counter = {'fwd':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[]}, 'rev':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[] }}
+counter = {'first-fwd':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[]}, 'first-rev':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[] }, 'second-fwd':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[]}, 'second-rev':{'D':[], 'I':[], 'M':[], 'S':[], 'rD':[], 'rI':[], 'rM':[], 'rS':[] } }
 
 start = time.time()
 try:
@@ -108,16 +109,24 @@ try:
     line = samout.readline()
     numread = 1
     while line:
-        revCmpFlag, cigar, md = line.split()
+        flag, cigar, md = line.split()
         md = md.upper()
+        flag = int(flag)
 
         if cigar == '*': #not available
             line = samout.readline()
             continue
 
-        revkey = 'fwd'
-        if revCmpFlag != '0':
-            revkey = 'rev'
+        if (flag & 0x40) > 0:
+            if (flag & 0x10) == 0:
+                revkey = 'first-fwd'
+            else:
+                revkey = 'first-rev'
+        else:
+            if (flag & 0x10) == 0:
+                revkey = 'second-fwd'
+            else:
+                revkey = 'second-rev'
 
         if not args.n: # don't count N in MD as mismatach
             strN = md_N_parser.findall(md)  # (\d+)N(\d+)N...

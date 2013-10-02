@@ -1,0 +1,45 @@
+
+library(DESeq)
+library(gdata)
+sampletb = read.table('%(sampletable)s', sep='\t', header=TRUE)
+filenames = paste('%(countfnprefix)s', sampletb$%(ID)s, '%(countfnsuffix)s', sep='')
+meta = %(meta)s
+
+if ( length(meta) > 0) {
+   sampleinfo = data.frame(ID = sampletb$%(ID)s, filename=filenames, condition=sampletb$%(condition)s, sampletb[, is.element(names(sampletb), meta) ] )
+} else {
+   sampleinfo = data.frame(ID = sampletb$%(ID)s, filename=filenames, condition=sampletb$%(condition)s )
+}
+valid = sampleinfo$condition=='%(gr1)s' | sampleinfo$condition=='%(gr2)s'
+sampleinfo = drop.levels( sampleinfo[valid, ] )
+nlevels = sapply(sampleinfo, function(col) length(levels(col)) )
+sampleinfo = drop.levels( sampleinfo[, nlevels>1] )
+meta = meta[ is.element(meta, names(sampleinfo)) ]
+
+countData <- newCountDataSetFromHTSeqCount(sampleinfo, '%(inputpath)s')
+
+countData = estimateSizeFactors(countData)
+countData = estimateDispersions(countData)
+
+deseqResult = nbinomTest(countData, '%(gr1)s', '%(gr2)s')
+pdf('%(outputpath)s%(prefix)s.%(gr1)s.%(gr2)s.plots.pdf')
+plotDispEsts(countData, main='Dispersion estimate')
+plotMA( deseqResult, main='MA plot' )
+hist( deseqResult$pval, breaks=100, col='skyblue', main='pval: %(gr1)s vs. %(gr2)s' )
+dev.off()
+
+if ( length(meta) > 0 ) {
+   confounds = names(sampleinfo)
+   confounds = confounds[ !is.element(confounds, c('ID', 'filename', 'condition')) ]
+   formulastr = paste( 'count ~ ', paste( confounds, collapse='+'))
+   glmfit1 = fitNbinomGLMs(countData, as.formula( paste(formulastr, '+condition') ), list(maxit=500) )
+   glmfit0 = fitNbinomGLMs(countData, as.formula( formulastr ), list(maxit=500) )
+   pvalGLM = nbinomGLMTest( glmfit1, glmfit0 )
+   padjGLM = p.adjust( pvalGLM, method='BH' )
+   deseqResult$pvalGLM <- pvalGLM
+   deseqResult$padjGLM <- padjGLM
+   save(countData, deseqResult, glmfit1, glmfit0, file='%(outputpath)s%(prefix)s.%(gr1)s.%(gr2)s.Rdata')
+} else {
+   save(countData, deseqResult, file='%(outputpath)s%(prefix)s.%(gr1)s.%(gr2)s.Rdata')
+}
+write.table( deseqResult, file='%(outputpath)s%(prefix)s.%(gr1)s.%(gr2)s.deseq.txt', sep='\t', row.names=F)
