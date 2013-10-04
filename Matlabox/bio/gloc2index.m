@@ -9,7 +9,16 @@ function index = gloc2index(gloc, gloc2)
         if ischar(gloc)
             gloc = numericchrm(gloc);
         end
+        if ~isa(gloc, 'double')
+            gloc = double(gloc);
+        end
+        if ~isa(gloc2, 'double')
+            gloc2 = double(gloc2);
+        end
         index = (gloc-1) * maxbp + gloc2;
     else
+        if ~isa(gloc, 'double')
+            gloc = double(gloc);
+        end
         index = (gloc(:,1)-1) * maxbp + gloc(:,2);
     end

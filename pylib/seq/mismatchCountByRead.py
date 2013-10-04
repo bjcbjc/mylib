@@ -72,7 +72,7 @@ print args
 # Command string; "samtools view -F" is used to filter reads and then pipe into "samtools calmd" which is piped to gawk to retain only flag-information, CIGAR, and MD. The printed information (three columns per alignment) is then piped to this python script for parsing and counting (See below). 
 
 # filter reads first to reduce the number of warnings in log, if MD is recalculated
-cmd = args.samtools + ' view -uh -F %d -q %d '%(0xf04, args.q) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f  + ''' | gawk '{OFS="\t"; if ( and($2,0xf04)==0 ) { for(i=1;i<=NF;i++) {if ($i ~ /MD:Z:/) {sub(/MD:Z:/,"",$i); print $2,$6,$i}}} }' '''
+cmd = args.samtools + ' view -uh -F %d -q %d '%(0xf04, args.q) + args.bam + ' | ' + args.samtools + ' calmd  - ' + args.f  + ''' | gawk '{OFS="\t"; if ( and($2,0x2)>0 ) { for(i=1;i<=NF;i++) {if ($i ~ /MD:Z:/) {sub(/MD:Z:/,"",$i); print $2,$6,$i}}} }' '''
 
 print 'Run command: ' + cmd
 
