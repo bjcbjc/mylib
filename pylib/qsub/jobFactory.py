@@ -32,7 +32,7 @@ class job:
         return
 
 class jobManager:
-    def __init__(self, ext='.job', outext='.stdout', shell='bash', mem='4G', time='8::', overwrite=False):
+    def __init__(self, ext='.job', outext='.log', shell='bash', mem='4G', time='8::', overwrite=False):
         self.ext = ext
         self.outext = outext
         self.shell = shell
@@ -97,14 +97,26 @@ class jobManager:
             cmdtxt = 'exec &>%s\n'%outpathfn
 
         f.write('\n')
+        f.write('set -e\n')
         f.write('echo hostname: `hostname`\n')
         if sgeJob:
             f.write('echo jobID: $JOB_ID\n')
         
-        for line in cmd:
+        cmdlineidx = []
+        noncmdkey = ['echo', 'printf', 'export', 'if', 'fi', 'set ']
+        for lineidx in range( len(cmd) ):
+            if any( [ cmd[lineidx].find(x) == 0 for x in noncmdkey ] ):
+                continue
+            cmdlineidx.append(lineidx)
+
+        totalcmd = len(cmdlineidx)
+        for lineidx in range(len(cmd)):
+            line = cmd[lineidx]
+            if lineidx in cmdlineidx:
+                cmdtxt = cmdtxt + 'printf "\\n======= jobCMD %d/%d: %s\\n\\n"\n'%(cmdlineidx.index(lineidx)+1, totalcmd, line.replace('"','""').replace('\1','\\1').replace('\2','\\2'))
             cmdtxt = cmdtxt + '%s\n\n'%line
-            if trackcmd:
-                cmdtxt = cmdtxt + 'echo finished %s\n\n'%line[:min(len(line),tracklen)]
+            if trackcmd and lineidx in cmdlineidx:
+                cmdtxt = cmdtxt + 'printf "finished %s\n\n"\n\n'%line#[:min(len(line),tracklen)]
         cmdtxt = cmdtxt + 'echo Finish %s\n'%fn
 
         if runOnServer == '':

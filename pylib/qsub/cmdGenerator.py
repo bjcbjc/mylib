@@ -12,7 +12,7 @@ def checkPath(p, create=False):
     return p
 
 def checkPathOnNode(p):
-    cmd = 'if [ ! -d %s ]; then \nmkdir %s\nfi'%(p,p)
+    cmd = 'if [ ! -d %s ]; then \nmkdir %s\necho "TMPJOBDIR=%s"\nfi'%(p,p,p)
     return cmd
 
 def formatCmd(cmd, *args ):
