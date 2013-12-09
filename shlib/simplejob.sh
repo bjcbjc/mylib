@@ -11,26 +11,30 @@ filepattern=$2
 runmode=$3
 
 if [ $# -lt 4 ]; then
+    jobname=$RANDOM
+else
+    jobname=$4
+fi
+
+if [ $# -lt 5 ]; then
     pipeoutext=""
 else
-    pipeoutext=$4
+    pipeoutext=$5
     if [[ "$pipeoutext" != .* ]]; then
 	pipeoutext="."$pipeoutext
     fi
 fi
 
-tmpstr=$RANDOM
+ls $filepattern > simpjob.$jobname.input
+nfile=`wc -l simpjob.$jobname.input | cut -f1 -d" "`
+echo "list in simpjob.$jobname.input"
 
-ls $filepattern > simpjob.$tmpstr.input
-nfile=`wc -l simpjob.$tmpstr.input | cut -f1 -d" "`
-echo "list in simpjob.$tmpstr.input"
-
-tmpscript=simpjob.$tmpstr.job
+tmpscript=simpjob.$jobname.job
 echo "#!/bin/bash" > $tmpscript
 echo "#$ -cwd" >> $tmpscript
 echo "#$ -j y" >> $tmpscript
-echo "#$ -o simpjob.$tmpstr.out" >> $tmpscript
-echo "infile=\`awk \"NR==\$SGE_TASK_ID\" simpjob.$tmpstr.input\`" >> $tmpscript
+echo "#$ -o simpjob.$jobname.out" >> $tmpscript
+echo "infile=\`awk \"NR==\$SGE_TASK_ID\" simpjob.$jobname.input\`" >> $tmpscript
 
 if [ -z "$pipeoutext" ]; then
     if [[ "$cmd" =~ "\$infile" ]]; then

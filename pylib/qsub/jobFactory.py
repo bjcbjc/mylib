@@ -86,6 +86,8 @@ class jobManager:
         if sgeJob:
             f.write('#$ -cwd\n')
             f.write('#$ -j y\n')
+            f.write('#$ -m ea\n')
+            f.write('#$ -M bjchen@nygenome.org\n')
             #f.write('#$ -l mem=%s,time=%s\n'%(mem, time))
             #f.write('#$ -l mem_free=%s'%(mem))
             for i in sgeopt:
