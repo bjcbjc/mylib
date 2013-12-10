@@ -1,10 +1,10 @@
 classdef TCGAclinical < handle
 
-    properties (Constant)
-        folder = './data/clinical/';
-        pafn = 'clinical_patient_all_brca.txt';
-        sdfn = 'clinical_slide_all_brca.txt';
-    end
+%     properties (Constant)
+%         folder = './data/clinical/';
+%         pafn = 'clinical_patient_all_brca.txt';
+%         sdfn = 'clinical_slide_all_brca.txt';
+%     end
     
     methods (Static)
         function s = readAllClinical()
@@ -12,7 +12,98 @@ classdef TCGAclinical < handle
             s.slide = TCGAclinical.readSlides();
         end
         
-        function patientinfo = readPatients(fn)
+        
+        function patientinfo = readPatients(fn, minMissRatio)
+            if nargin < 1
+                fn = [TCGAclinical.folder TCGAclinical.pafn];
+            end
+            if nargin < 2
+                minMissRatio = 0;
+            end
+            t = parseText(fn, 'nrowname',1,'ncolname',1);            
+
+            %discard columns w/o information or lack of variation within tumor or
+            %normal samples
+            remove = all(strcmpi('null', t.text), 1);
+            remove = remove | all(~cellfun(@isempty, strfind(t.text, ...
+                'Not Available')), 1);    
+            t.colname(remove) = [];
+            t.text(:,remove) = [];
+            
+            remove = strcmp(t.colname, 'patient_id') | ... %already in barcode
+                strcmp(t.colname, 'bcr_patient_uuid') | ...  %not very useful
+                strcmp(t.colname, 'tissue_source_site'); %already in barcode
+            t.colname(remove) = [];
+            t.text(:, remove) = [];
+
+            t.text = regexprep(t.text, '\[\w+\s*\w*\]', 'NaN');
+%             t.text = strrep(t.text, '[Not Available]', 'NaN');
+%             t.text = strrep(t.text, '[Not Applicable]', 'NaN');
+%             t.text = strrep(t.text, '[Completed]', 'NaN');
+%             t.text = strrep(t.text, '[Discrepancy]', 'NaN');
+%             t.text = strrep(t.text, '[Unknown]', 'NaN');
+
+            remove = [];           
+            for i = 1:size(t.text, 2)                
+                if length( setdiff(t.text(:,i), 'NaN') ) <= 1
+                    remove = [remove, i];
+                end
+            end
+            t.colname(remove) = [];
+            t.text(:, remove) = [];
+
+            t.colname = strrep(t.colname, '-', '_');
+            %sample = tcgaSampleDecoder.decode(t.rowname);
+
+            patientinfo.sample = t.rowname;
+            %patientinfo.tss = sample.tss;
+            %patientinfo.participant = sample.participant; 
+            
+            %separate attributes into ref, categorical and numerical
+            %ref: most data are not available or censored (can't be used for test)
+            %categorical: categorical data
+            %numerical
+            %
+            daysattr = ~cellfun(@isempty, strfind(t.colname, 'days_'))';
+            missratio = mean(strcmp(t.text, 'NaN'), 1);
+            t.colname(missratio < minMissRatio & ~daysattr ) = [];
+            t.text(:, missratio < minMissRatio & ~daysattr ) = [];
+            numeric = all(isnumericstring(t.text),1);           
+            for i = 1:length(t.colname)                
+                if numeric(i) || daysattr(i)
+                    patientinfo.(t.colname{i}) = str2double( t.text(:,i) );
+                elseif all(ismember(upper(setdiff(t.text(:,i), 'NaN')), {'YES','NO'}))
+                    patientinfo.(t.colname{i}) = str2double( ...
+                        strrep(strrep(upper(t.text(:,i)), 'YES','1'), 'NO', '0')) ;
+                elseif all(ismember(upper(setdiff(t.text(:,i), 'NaN')), {'TRUE','FALSE'}))
+                    patientinfo.(t.colname{i}) = str2double( ...
+                        strrep(strrep(upper(t.text(:,i)), 'TRUE','1'), 'FALSE', '0')) ;                   
+                else
+                    patientinfo.(t.colname{i}) = t.text(:,i);
+                end
+            end
+%             patientinfo.attr_num = ...
+%                 t.colname((numeric & missratio <= 0.5) | daysattr);
+%             patientinfo.attr_ref = setdiff(t.colname(missratio > 0.5), patientinfo.attr_num);
+%             patientinfo.attr_cat = setdiff(t.colname, union(patientinfo.attr_ref, patientinfo.attr_num));
+% 
+%             [~,i] = ismember(patientinfo.attr_num, t.colname);
+%             patientinfo.data_num = str2double( t.text(:, i) );
+%             [~,i] = ismember(patientinfo.attr_ref, t.colname);
+%             patientinfo.data_ref = t.text(:, i);
+%             [~,i] = ismember(patientinfo.attr_cat, t.colname);
+%             patientinfo.data_cat = t.text(:, i);
+            
+%             group = {'IV', 'III', 'II', 'I'}; %reverse search!
+%             for i = 1:length(group)
+%                 k = ~cellfun(@isempty, ...
+%                     strfind(tmp(:,2), sprintf('Stage %s',group{i})));
+%                 tmp(k,2) = {sprintf('%d',5-i)};
+%             end
+%             patientinfo.data_num(:, end+1:end+4) = str2double(tmp);
+        end
+        
+        function patientinfo = readPatients_back(fn)
             if nargin < 1
                 fn = [TCGAclinical.folder TCGAclinical.pafn];
             end
