@@ -30,9 +30,9 @@ classdef TCGAParser < handle
             n = size(fns, 1);            
             for i = 1:n                
                 t = parseText(fns{i,1}, 'nrowname', 1, 'ncolname', 2, 'numeric', true, 'treatasempty', {'na','NA','null'});
-                if ~strcmp(t.colname{1}, fns{i,2})
-                    error('inconsist ID %s, %s', t.colname{1}, fns{i,2});
-                end
+%                 if ~strcmp(t.colname{1}, fns{i,2})
+%                     error('inconsist ID %s, %s', t.colname{1}, fns{i,2});
+%                 end
                 if i == 1
                     data.gid = t.rowname;
                     data.exp = NaN(length(data.gid), n);
