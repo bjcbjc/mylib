@@ -276,7 +276,8 @@ if (~willdisplay), return; end
 
 %f1 = figure('pos',get(gcf,'pos') + [0,-200,0,0],'tag','boxplot');
 if ~isempty(displayopt)
-    figure(displayopt);
+    %figure(displayopt);
+    set(0,'CurrentFigure',displayopt);
 end
 %ax = axes('Parent',f1);
 %ax = get(f1, 'currentaxes');
