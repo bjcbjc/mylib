@@ -24,7 +24,7 @@ classdef TCGAParser < handle
             end
         end
         
-        function data = reaExpArray(fns, fndir)
+        function data = readExpArray(fns, fndir)
             if nargin < 2, fndir = ''; end
             fns(:,1) = strcat(fndir, fns(:,1));
             n = size(fns, 1);            
