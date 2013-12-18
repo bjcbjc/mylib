@@ -38,10 +38,11 @@ classdef TCGAParser < handle
                     data.exp = NaN(length(data.gid), n);
                     data.exp(:,i) = t.text;
                 else
-                    if any(~strcmp(data.gid, t.rowname))
+                    [~, rowi] = ismember(data.gid, t.rowname);
+                    if any(rowi==0) || length(data.gid) ~= length(t.rowname)
                         error('file %d has different gene names', i);
-                    end
-                    data.exp(:,i) = t.text;
+                    end                    
+                    data.exp(:,i) = t.text(rowi,:);
                 end
             end            
             data.sample = fns(:,2);
