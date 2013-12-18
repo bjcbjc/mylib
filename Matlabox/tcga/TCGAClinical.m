@@ -1,4 +1,4 @@
-classdef TCGAclinical < handle
+classdef TCGAClinical < handle
 
 %     properties (Constant)
 %         folder = './data/clinical/';

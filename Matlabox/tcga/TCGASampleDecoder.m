@@ -1,5 +1,30 @@
-classdef tcgaSampleDecoder < handle
+classdef TCGASampleDecoder < handle
 
+    properties (Constant)
+        indextb = {'tss', 7; 'participant', 12; 'patient', 12; ...
+            'sample', 15; 'vial', 16; 'portion', 20; 'analyte', 21; ...
+            'plate', 26; 'center', 29};
+        sampleTypeTb = { ...
+            1, 'Primary solid Tumor', 'TP'; ...
+            2, 'Recurrent Solid Tumor', 'TR'; ...
+            3, 'Primary Blood Derived Cancer - Peripheral Blood', 'TB'; ...
+            4, 'Recurrent Blood Derived Cancer - Bone Marrow', 'TRBM'; ...
+            5, 'Additional - New Primary', 'TAP'; ...
+            6, 'Metastatic', 'TM'; ...
+            7, 'Additional Metastatic', 'TAM'; ...
+            8, 'Human Tumor Original Cells', 'THOC'; ...
+            9, 'Primary Blood Derived Cancer - Bone Marrow', 'TBM'; ...
+            10, 'Blood Derived Normal', 'NB'; ...
+            11, 'Solid Tissue Normal', 'NT'; ...
+            12, 'Buccal Cell Normal', 'NBC'; ...
+            13, 'EBV Immortalized Normal', 'NEBV'; ...
+            14, 'Bone Marrow Normal', 'NBM'; ...
+            20, 'Control Analyte', 'CELLC'; ...
+            40, 'Recurrent Blood Derived Cancer - Peripheral Blood', 'TRB'; ...
+            50, 'Cell Lines', 'CELL'; ...
+            60, 'Primary Xenograft Tissue', 'XP'; ...
+            61, 'Cell Line Derived Xenograft Tissue', 'XCL'};
+    end
  
     methods (Static)
         
@@ -23,10 +48,10 @@ classdef tcgaSampleDecoder < handle
             
             n = length(sampleid);
             s = textscan(sampleid{1}, '%s', 'delimiter', '-');
-            sampstruct = tcgaSampleDecoder.sampleStruct(s{1});
+            sampstruct = TCGASampleDecoder.sampleStruct(s{1});
             for i = 2:n
                 s = textscan(sampleid{i}, '%s', 'delimiter', '-');
-                sampstruct(i,1) = tcgaSampleDecoder.sampleStruct(s{1});
+                sampstruct(i,1) = TCGASampleDecoder.sampleStruct(s{1});
             end
             
             if length(unique({sampstruct.proj})) ~= 1                 
@@ -37,11 +62,12 @@ classdef tcgaSampleDecoder < handle
             sampleCollection.proj = sampstruct(1).proj;
             sampleCollection.tss = {sampstruct.tss}';
             sampleCollection.participant = {sampstruct.participant}';
-            sampleCollection.sample = strcat(sampleCollection.tss, sampleCollection.participant);
-            if isfield(sampstruct(1), 'samplevial')
-                sampleCollection.samplevial = {sampstruct.samplevial}';
-                sampleCollection.samplecode = {sampstruct.samplecode}';
-                sampleCollection.sampletype = [sampstruct.sampletype]';
+%             sampleCollection.sample = strcat(sampleCollection.tss, sampleCollection.participant);
+            if isfield(sampstruct(1), 'vial')
+                sampleCollection.vial = {sampstruct.vial}';
+                sampleCollection.sample = [sampstruct.sample]';
+                %sampleCollection.samplecode = {sampstruct.samplecode}';
+                %sampleCollection.sampletype = [sampstruct.sampletype]';
             end
             if fulldecode
                 if isfield(sampstruct(1), 'portion')
@@ -56,7 +82,7 @@ classdef tcgaSampleDecoder < handle
             end
         end
         
-        function [idx1, idx2] = matchSample(sample1, sample2)
+        function [sample, idx1, idx2] = intersect(sample1, sample2)
             n1 = length(sample1{1});
             n2 = length(sample2{1});
             [n, mi] = min([n1, n2]);
@@ -65,25 +91,82 @@ classdef tcgaSampleDecoder < handle
             else
                 sample1 = cellfun(@(x) x(1:n), sample1, 'uniformoutput', false);
             end
-            [~, idx1, idx2] = intersect(sample1, sample2);            
+            [sample, idx1, idx2] = intersect(sample1, sample2);            
         end
         
-        function [tf idx] = sampleIsMember(sampleid1, sampleid2)
+        function patientcode = reduceToParticipant(barcode)
+            % barcode: TCGA barcodes
+            % strip barcodes to participant level
+            patientcode = TCGASampleDecoder.reduceBarcode(barcode, 'patient');            
+        end
+        
+        function newcode = reduceBarcode(barcode, labelIndex)
+            % Reduce barcode to indicated index (numeric index value or
+            % TCGA barcode labels eg. Participant, Sample, Vial, Portion,
+            % Analyte and etc. Return bardcode(1:k), k is labelIndex or the
+            % index defined by the label
+            %
+            % labelIndex: index number or label (string), valid strings:
+            % {'TSS', 'Participant'(or 'patient'), 'Sample', 'Vial',
+            % 'Analyte', 'Plate', 'Center'}, CASE-INSENSITIVE
+            %
+            
+            newcode = barcode;
+            if ischar(labelIndex)
+                [~, j] = ismember(lower(labelIndex), TCGASampleDecoder.indextb(:,1));
+                if j == 0
+                    fprintf('Cannot find label %s; return input barcodes\n', labelIndex);                    
+                    return
+                end
+                labelIndex = TCGASampleDecoder.indextb{j, 2};
+            end
+            n = cellfun(@length, barcode);
+            idx = n > labelIndex;
+            if any( n < labelIndex)
+                fprintf('Some barcodes are shorted than the requested length\n');
+            end
+            newcode(idx) = cellfun(@(x) x(1:labelIndex), barcode(idx), 'unif', 0);
+        end
+        
+        function [matchcode, idx] = longestMatch(barcodelist, query)
+            % return the longest matched barcode of query, compared to
+            % barcodelist; query is a string
+            %
+            % barcodelist: list of barcodes to search in
+            % query: a barcode for matching
+            %
+            % matchcode: the longest barcode that matches the prefix of
+            %   query
+            % idx: indices to barcodelist that contains the longest match
+            %
+            %
+            indices = cell2mat(TCGASampleDecoder.indextb(:,2));
+            matchcode = '';
+            n = length(query);
+            indices( indices > n ) = [];
+            for i = length(indices):-1:1
+                idx = find( cellfun(@(x) ismember(1,x), strfind(barcodelist, query(1:indices(i))) ) ); 
+                if ~isempty(idx)
+                    matchcode = query(1:indices(i));
+                    return
+                end
+            end            
+        end
+        
+        function [tf, idx] = ismember(sampleid1, sampleid2)
+            if ischar(sampleid1), sampleid1 = {sampleid1}; end
+            if ischar(sampleid2), sampleid2 = {sampleid2}; end
             n1 = unique(cellfun(@length, sampleid1));
             n2 = unique(cellfun(@length, sampleid2));
             if length(n1) > 1 || length(n2) > 1
                 error('lengths of sample IDs are different in one of the array');
             end
             if n1 < n2
-                for i = 1:length(sampleid2)
-                    sampleid2{i} = sampleid2{1}(1:n1);
-                end
+                sampleid2 = TCGASampleDecoder.reduceBarcode(sampleid2, n1);
             elseif n1 > n2
-                for i = 1:length(sampleid1)
-                    sampleid1{i} = sampleid1{i}(1:n2);
-                end
+                sampleid1 = TCGASampleDecoder.reduceBarcode(sampleid1, n2);
             end
-            [tf idx] = ismember(sampleid1, sampleid2);
+            [tf, idx] = ismember(sampleid1, sampleid2);
         end
     end
 
@@ -94,16 +177,18 @@ classdef tcgaSampleDecoder < handle
             sample.tss = s{2};
             sample.participant = s{3};
             if n >= 4
-                sample.samplevial = s{4};                
-                c = str2double( s{4}(1:end-1) );
-                sample.samplecode = s{4}(1:end-1);
-                if c < 10 %tumor
-                    sample.sampletype = 2;
-                elseif c < 20 %normal
-                    sample.sampletype = 1;
-                else %control
-                    sample.sampletype = 0;
-                end
+                sample.vial = s{4}(end);
+                sample.sample = str2double(s{4}(1:end-1));
+%                 sample.samplevial = s{4};                
+%                 c = str2double( s{4}(1:end-1) );
+%                 sample.samplecode = s{4}(1:end-1);
+%                 if c < 10 %tumor
+%                     sample.sampletype = 2;
+%                 elseif c < 20 %normal
+%                     sample.sampletype = 1;
+%                 else %control
+%                     sample.sampletype = 0;
+%                 end
             end
             if n >= 5
                 sample.portion = s{5};
