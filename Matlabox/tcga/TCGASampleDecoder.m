@@ -168,6 +168,22 @@ classdef TCGASampleDecoder < handle
             end
             [tf, idx] = ismember(sampleid1, sampleid2);
         end
+        
+        function sampletype = translateSampleType(sampleTypeCode, shortname)
+            if nargin < 2, shortname = false; end
+            if ischar(sampleTypeCode), sampleTypeCode = {sampleTypeCode}; end
+            if iscellstr(sampleTypeCode)
+                s = TCGASampleDecoder.decode(sampleTypeCode);
+                sampleTypeCode = s.sample;
+            end
+            code = cell2mat(TCGASampleDecoder.sampleTypeTb(:,1));
+            [~, i] = ismember(sampleTypeCode, code);
+            sampletype = repmat({'NA'}, length(sampleTypeCode), 1);            
+            sampletype(i~=0) = TCGASampleDecoder.sampleTypeTb(i(i~=0), shortname+2);
+            if length(sampletype) == 1
+                sampletype = sampletype{1};
+            end
+        end
     end
 
     methods (Access = private, Static)
