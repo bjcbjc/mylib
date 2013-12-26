@@ -1,4 +1,5 @@
 function strarray = numarray2strarray(numarray)
+% faster than num2cellstr
     [m, n] = size(numarray);
     if m == 1 && n > 1
         singlecol = true;

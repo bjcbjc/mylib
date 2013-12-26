@@ -85,12 +85,13 @@ classdef GENOMEFUNC < handle
         end
         
         function [gid, idx] = name2Entrez(datastruct, name, chrm, region)
-            if nargin < 3, chrm = []; end
+            if nargin < 3, chrm = []; end            
             if nargin < 4, region = []; end
             if ischar(name)
                 name = {name};
             end
-            name = upper(name);
+            
+            name = upper(name);            
             if isempty(chrm)
                 fprintf('name mapping might not be unique\n');
                 [~, idx] = ismember(name, upper(datastruct.name));
@@ -126,19 +127,23 @@ classdef GENOMEFUNC < handle
                 
                 gid = NaN(length(name), 1);
                 
-                query = strcat(name, '_', chrm);
-                key = strcat(datastruct.name, '_', arrayfun(@num2str, datastruct.chrm, ...
-                    'uniformoutput', false));
+                query = strcat(name, '_', chrm);                
+%                 key = strcat(datastruct.name, '_', arrayfun(@num2str, datastruct.chrm, ...
+%                     'uniformoutput', false));
+                key = strcat(upper(datastruct.name), '_', numarray2strarray(datastruct.chrm));
                 [~, idx] = ismember(query, key);
                 gid(idx~=0) = datastruct.id(idx(idx~=0));
                 
-                notfound = find(idx == 0);
-                key = strcat(datastruct.alias, '_', arrayfun(@num2str, datastruct.alias_chrm, ...
-                    'uniformoutput', false));
-                [~, ii] = ismember(query(idx==0), key);
-                gid(notfound(ii~=0)) = datastruct.alias_id(ii(ii~=0));
-                [~, j] = ismember(datastruct.alias_id(ii(ii~=0)), datastruct.id);
-                idx(notfound(ii~=0)) = j;
+                extralookup = {'alias', 'locustag'};
+                for lookupidx = 1:length(extralookup)
+                    notfound = find(idx == 0);
+                    key = strcat(upper(datastruct.(extralookup{lookupidx})), ...
+                        '_', numarray2strarray(datastruct.([extralookup{lookupidx} '_chrm'])));                    
+                    [~, ii] = ismember(query(idx==0), key);
+                    gid(notfound(ii~=0)) = datastruct.([extralookup{lookupidx}, '_id'])(ii(ii~=0));
+                    [~, j] = ismember(datastruct.([extralookup{lookupidx}, '_id'])(ii(ii~=0)), datastruct.id);
+                    idx(notfound(ii~=0)) = j;
+                end                
                 idx(idx == 0) = NaN;
             end
         end
