@@ -86,8 +86,8 @@ class jobManager:
         if sgeJob:
             f.write('#$ -cwd\n')
             f.write('#$ -j y\n')
-            f.write('#$ -m ea\n')
-            f.write('#$ -M bjchen@nygenome.org\n')
+            #f.write('#$ -m ea\n')
+            #f.write('#$ -M bjchen@nygenome.org\n')
             #f.write('#$ -l mem=%s,time=%s\n'%(mem, time))
             #f.write('#$ -l mem_free=%s'%(mem))
             for i in sgeopt:
@@ -107,18 +107,21 @@ class jobManager:
         cmdlineidx = []
         noncmdkey = ['echo', 'printf', 'export', 'if', 'fi', 'set ']
         for lineidx in range( len(cmd) ):
-            if any( [ cmd[lineidx].find(x) == 0 for x in noncmdkey ] ):
+            if any( [ cmd[lineidx].cmdstr.find(x) == 0 for x in noncmdkey ] ):
                 continue
             cmdlineidx.append(lineidx)
 
         totalcmd = len(cmdlineidx)
         for lineidx in range(len(cmd)):
-            line = cmd[lineidx]
+            cmdstr = cmd[lineidx].cmdstr
+            logstr = cmd[lineidx].logstr
             if lineidx in cmdlineidx:
-                cmdtxt = cmdtxt + 'printf "\\n======= jobCMD %d/%d: %s\\n\\n"\n'%(cmdlineidx.index(lineidx)+1, totalcmd, line.replace('"','""').replace('\1','\\1').replace('\2','\\2'))
-            cmdtxt = cmdtxt + '%s\n\n'%line
+                if logstr != '':
+                    cmdtxt = cmdtxt + 'printf "\\n======= jobCMD %d/%d: %s\\n\\n"\n'%(cmdlineidx.index(lineidx)+1, totalcmd, logstr.replace('"','""').replace('\1','\\1').replace('\2','\\2'))
+            cmdtxt = cmdtxt + '%s\n\n'%cmdstr
             if trackcmd and lineidx in cmdlineidx:
-                cmdtxt = cmdtxt + 'printf "finished %s\n\n"\n\n'%line#[:min(len(line),tracklen)]
+                if logstr != '':
+                    cmdtxt = cmdtxt + 'printf "finished %s\n\n"\n\n'%logstr#[:min(len(line),tracklen)]
         cmdtxt = cmdtxt + 'echo Finish %s\n'%fn
 
         if runOnServer == '':

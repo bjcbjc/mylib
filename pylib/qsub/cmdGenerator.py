@@ -4,6 +4,11 @@
 import os.path
 from os import system
 
+class CMD:
+    def __init__(self, cmdstr, logstr=''):
+        self.cmdstr = cmdstr
+        self.logstr = logstr
+
 def checkPath(p, create=False):
     if p[-1] != '/': p = p + '/'
     if create:
@@ -11,15 +16,24 @@ def checkPath(p, create=False):
             system('mkdir %s'%p.strip('='))
     return p
 
-def checkPathOnNode(p):
-    cmd = 'if [ ! -d %s ]; then \nmkdir %s\necho "TMPJOBDIR=%s"\nfi'%(p,p,p)
+def checkPathOnNode(p):    
+    cmdstr = 'if [ ! -d %s ]; then \nmkdir -p %s\necho "TMPJOBDIR=%s"\nfi'%(p,p,p)
+    cmd = CMD(cmdstr)
     return cmd
 
-def formatCmd(cmd, *args ):
+def formatCmd(cmd, *args, **kwargs ):
     #args contains tuples of all parameters for a command
     #if args[i] is any other data types (number, string, list), it's printed directly
     #if args[i] is a dict, it's printed as 'key value'
     #order of args should follow the order of the command 'cmd'
+    #
+    # kwargs: logstr='', string for logging command(s); for tracking purpose
+    #
+
+    if 'logstr' in kwargs:
+        logstr = kwargs['logstr']
+    else:
+        logstr = ''
 
     pipeout = ''
     if type(cmd) == type([]):
@@ -52,7 +66,11 @@ def formatCmd(cmd, *args ):
             cmdstr = cmdstr + ' %s'%i
     if pipeout != '':
         cmdstr = cmdstr + ' > %s'%pipeout
-    return cmdstr
+
+    if logstr == '':
+        logstr = cmdstr
+    cmdobj = CMD(cmdstr, logstr)
+    return cmdobj
     
     
 
