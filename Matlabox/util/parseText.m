@@ -87,8 +87,7 @@ function res = parseText(fn, varargin)
         line = fgetl(fid);
         i = i + 1;
     end
-    if colname
-        %res.colname = cell(0, ncolname);
+    if colname        
         for i = 1:ncolname
             hline = fgetl(fid);            
             a = textscan(hline, '%s', 'delimiter', delimiter);
@@ -96,12 +95,6 @@ function res = parseText(fn, varargin)
                 res.colname = cell(length(a{1}), ncolname);
             end
             res.colname(:, i) = a{1};
-%             [res.colname{1, i} t] = strtok(hline,delimiter);
-%             nextc = 2;
-%             while ~isempty(t) %length(t) > 0
-%                 [res.colname{nextc, i} t] = strtok(t, delimiter);
-%                 nextc = nextc + 1;
-%             end            
         end
     end
     
@@ -115,15 +108,23 @@ function res = parseText(fn, varargin)
     if isnumeric(delimiter), delimiter = '\t'; end
     
     if ncol == 0
+        %read one data line
+        fpos = ftell(fid);
+        line = fgetl(fid);
+        offset = fpos - ftell(fid);
+        fseek(fid, offset, 'cof');
+        %decide the number of columns
+        a = textscan(line, '%s', 'delimiter', delimiter, passpara{:});
         if colname
             ncol = size(res.colname,1);
-        else
-            fpos = ftell(fid);
-            line = fgetl(fid);
-            offset = fpos - ftell(fid);        
-            fseek(fid, offset, 'cof');
-            %decide the number of columns        
-            a = textscan(line, '%s', 'delimiter', delimiter, passpara{:});
+            %read a data line to confirm the number of columns; this is
+            %because sometimes the header does not have labels for the
+            %first column
+            if ncol == length(a{1}) - 1
+                ncol = ncol + 1;
+                res.colname = [{''}; res.colname];
+            end
+        else            
             ncol = length(a{1});
         end
     end
