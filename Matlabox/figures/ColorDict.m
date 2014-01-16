@@ -6,6 +6,7 @@ classdef ColorDict < handle
     end
     
     properties (Constant)
+        %ordered by distictiveness
         preset = {'r', [0.9, 0.1, 0.1]; ... %red
             'g', [0, 0.8, 0]; ... %green
             'b', [0.1, 0.1, 0.9]; ... %blue            
@@ -14,6 +15,17 @@ classdef ColorDict < handle
             'o', [0.98, 0.67, 0.15]; ... %orange
             'p', [0.6, 0.1, 0.6]; ... 'purple'
             'k', [0.3, 0.3, 0.3]; ...%black
+            'n', [0.7, 0.7, 0.7]}; %grey
+        %for look up
+        available = {'r', [0.9, 0.1, 0.1]; ... %red
+            'g', [0, 0.8, 0]; ... %green
+            'b', [0.1, 0.1, 0.9]; ... %blue            
+            'm', [1, 0, 1]; ... %magenta
+            'c', [0.1, 0.8, 0.8]; ... %cyan
+            'o', [0.98, 0.67, 0.15]; ... %orange
+            'p', [0.6, 0.1, 0.6]; ... 'purple'
+            'k', [0.3, 0.3, 0.3]; ...%black
+            'y', [0.8, 0.8, 0.1]; ...
             'n', [0.7, 0.7, 0.7]}; %grey
 %         preset = {'r', [0.5, 0.1, 0.1]; ...
 %             'g', [0.1, 0.1, 0.6]; ...
@@ -81,12 +93,12 @@ classdef ColorDict < handle
     methods (Static = true) 
         function color = translate(colorchar)
             
-            [~, i] = ismember(colorchar, ColorDict.preset(:,1));
+            [~, i] = ismember(colorchar, ColorDict.available(:,1));
             if any(i==0)
                 u = colorchar(i==0);
                 error('unknown color %s', strcat(u{:}));
             end
-            color = cell2mat(ColorDict.preset(i,2));
+            color = cell2mat(ColorDict.available(i,2));
         end
     end
 end

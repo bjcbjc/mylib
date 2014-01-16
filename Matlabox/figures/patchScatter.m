@@ -23,7 +23,7 @@ function dothandle = patchScatter(x, y, varargin)
         else
             para.cdata = para.facecolor;
         end
-        para.facecolor = 'flat';
+        para.facecolor = squeeze(para.cdata); %'flat';
     end
     
     figpos = get(gcf, 'position');

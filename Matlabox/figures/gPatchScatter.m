@@ -30,10 +30,10 @@ function h = gPatchScatter(x, y, g, varargin)
         
     ngroup = length(ugroup);
     if isempty(para.facecolor)
-        para.facecolor = defcolor(mod((1:ngroup)-1, defn)+1);
+        para.facecolor = ColorDict.translate( defcolor(mod((1:ngroup)-1, defn)+1));
     elseif isscalar(para.facecolor)
         m = size(para.facecolor, 1);
-        if m == 3 %rgb
+        if m == 3 && ngroup ~= 3 %rgb
             para.facecolor = para.facecolor';
         end
     end
@@ -60,6 +60,7 @@ function h = gPatchScatter(x, y, g, varargin)
             set(h(i), 'displayname', num2str(ugroup(sidx(i))));
         end
     end
+    legend('show');
     
         
     
