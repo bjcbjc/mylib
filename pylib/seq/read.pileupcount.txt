@@ -1,0 +1,46 @@
+AlleleCount
+allele read counts for NGS data
+
+Generate 'compact' read counts from samtools mpileup. The require inputs include bam files, 
+reference sequence and a location file, which is used to limit the positions the counts are calculated. 
+The location file can be a bed file or a VCF file.
+
+Require: samtools
+
+Main file: pileupCount.py
+
+usage: pileupCount.py [-h] [-d [INT]] [-q [INT]] [-Q [INT]] [-f [file]] -loc [file] -bam [file] -r [INT] [-o [file]]
+[-stranded] [-samtools [SAMTOOLS]] [-tmpdir [TMPDIR]] [-samtools_mpileup_option [value]]
+
+optional arguments:
+-h, --help show this help message and exit
+-d [INT] INT for samtools mpileup, read maximally INT reads per bam [10,000]
+-q [INT] INT for samtools mpileup, min mapping quality for an alignment to be used [0]
+-Q [INT] INT for samtools mpileup, mim base quality for a base to be considered [13]
+-f [file] faidx-indexed reference fasta
+-loc [file] file, file can be VCF or bed, [chr, pos] as columns
+-bam [file] file, bam file for pileup
+-r [INT] min reads required for each base
+-o [file] file name for the output, [.out]
+-stranded a switch to specify if it is strand-specific data, [false]
+-samtools [SAMTOOLS] samtools path, [/data/NYGC/Software/samtools/samtools-0.1.19]
+-tmpdir [TMPDIR] path for temporary files, [./]
+-samtools_mpileup_option [value]
+options that are passed to samtools mpileup
+
+Output format: [chrm] [loc] [referece allele] [number of reads*] [base count]
+
+Example: chr1 765499 g 30 >16G5g7
+chr1 771581 T 27 >16T6t3
+chr1 771786 A 27 >16A3a6
+chr1 774180 c 28 >16C3c7
+chr1 774869 g 21 >18G1
+
+Note: Number of reads: For RNA data, this number includes reads that "spliced" 
+across junctions but the reads themselves might not actually flanking the position. 
+
+Base count: The string is formatted as "type base" followed by "number of reads". 
+For example, >16C3c7 means at this position, there are 16 forward-stranded reads 
+that are spliced across this position, 3 forward-stranded reads with C base, and 
+7 reverse-stranded reads with C base. For more information about how bases are 
+represented, see samools' documentation.
