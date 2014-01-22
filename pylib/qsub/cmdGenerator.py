@@ -16,10 +16,22 @@ def checkPath(p, create=False):
             system('mkdir %s'%p.strip('='))
     return p
 
-def checkPathOnNode(p):    
-    cmdstr = 'if [ ! -d %s ]; then \nmkdir -p %s\necho "TMPJOBDIR=%s"\nfi'%(p,p,p)
+def checkPathOnNode(p, tmpdir=True):    
+    if tmpdir:
+        cmdstr = 'if [ ! -d %s ]; then \nmkdir -p %s\necho "TMPJOBDIR=%s"\nfi'%(p,p,p)
+    else:
+        cmdstr = 'if [ ! -d %s ]; then \nmkdir -p %s\nfi'%(p,p)
     cmd = CMD(cmdstr)
     return cmd
+
+def passToScript(cmdset):
+    #cmdset is dictionary
+    #look for 'toShell' key
+    key = 'toShell'
+    if key in cmdset.keys():
+        return formatCmd( cmdset[key] )
+    else:
+        return formatCmd('')
 
 def formatCmd(cmd, *args, **kwargs ):
     #args contains tuples of all parameters for a command

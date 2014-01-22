@@ -28,7 +28,6 @@ classdef GENOMEFUNC < handle
             tf = tf & bsxfun(@ge, base(:,2), query(:,1)');
         end
         
-        
         function [tf, idx] = isWithinRegion(query, searchRegion)
             % query: [chr, start, (end)]
             % searchRegion: matrix, [chr, start, end]
@@ -69,8 +68,6 @@ classdef GENOMEFUNC < handle
                 end                
             end
         end
-        
-        
         
         function [name, idx] = entrez2Name(datastruct, gid)
             newid = GENOMEFUNC.replaceOldID(datastruct, gid);

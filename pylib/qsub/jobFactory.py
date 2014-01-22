@@ -107,7 +107,7 @@ class jobManager:
         cmdlineidx = []
         noncmdkey = ['echo', 'printf', 'export', 'if', 'fi', 'set ']
         for lineidx in range( len(cmd) ):
-            if any( [ cmd[lineidx].cmdstr.find(x) == 0 for x in noncmdkey ] ):
+            if any( [ cmd[lineidx].cmdstr.find(x) == 0 for x in noncmdkey ] ) or cmd[lineidx].cmdstr == '':
                 continue
             cmdlineidx.append(lineidx)
 
