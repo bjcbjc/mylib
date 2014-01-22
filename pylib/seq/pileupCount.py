@@ -141,13 +141,13 @@ def pileupToCount(samout, out, args, para, singlesite=False):
                     if len(indelKey) > 0:
                         indelCountString = '\t'.join( [ ','.join(indelKey), ','.join( ['%s'%indels[k] for k in indelKey] ), ','.join( ['%s'%indels[k.lower()] for k in indelKey] ) ] )
                     else:
-                        indelCountString = '\t0\t0'
+                        indelCountString = '0\t0'
                 else:
                     indelKey = indels.keys()
                     if len(indelKey) > 0:
                         indelCountString = '\t'.join( [ ','.join(indelKey), ','.join( ['%s'%indels[k] for k in indelKey] ) ] )
                     else:
-                        indelCountString = '\t0\t0'
+                        indelCountString = '0\t0'
                 #out.write('\t'.join(line[:4]) + '\t' + countstring + '\n')
                 outbuffer = outbuffer + '\t'.join(line[:4]) + '\t' + countstring + '\t' + indelCountString + '\n'
             else:
