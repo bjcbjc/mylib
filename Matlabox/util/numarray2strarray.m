@@ -8,6 +8,8 @@ function strarray = numarray2strarray(numarray)
         singlecol = true;
     elseif m > 1 && n > 1 %multiple columns
         singlecol = false;
+    elseif m == 1 && n == 1
+        singlecol = true;
     end
     
     if singlecol

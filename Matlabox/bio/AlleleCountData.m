@@ -83,13 +83,17 @@ classdef AlleleCountData < handle
     end
     
     methods (Static)
-        function data = readTableFormatOutput(filename)
+        function data = readTableFormatOutput(filename, stranded)
             f = fopen(filename, 'r');
             line = fgetl(f);
             fclose(f);
             token = textscan(line, '%s');
             ncol = length(token{1});
-            t = parseText(filename, 'nrowname', 0, 'ncolname', 1, 'numericcol', [2, 4:ncol-3]);
+            if ~stranded
+                t = parseText(filename, 'nrowname', 0, 'ncolname', 1, 'numericcol', [2, 4:ncol-2]);
+            else
+                t = parseText(filename, 'nrowname', 0, 'ncolname', 1, 'numericcol', [2, 4:ncol-3]);
+            end
             data.locidx = gloc2index( [ numericchrm(t.text(:,strcmp(t.colname, 'chr'))) t.numtext(:,strcmp(t.numcolname, 'pos')) ]);
             data.ref = t.text(:, strcmp(t.colname, 'ref'));
             data.numread = t.numtext(:, strcmp(t.numcolname, '#read'));
@@ -98,8 +102,51 @@ classdef AlleleCountData < handle
             data.count = t.numtext(:, ntbaseidx);
             indelcol = find(strcmp(t.colname, 'indel'));
             data.indel = t.text(:, indelcol);
-            data.indelcount = t.text(:, indelcol+1:indelcol+2);
-            [data.indelcount, data.indel] = AlleleCountData.parseIndel(data);
+            if stranded
+                data.indelcount = t.text(:, indelcol+1:indelcol+2);
+            else
+                data.indelcount = t.text(:, indelcol+1:end);
+            end
+            i = strcmp(data.indel, '0');
+            data.indel(i) = {''};            
+%             [data.indelcount, data.indel] = AlleleCountData.parseIndel(data);
+        end
+        
+        function data = getRefAltCount(data, ref, alt)
+            %ref and alt are from callers, they may be indels, but indels
+            %will not be matched, since pileup does not know the indels
+            %calls from callers; indel results from pileup do not
+            %necessarily matched indel calls from other callers, so no good
+            %way to match indel counts
+            %
+            %if alt is '-' (deletion), '*' count from pileup will be
+            %returned
+            %if ref is '-', '<' and  '>' counts from pileup are reported
+            %
+            nloc = length(data.locidx);
+            nbase = length(data.ntbase);
+            if nloc ~= length(ref) || nloc ~= length(alt)
+                error('number of ref or alt ~= number of loc in data');
+            end
+            data.refCount = NaN(nloc,1);
+            data.altCount = NaN(nloc, 1);
+            %data.otherCount = NaN(nloc, 1);
+            rowidx = (1:nloc)';
+            
+            if all(ismember({'A','a'}, data.ntbase))
+                tmpdata = AlleleCountData.collapseStrand(data);
+            else
+                tmpdata = data;
+            end
+            
+            ref = strrep(ref, '-', '>');
+            [~, colidx] = ismember(ref, tmpdata.ntbase);            
+            data.refCount( colidx ~= 0) = tmpdata.count( sub2ind([nloc, nbase], rowidx(colidx~=0), colidx(colidx~=0)) );
+            
+            alt = strrep(alt, '-', '*');
+            [~, colidx] = ismember(alt, tmpdata.ntbase);
+            data.altCount( colidx ~= 0) = tmpdata.count( sub2ind([nloc, nbase], rowidx(colidx~=0), colidx(colidx~=0)) );
+
         end
         
         function [count, indel] = indelCount(data, stranded, countmode)

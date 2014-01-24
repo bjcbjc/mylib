@@ -82,14 +82,20 @@ classdef TCGASampleDecoder < handle
             end
         end
         
-        function [sample, idx1, idx2] = intersect(sample1, sample2)
-            n1 = length(sample1{1});
-            n2 = length(sample2{1});
-            [n, mi] = min([n1, n2]);
-            if mi == 1
-                sample2 = cellfun(@(x) x(1:n), sample2, 'uniformoutput', false);
+        function [sample, idx1, idx2] = intersect(sample1, sample2, reduceto)
+            if nargin < 3, reduceto = []; end
+            if isempty(reduceto)
+                n1 = length(sample1{1});
+                n2 = length(sample2{1});
+                [n, mi] = min([n1, n2]);
+                if mi == 1
+                    sample2 = cellfun(@(x) x(1:n), sample2, 'uniformoutput', false);
+                else
+                    sample1 = cellfun(@(x) x(1:n), sample1, 'uniformoutput', false);
+                end
             else
-                sample1 = cellfun(@(x) x(1:n), sample1, 'uniformoutput', false);
+                sample1 = TCGASampleDecoder.reduceBarcode(sample1, reduceto);
+                sample2 = TCGASampleDecoder.reduceBarcode(sample2, reduceto);
             end
             [sample, idx1, idx2] = intersect(sample1, sample2);            
         end
@@ -153,18 +159,24 @@ classdef TCGASampleDecoder < handle
             end            
         end
         
-        function [tf, idx] = ismember(sampleid1, sampleid2)
+        function [tf, idx] = ismember(sampleid1, sampleid2, reduceto)
+            if nargin < 3, reduceto = []; end
             if ischar(sampleid1), sampleid1 = {sampleid1}; end
             if ischar(sampleid2), sampleid2 = {sampleid2}; end
-            n1 = unique(cellfun(@length, sampleid1));
-            n2 = unique(cellfun(@length, sampleid2));
-            if length(n1) > 1 || length(n2) > 1
-                error('lengths of sample IDs are different in one of the array');
-            end
-            if n1 < n2
-                sampleid2 = TCGASampleDecoder.reduceBarcode(sampleid2, n1);
-            elseif n1 > n2
-                sampleid1 = TCGASampleDecoder.reduceBarcode(sampleid1, n2);
+            if isempty(reduceto)
+                n1 = unique(cellfun(@length, sampleid1));
+                n2 = unique(cellfun(@length, sampleid2));
+                if length(n1) > 1 || length(n2) > 1
+                    error('lengths of sample IDs are different in one of the array');
+                end
+                if n1 < n2
+                    sampleid2 = TCGASampleDecoder.reduceBarcode(sampleid2, n1);
+                elseif n1 > n2
+                    sampleid1 = TCGASampleDecoder.reduceBarcode(sampleid1, n2);
+                end
+            else
+                sampleid1 = TCGASampleDecoder.reduceBarcode(sampleid1, reduceto);
+                sampleid2 = TCGASampleDecoder.reduceBarcode(sampleid2, reduceto);
             end
             [tf, idx] = ismember(sampleid1, sampleid2);
         end
