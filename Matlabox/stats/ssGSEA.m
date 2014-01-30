@@ -115,10 +115,11 @@ function score = computeScore(tmpscore, annotated, defaultscore, NR, revsearch)
     % ssGSEA takes the sum 
     score(1,:) = sum(cumsum(defaultscore, 1), 1);
     %original GSEA
-%     score(1,:) = max(cumsum(defaultscore, 1), [], 1);
+    % score(1,:) = max(cumsum(defaultscore, 1), [], 1);
     if revsearch
         defaultscore = defaultscore(ngene:-1:1, :);
         score(2,:) = sum(cumsum(defaultscore, 1), 1);
+        %score(2,:) = min(cumsum(defaultscore, 1), [], 1);
     end
 end
 
