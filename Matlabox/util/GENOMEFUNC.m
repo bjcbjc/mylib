@@ -290,30 +290,30 @@ classdef GENOMEFUNC < handle
                 window, window, window);
         end
         
-        function q = idQuery(datastruct, searchId, key, idname)
+        function q = idQuery(datastruct, query, returnFields, idname)
             if nargin < 4, idname = 'id'; end
-            [~, i] = ismember(searchId, datastruct.(idname));
-            n = length(searchId);
-            if ~iscellstr(key)            
-                key = {key};
+            [~, i] = ismember(query, datastruct.(idname));
+            n = length(query);
+            if ~iscellstr(returnFields)            
+                returnFields = {returnFields};
             end
-            if any(cellfun(@(x) strcmp(x, 'all'), key))
-                key = {'id', 'name', 'chrm', 'start', 'end', 'strand'};
+            if any(cellfun(@(x) strcmp(x, 'all'), returnFields))
+                returnFields = {'id', 'name', 'chrm', 'start', 'end', 'strand'};
             end
             
-            q = cell(n, length(key));
+            q = cell(n, length(returnFields));
             allNumeric = true;
-            for ki = 1:length(key)
-                if iscell(datastruct.(key{ki}))
+            for ki = 1:length(returnFields)
+                if iscell(datastruct.(returnFields{ki}))
                     q(i==0, ki) = {'NotFound'};
                     if any(i ~= 0)
-                        q(i~=0, ki) = datastruct.(key{ki})(i(i~=0));
+                        q(i~=0, ki) = datastruct.(returnFields{ki})(i(i~=0));
                     end
                     allNumeric = false;
                 else
                     q(i==0, ki) = {NaN};
                     if any(i ~= 0)
-                        q(i~=0, ki) = num2cell(datastruct.(key{ki})(i(i~=0)));
+                        q(i~=0, ki) = num2cell(datastruct.(returnFields{ki})(i(i~=0)));
                     end
                 end                
             end  
