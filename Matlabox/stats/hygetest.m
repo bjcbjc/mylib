@@ -3,7 +3,7 @@ function [pvalue, nOverlap] = hygetest(data1, data2)
     % test P( #overlap >= overlap btw variable A in data1 and variable B in
     % data2); if data2 is empty, do pair-wise test among all variables in
     % data1
-    %
+    % 
     
     if nargin < 2, data2 = data1; end
     if isempty(data2), data2 = data1; end
