@@ -386,6 +386,22 @@ classdef GENOMEFUNC < handle
             g = GENOMEFUNC.genesInWindow(datastruct, loc(1), loc(2)-window, loc(3)+window, key);
         end
         
+        function [tf, idx] = ismemberGencode(gencodeId1, gencodeId2, removedot)
+            if nargin < 3, removedot = true; end
+            if removedot
+                gencodeId1 = regexp(gencodeId1, '\w+', 'match', 'once');
+                gencodeId2 = regexp(gencodeId2, '\w+', 'match', 'once');
+            end
+            [tf, idx] = ismember(gencodeId1, gencodeId2);
+        end
         
+        function [overlap, idx1, idx2] = intersectGencode(gencodeId1, gencodeId2, removedot)
+            if nargin < 3, removedot = true; end
+            if removedot
+                gencodeId1 = regexp(gencodeId1, '\w+', 'match', 'once');
+                gencodeId2 = regexp(gencodeId2, '\w+', 'match', 'once');
+            end
+            [overlap, idx1, idx2] = intersect(gencodeId1, gencodeId2);
+        end
     end
 end

@@ -105,7 +105,7 @@ class jobManager:
             f.write('echo jobID: $JOB_ID\n')
         
         cmdlineidx = []
-        noncmdkey = ['echo', 'printf', 'export', 'if', 'fi', 'set ']
+        noncmdkey = ['echo', 'printf', 'export', 'if', 'fi', 'set ', 'shopt','alias']
         for lineidx in range( len(cmd) ):
             if any( [ cmd[lineidx].cmdstr.find(x) == 0 for x in noncmdkey ] ) or cmd[lineidx].cmdstr == '':
                 continue
