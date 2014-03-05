@@ -1,4 +1,4 @@
-function score = sere(readcount, minReadCount, pairwise)
+function score = sere2(readcount, minReadCount, pairwise)
     % simple error ratio estimate (Schulze et al BMC Genomics 2012)
     %
     % readcount: #gene x #sample
@@ -26,13 +26,16 @@ function score = sere(readcount, minReadCount, pairwise)
         [ngene, nsample] = size(readcount);
         nReadAcrossGene = sum(readcount, 1);
         score = zeros(nsample,nsample);
+        sqcount = readcount.^2;
         for i = 1:nsample-1
             for j = i+1:nsample
                 nReadAcrossSample = sum(readcount(:, [i, j]), 2);
                 total = sum(nReadAcrossSample);
-                expectation = bsxfun(@times, nReadAcrossSample, nReadAcrossGene([i,j])) ./ total;                
+                %expectation = bsxfun(@times, nReadAcrossSample, nReadAcrossGene([i,j])) ./ total;                
                 valid = nReadAcrossSample > minReadCount;                                
-                score(i,j) = sqrt( sum(sum( (readcount(valid,[i,j])-expectation(valid,:)).^2 ./ expectation(valid,:) )) ./ sum(valid) );
+                crsprod = bsxfun(@times, nReadAcrossSample(valid), nReadAcrossGene([i,j]));
+                score(i,j) = sqrt(total * (sum(sum(sqcount(valid,[i,j]) ./ crsprod)) -1) ./ sum(valid));
+                %score(i,j) = sqrt( sum(sum( (readcount(valid,[i,j])-expectation(valid,:)).^2 ./ expectation(valid,:) )) ./ sum(valid) );
                 score(j,i) = score(i,j);
             end
         end
