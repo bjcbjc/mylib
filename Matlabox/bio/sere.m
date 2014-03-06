@@ -22,6 +22,34 @@ function score = sere2(readcount, minReadCount, pairwise)
         nsample = size(readcount, 2);        
         %single estimate
         score = sqrt( sum(sum( (readcount(valid,:)-expectation(valid,:)).^2 ./ expectation(valid,:) )) ./ sum(valid) ./ (nsample-1));                
+    elseif minReadCount < 0 %no filtering: much faster for large dataset
+        [ngene, nsample] = size(readcount);
+        nReadAcrossGene = sum(readcount, 1);
+        score = zeros(nsample,nsample);
+        sqcount = readcount.^2;
+        for i = 1:nsample-1
+            for j = i+1:nsample
+                nReadAcrossSample = sum(readcount(:, [i, j]), 2);
+                total = sum(nReadAcrossGene([i,j])); 
+                crsprod = bsxfun(@times, nReadAcrossSample, nReadAcrossGene([i,j]));
+                score(i,j) = sqrt(total * (sum(sum(sqcount(:,[i,j]) ./ crsprod)) -1) ./ ngene);
+                %score(i,j) = sqrt( sum(sum( (readcount(valid,[i,j])-expectation(valid,:)).^2 ./ expectation(valid,:) )) ./ sum(valid) );
+                score(j,i) = score(i,j);
+            end
+        end
+%         for i = 1:nsample-1
+%             nReadAcrossSample = bsxfun(@plus, readcount(:,i), readcount(:,i+1:end)); %ngene x test            
+%             total = sum(nReadAcrossSample, 1);
+%             ns = zeros(1, nsample-i, 2);
+%             ns(:,:,1) = nReadAcrossGene(i);
+%             ns(:,:,2) = nReadAcrossGene(i+1:end);            
+%             crsprod = bsxfun(@times, nReadAcrossSample, ns);  %gene x test x 2
+%             sqobs = zeros(ngene, nsample-i, 2);
+%             sqobs(:,:,1) = repmat(sqcount(:,i),1, nsample-i);
+%             sqobs(:,:,2) = sqcount(:,i+1:end);
+%             score(i, i+1:end) = sqrt(total .* (sum(sum(sqobs./crsprod,3),1) -1) ./ ngene);
+%             score(i+1:end, i) = score(i, i+1:end);
+%         end
     else                
         [ngene, nsample] = size(readcount);
         nReadAcrossGene = sum(readcount, 1);
@@ -30,7 +58,7 @@ function score = sere2(readcount, minReadCount, pairwise)
         for i = 1:nsample-1
             for j = i+1:nsample
                 nReadAcrossSample = sum(readcount(:, [i, j]), 2);
-                total = sum(nReadAcrossSample);
+                total = sum(nReadAcrossGene([i,j]));
                 %expectation = bsxfun(@times, nReadAcrossSample, nReadAcrossGene([i,j])) ./ total;                
                 valid = nReadAcrossSample > minReadCount;                                
                 crsprod = bsxfun(@times, nReadAcrossSample(valid), nReadAcrossGene([i,j]));
