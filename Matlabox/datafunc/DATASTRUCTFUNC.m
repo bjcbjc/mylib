@@ -27,10 +27,10 @@ classdef DATASTRUCTFUNC < handle
                 [dim1, dim2] = size(data.(queryFields{1}));
                 %which dim matches key
                 if keyDim == dim1
-                    result = CROSSREF.allocateData(class(data.(queryFields{1})), [n, dim2]);
+                    result = DATASTRUCTFUNC.allocateData(class(data.(queryFields{1})), [n, dim2]);
                     result(idx~=0, :) = data.(queryFields{1})(idx(idx~=0 ), :);
                 elseif keyDim == dim2
-                    result = CROSSREF.allocateData(class(data.(queryFields{1})), [dim1, n]);
+                    result = DATASTRUCTFUNC.allocateData(class(data.(queryFields{1})), [dim1, n]);
                     result(:, idx~=0) = data.(queryFields{1})(:, idx(idx~=0 ));
                 else
                     error('cannot determine which dimension to match for %s', queryFields{1});
@@ -108,10 +108,10 @@ classdef DATASTRUCTFUNC < handle
                 [dim1, dim2] = size(copyFrom.(copyFields{i}));
                 %which dim matches key
                 if length(copyFrom.(copyKey)) == dim1
-                    data.(newfd) = CROSSREF.allocateData(class(copyFrom.(copyFields{i})), [n, dim2]);
+                    data.(newfd) = DATASTRUCTFUNC.allocateData(class(copyFrom.(copyFields{i})), [n, dim2]);
                     data.(newfd)(idx ~= 0, :) = copyFrom.(copyFields{i})( idx(idx~=0), : );
                 elseif length(copyFrom.(copyKey)) == dim2
-                    data.(newfd) = CROSSREF.allocateData(class(copyFrom.(copyFields{i})), [dim1, n]);
+                    data.(newfd) = DATASTRUCTFUNC.allocateData(class(copyFrom.(copyFields{i})), [dim1, n]);
                     data.(newfd)(:, idx ~= 0) = copyFrom.(copyFields{i})( :, idx(idx~=0));
                 else
                     error('cannot determine which dimension to match for %s', copyFields{i});

@@ -3,7 +3,7 @@ function handles = distinctColorMarker(handles, varargin)
     %  be identified; for example, it can be used gscatter plot when the
     %  number of groups is large
     
-    para.marker = {'.', 'sq', '^', 'o', 'x'};
+    para.marker = {'.', 'sq', '^', 'o', 'x', '*'};
     para.color = [0.9, 0.1, 0.1; ... %red
         0, 0.8, 0; ... %green
         0.1, 0.1, 0.9; ... %blue        

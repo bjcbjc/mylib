@@ -43,6 +43,39 @@ classdef DATAFUNC < handle
             binmtx = false(n, nl);
             binmtx( sub2ind( [n, nl], (1:n)', uidx ) ) = true;
         end
+        
+        %return data(index), but fill in NaN or NA for index=0 or NaN index
+        function res = getDataByIndex(data, index, indexDim)
+            if nargin < 3, indexDim = 1; end            
+            if indexDim ~= 1
+                newOrder = [indexDim, setdiff(1:ndims(data), indexDim)];
+                [~, revertOrder] = sort(newOrder);
+                data = permute(data, newOrder);
+            end
+            valid = index ~= 0 & ~isnan(index);
+            if all(valid)
+                res = data(index, :);
+            else
+                n = length(index);
+                resSize = size(data);
+                resSize(1) = n;
+                res = DATAFUNC.allocateData(class(data), resSize);
+                res(valid,:) = data(index(valid),:);
+            end
+            if indexDim ~= 1
+                %revert back
+                res = permute(res, revertOrder);
+            end
+        end
+        
+        function newvar = allocateData(datatype, allocSize)
+            if strcmp(datatype, 'cell')
+                newvar = cell(allocSize);
+                newvar(:) = {'NA'};
+            else
+                newvar = NaN(allocSize);
+            end
+        end
     end
     
 end
