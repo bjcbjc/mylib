@@ -1,4 +1,4 @@
-function pValue = NaNwelchTest(matrix1, matrix2)
+function [pValue, tValue] = NaNwelchTest(matrix1, matrix2)
 n1 = sum( (1-isnan(matrix1))');
 n2= sum( (1-isnan(matrix2))');
 var1= nanvar(matrix1');
