@@ -13,7 +13,7 @@ def checkPath(p, create=False):
     if p[-1] != '/': p = p + '/'
     if create:
         if not os.path.exists(p):
-            system('mkdir %s'%p.strip('='))
+            system('mkdir -p %s'%p.strip('='))
     return p
 
 def checkPathOnNode(p, tmpdir=True):    
