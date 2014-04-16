@@ -37,6 +37,7 @@ function res = parseText(fn, varargin)
     ncolname = 0;
     bufsize = 4095;
     numericcol = [];
+    commentstyle = '#';
     
     passpara = {};
     i = 1;
@@ -48,6 +49,8 @@ function res = parseText(fn, varargin)
                 eval(sprintf('%s = %d;',varargin{i},varargin{i+1}));
             case {'numericcol'}
                 eval(sprintf('%s = %s;', varargin{i}, mat2str(varargin{i+1})));
+            case {'commentstyle'}
+                eval(sprintf('%s = ''%s'';', varargin{i}, varargin{i+1}));
             case {'delimiter'}
                 if strcmp(varargin{i+1},'\t')
                     delimiter = 9;
@@ -83,10 +86,24 @@ function res = parseText(fn, varargin)
     fid = fopen(fn);    
     %skip lines if any
     i = 0;
+    line = -1;
     while i < skip
         line = fgetl(fid);
         i = i + 1;
     end
+    
+    if ~ischar(line)
+        fpos = ftell(fid);
+        line = fgetl(fid);
+        offset = fpos - ftell(fid);        
+    end    
+    while ~isempty( regexp(line, sprintf('^%s',commentstyle), 'once'))
+        fpos = ftell(fid);
+        line = fgetl(fid);
+        offset = fpos - ftell(fid);        
+    end
+    fseek(fid, offset, 'cof');        
+        
     if colname        
         for i = 1:ncolname
             hline = fgetl(fid);            
