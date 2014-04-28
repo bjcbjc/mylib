@@ -18,7 +18,7 @@ classdef RNACOUNT < handle
         function tpm = getTPM(count, geneLength, pseudoCount)
             %count: gene x sample
             %geneLength: gene x 1            
-            if nargin < 3, pseudoCount = 0; end
+            if nargin < 3, pseudoCount = 0.9; end
             vl = bsxfun(@rdivide, bsxfun(@rdivide, count+pseudoCount, sum(count,1)), geneLength);
             tpm = bsxfun(@rdivide, vl, sum(vl, 1) ) * 1e6;
         end

@@ -1,4 +1,4 @@
-function score = sere2(readcount, minReadCount, pairwise)
+function score = sere(readcount, minReadCount, pairwise)
     % simple error ratio estimate (Schulze et al BMC Genomics 2012)
     %
     % readcount: #gene x #sample

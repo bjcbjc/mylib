@@ -1,5 +1,6 @@
 function idx = jobDivider(jobidx, numTotalJobs, n)
     %jobidx = index of job
+    %n: number of tasks
     k = floor(n / numTotalJobs);
     alpha = mod(n, numTotalJobs);
     if jobidx <= alpha
