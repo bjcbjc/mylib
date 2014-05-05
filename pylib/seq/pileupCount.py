@@ -193,6 +193,7 @@ argp.add_argument('-r',  metavar='INT', required=True, type=int, default=10, hel
 argp.add_argument('-o', type=str, default='test.out', metavar='file', help='file name for the output, [<bam>.out]')
 argp.add_argument('-tableformat', action='store_true', help='make table output instead; this option is turned off by default')
 argp.add_argument('-stranded', action='store_true', help='a switch to specify if it is strand-specific data, [false]' )
+argp.add_argument('-useSingleSiteCall', action='store_true', help='a switch to specify calling samtools with -r; this may be faster for sites with very high coverage, [false]' )
 argp.add_argument('-ignoreEnd', default=0, metavar='INT', type=int, help='ignore INT bp from both end of each read [0]' )
 argp.add_argument('-readLength', default=0, metavar='INT', type=int, help='used when -ignoreEnd is specified; if not -readLength is not specified, it will be inferred from a random read from the bam file [0]')
 argp.add_argument('-Phred64', action='store_true', help='a switch to specify base quality encoding is Phred+64; default is Phred+33; [false]')
@@ -252,8 +253,10 @@ if args.reg != '':
     tmpfiles = []
 else:
     locfile, tmpfiles = createTempLocFile(args, validChrms)
-    cmd = args.samtools + ' mpileup -r %s:%s-%s '
-    #cmd = args.samtools + ' mpileup -l %s '%(locfile)
+    if args.useSingleSiteCall:
+        cmd = args.samtools + ' mpileup -r %s:%s-%s '
+    else:
+        cmd = args.samtools + ' mpileup -l %s '%(locfile)
 
 for switch in sampara:
     cmd = cmd + '-%s %s '%(switch, argtb[switch])
@@ -265,32 +268,38 @@ samout, samerr, out = None, None, None
 try:
     #run samtools and pipe the output for further process (save space)
     if args.loc != '':
-        siteloc = [l.strip().split() for l in open(locfile).readlines()]
-        out = open(args.o, 'w')
-        if args.tableformat:
-            out.write('\t'.join(['chr', 'pos', 'ref', '#read']) + '\t' + '\t'.join(para.baseLabels) + '\n')
-        count = 0
-        outbuffer = ''
-        for chrm, site in siteloc:
-            #tic = time.time()
-            sampipe = subprocess.Popen(cmd%(chrm,site,site), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if not args.useSingleSiteCall:
+            sampipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             samout, samerr = sampipe.stdout, sampipe.stderr
+            out = open(args.o, 'w')
+            pileupToCount(samout, out, args, para, singlesite=False)
+        else:
+            siteloc = [l.strip().split() for l in open(locfile).readlines()]
+            out = open(args.o, 'w')
+            if args.tableformat:
+                out.write('\t'.join(['chr', 'pos', 'ref', '#read']) + '\t' + '\t'.join(para.baseLabels) + '\n')
+            count = 0
+            outbuffer = ''
+            for chrm, site in siteloc:
+                #tic = time.time()
+                sampipe = subprocess.Popen(cmd%(chrm,site,site), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                samout, samerr = sampipe.stdout, sampipe.stderr
             
-            #out = open(args.o, 'w')
-            outbuffer = outbuffer + pileupToCount(samout, out, args, para, singlesite=True)
-            logmsg = samerr.read().strip()
-            if logmsg != '[mpileup] 1 samples in 1 input files':
-                print logmsg
-            count = count + 1
-            #print chrm,site
-            if count%100 == 0:
+                #out = open(args.o, 'w')
+                outbuffer = outbuffer + pileupToCount(samout, out, args, para, singlesite=True)
+                logmsg = samerr.read().strip()
+                if logmsg != '[mpileup] 1 samples in 1 input files':
+                    print logmsg
+                count = count + 1
+                #print chrm,site
+                if count%100 == 0:
+                    out.write(outbuffer)
+                    outbuffer = ''
+                closefiles([samout, samerr])
+                #print '%d, %s'%(count, time.time()-tic)
+            if outbuffer != '':
                 out.write(outbuffer)
                 outbuffer = ''
-            closefiles([samout, samerr])
-            #print '%d, %s'%(count, time.time()-tic)
-        if outbuffer != '':
-            out.write(outbuffer)
-            outbuffer = ''
         if len(tmpfiles) > 0:
             #remove temp file
             subprocess.call( 'rm -f ' + ' '.join(tmpfiles), shell=True )
