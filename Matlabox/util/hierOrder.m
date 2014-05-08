@@ -12,10 +12,12 @@ if xy(1)
     d = pdist(mtx, distance);
     tree = linkage(d, 'average');
     rowidx = optimalleaforder(tree, d);
+    colidx = [];
 end
 
 if xy(2)
     d = pdist(mtx', distance);
     tree = linkage(d, 'average');
     colidx = optimalleaforder(tree, d);
+    rowidx = [];
 end

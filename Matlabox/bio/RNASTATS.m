@@ -1,6 +1,158 @@
 classdef RNASTATS < handle
     methods (Static)
-        function geneBodyCov = readGeneBodyCoverage(pathPattern, sampleNamePattern)            
+        function rnametrics = collectQCMetrics(projectPath)
+            rnametrics.geneBodyCov = RNASTATS.readGeneBodyCoveragePicard( ...
+                [projectPath, '/Sample*/Stats/*RNAMetrics.txt'] );            
+            rnametrics.report = RNASTATS.readReportStats([projectPath, '/Results/']);
+            
+            %inner dist freq and GC
+            rnametrics.GC = RNASTATS.readGCDistribution([projectPath, '/Sample*/Stats/*.GC.xls']);
+
+%             rnametrics.markDupStat = RNASTATS.readMarkDuplicate('TCGA/rnaseq/project/Sample*/Stats/*_MarkDuplicates.metrics.txt');
+%             rnametrics.innerDistance = RNASTATS.readInnerDistanceDistribution('TCGA/rnaseq/project/Results/inner_distance_read_distribution.txt');
+%             rnametrics.readDistribution = RNASTATS.readReadDistribution('TCGA/rnaseq/project/Sample*/Stats/*.read_distribution.txt');        
+%             rnametrics.spliceRate = RNASTATS.readSplicingRate('TCGA/rnaseq/project/Sample*/Stats/*.splicing_rate.txt');                        
+        end
+        
+        function generateQCFigure(rnametrics, figPath)
+            fig = offFigure(500, 300);
+            % gene body coverage
+            nk = nanmax(rnametrics.geneBodyCov.kmeans);
+            clf(fig);
+            lineHandles = NaN(1, nk);
+            hold on;
+            for kidx = 1:nk                
+                lineHandles(kidx) = plot(rnametrics.geneBodyCov.distribution(:, rnametrics.geneBodyCov.kmeans==kidx), '-');
+            end
+            hold off;
+            distinctColorMarker(lineHandles);            
+            xlabel('gene body 5'' to 3''', 'fontsize', 12);
+            ylabel('read count distribution', 'fontsize', 12);
+            xlim([0 size(rnametrics.geneBodyCov.distribution,1)+1]);
+            legend('on');
+            saveas(fig, [figPath, '/cluster_genebody_cov.png'], 'png');
+            
+            % gc heatmap
+            clf(fig);
+            nSample = length(rnametrics.GC.sample);            
+            set(fig, 'position', [0, 0, max(300, min(3*nSample, 1800)), 500]);
+            set(gca,'LooseInset',get(gca,'TightInset'));
+            ytickStart = find(any(rnametrics.GC.data>0,2), 1, 'first') - 1;
+            ytickEnd = find(any(rnametrics.GC.data>0,2), 1, 'last') + 1;
+            ytickStep = round((ytickEnd - ytickStart)/10);
+            si = hierOrder( rnametrics.GC.data, 'correlation', [false, true]);
+            nanimagesc(rnametrics.GC.data(ytickStart:ytickEnd, si), redbluecmap);            
+            set(gca, 'ytick', 1:ytickStep:yTickEnd-ytickStart+1, ...
+                'yticklabel',rnametrics.GC.GCContent(ytickStart:ytcikStep:ytickEnd));
+            saveas(fig, [figPath, '/GC_content_density.png'], 'png');
+            
+            %splicing rate
+            if ~ishandle(fig)
+                fig = figure('position',  [0, 0, 800, 300], 'visible', 'off', 'paperpositionmode', 'auto');
+            end
+            clf(fig);
+            set(0, 'currentfigure', fig);
+            spliceRate = RNASTATS.readSplicingRate('TCGA/rnaseq/project/Sample*/Stats/*.splicing_rate.txt');
+            if length(spliceRate.data) ~= n || length(spliceRate.sample) ~= n
+                fprintf('#number of splicing rate files (%d) ~= #samples (%d)\n', length(spliceRate.data), n);
+            else
+                set(fig, 'position', [0, 0, 400, 300]);
+                hist(spliceRate.data, 20);
+                xlabel('splicing rate', 'fontsize', 12);
+                ylabel('number of samples', 'fontsize', 12);
+                title('histogram of splicing rates', 'fontsize', 12);
+            end
+            saveas(fig, 'figure/tcga_exp/NYGCpipeline/histogram_splice_rate.png', 'png');
+            
+            %read distribution
+            if ~ishandle(fig)
+                fig = figure('position',  [0, 0, 1500, 1200], 'visible', 'off', 'paperpositionmode', 'auto');
+            end
+            clf(fig);
+            set(0, 'currentfigure', fig);
+            
+            [plotrow, plotcol] = numSubplot(length(readDistribution.label));
+            set(fig, 'position',  [0, 0, 400*plotcol, 300*plotrow], 'visible', 'off', 'paperpositionmode', 'auto');
+            plotfd = 'Tags_Kb';
+            for varIdx = 1:length(readDistribution.label)
+                subplot(plotrow, plotcol, varIdx);
+                hist(readDistribution.(plotfd)(varIdx, :), 20);
+                title(strrep(readDistribution.label{varIdx}, '_', ' '), 'fontsize', 12);
+                if strcmpi(plotfd, 'Tags_Kb')
+                    xlabel(strrep(plotfd, '_', '/'), 'fontsize', 12);
+                else
+                    xlabel(strrep(plotfd, '_', ' '), 'fontsize', 12);
+                end
+                ylabel('# samples', 'fontsize', 12);
+            end
+            saveas(fig, sprintf('figure/tcga_exp/NYGCpipeline/histogram_read_distribution_%s.png',plotfd), 'png');
+            
+            %
+            if ~ishandle(fig)
+                fig = figure('position',  [0, 0, 2500, 700], 'visible', 'off', 'paperpositionmode', 'auto');
+            end
+            clf(fig);
+            set(0, 'currentfigure', fig);
+            
+            clustobj = clustergram(RNAMETRICS.report.data(idx,:), 'standardize', 'row', 'RowPDist', 'cosine', 'ColumnPDist', 'cosine', 'rowlabels', RNAMETRICS.report.label(idx),'colormap', redbluecmap, 'columnlabels', cellfun(@(x) x(13:23), RNAMETRICS.report.sample, 'unif', 0), 'displayratio', [1/6, 1/20]);
+            plot(clustobj, fig);
+            saveas(fig, 'figure/tcga_exp/NYGCpipeline/clusterRNAmetrics.cosine.png', 'png');            
+            close(fig);
+            
+            % correlate report metrics with PCA
+            
+            metricfd = {'rRNA_rate_PCT', 'Mapping_rate_PCT', 'Splicing_rate_PCT', ...
+                'Assignment_to_genes_rate_PCT', '3prime_mean_coverage', 'Mean_GC_content'};
+            metriclim = {[0,20], [50,90], [16,25], [70,90], [],[]};
+
+        end
+        
+        function geneBodyCov = readGeneBodyCoveragePicard(pathPattern, sampleNamePattern)            
+            if nargin < 2, sampleNamePattern = '/(Sample_[\w\-\_]+)/'; end
+            geneBodyCov.fns = listfilename(pathPattern, true);
+            geneBodyCov.sample = RNASTATS.getSampleNameFromPath(geneBodyCov.fns, sampleNamePattern);            
+            geneBodyCov.distribution = NaN(101, length(geneBodyCov.fns));
+            na = 0;
+            for i = 1:length(geneBodyCov.fns)
+                found = false;
+                f = fopen(geneBodyCov.fns{i}, 'r');
+                line = fgetl(f);
+                while ischar(line)
+                    if ~isempty(strfind(line, 'normalized_position'))
+                        found = true;
+                        break
+                    end
+                    line = fgetl(f);
+                end
+                if ~found
+                    error('cannot find normalized_position, %s',geneBodyCov.fns{i});
+                end
+                t = textscan(f, '%f %f');
+                fclose(f);
+                
+                if length(t{1}) == 101
+                    [~, si] = sort(t{1});
+                    geneBodyCov.distribution(:, i) = t{2}(si);
+                else
+                    na = na + 1;
+                end
+            end
+            if na > 0
+                fprintf('%d samples have no gene body coverage infomation\n',na);
+            end
+                        
+            vi = ~all(isnan(geneBodyCov.distribution), 1);
+            if sum(vi) > 20
+                d = geneBodyCov.distribution(:, vi)';
+                eva = evalclusters(d, 'kmeans', 'silhouette', 'klist', 2:5);
+                kidx = kmeans(d, eva.OptimalK, 'replicates', 10, 'emptyaction', 'drop');
+                geneBodyCov.kmeans = NaN(length(geneBodyCov.fns),1);
+                geneBodyCov.kmeans(vi) = kidx;
+            end
+            RNASTATS.anyNaN(geneBodyCov.distribution, 'gene body cov');
+        end
+        
+        function geneBodyCov = readGeneBodyCoverageRSeQC(pathPattern, sampleNamePattern)            
             if nargin < 2, sampleNamePattern = '/(Sample_[\w\-\_]+)/'; end
             geneBodyCov.fns = listfilename(pathPattern, true);
             geneBodyCov.sample = RNASTATS.getSampleNameFromPath(geneBodyCov.fns, sampleNamePattern);            
@@ -197,7 +349,49 @@ classdef RNASTATS < handle
             featureCount.count = t.numtext(:, ~strcmpi(t.numcolname, 'length'));
         end
         
-        function GC = readGCDistribution(fn)
+        function GC = readGCDistribution(pathPattern, sampleNamePattern)
+            if nargin < 2, sampleNamePattern = '/(Sample_[\w\-\_]+)/'; end
+            GC.fns = listfilename(pathPattern, true);
+            GC.sample = RNASTATS.getSampleNameFromPath(GC.fns, sampleNamePattern);              
+            tmp = cell(2,length(GC.fns));
+            for i = 1:length(GC.fns)
+                t = parseText(GC.fns{i}, 'nrowname',0,'ncolname',1,'numeric',true);
+                [~, si] = sort(t.text(:,1));
+                tmp{1,i} = t.text(si,1)';
+                tmp{2,i} = t.text(si,2);
+            end
+            n = cellfun(@length, tmp(1,:));
+            [m, idx] = max(n);            
+            if length(unique(n)) == 1
+                GC.GCContent = tmp{1,1};
+                GC.data = cell2mat(tmp(2,:));
+                GC.data = bsxfun(@rdivide, GC.data, sum(GC.data,1));
+                RNASTATS.anyNaN(GC.data);
+            else
+                if length(unique(cell2mat(tmp(1,:)))) == m
+                    GC.GCContent = tmp{1,idx};
+                    GC.data = zeros(m, length(GC.sample));
+                    for i = 1:length(GC.sample)
+                        [~, si] = ismember(tmp{1,i}, GC.GCContent);
+                        GC.data(si,i) = tmp{2,i};                        
+                    end
+                    RNASTATS.anyNaN(GC.data);
+                else
+                    GC.GCContent = (0:m-1)./(m-1) * 100;
+                    GC.data = NaN(m, length(GC.sample));
+                    for i = 1:length(GC.sample)
+                        GC.data(1:n(i),i) = tmp{2,i}./sum(tmp{2,i});
+                        if n(i) < m
+                            GC.data(m,i) = GC.data(n(i), i);
+                            GC.data(n(i):m-1,i) = NaN;
+                        end
+                    end
+                end
+            end     
+            GC.note = sprintf('data is density');
+        end
+        
+        function GC = readGCDistributionMtx(fn)
             %fn is the matrix text format from Heather's R data
             %GC_read_distribution.txt
             t = parseText(fn, 'nrowname', 1, 'ncolname', 1, 'numeric', true);
@@ -223,7 +417,7 @@ classdef RNASTATS < handle
         
         function report = readReportStats(reportpath, varargin)
             para.fns = {'QC_statistics.txt', ...                
-                'Read_distribution_statistics.txt'};
+                'read_distribution.txt'};
                         
             para = assignpara(para, varargin{:});
             if reportpath(end) ~= '/', reportpath = [reportpath '/']; end
