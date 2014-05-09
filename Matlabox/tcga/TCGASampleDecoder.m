@@ -196,6 +196,37 @@ classdef TCGASampleDecoder < handle
                 sampletype = sampletype{1};
             end
         end
+        
+        function pair = getSamplePair(barcode, refType)
+            if nargin < 2, refType = 11; end
+            sample = TCGASampleDecoder.decode(barcode);
+            refIdx = sample.sample == refType;
+            valid = ismember(sample.participant, sample.participant(refIdx));
+            [count, upatient] = eleCounts(sample.participant(valid));
+            validPatient = upatient(count > 1); %has pair
+            nonRefIdx = find( ismember(sample.participant, validPatient) & ...
+                sample.sample ~= refType);
+            n = length(nonRefIdx);
+            pair = cell(n ,2);
+            pair(:,2) = barcode(nonRefIdx);
+            refSample = barcode(refIdx);
+            curLast = n;
+            for i = 1:n
+                [~, idx] = TCGASampleDecoder.longestMatch(refSample, pair{i,2});
+                nMatch = length(idx);
+                if nMatch == 1
+                    pair{i,1} = refSample{idx};
+                elseif nMatch > 1
+                    pair{i,1} = refSample{idx};
+                    pair(curLast+1:curLast+nMatch-1, 2) = pair(i,2);
+                    pair(curLast+1:curLast+nMatch-1, 1) = refSample(idx);
+                    curLast = curLast + nMatch - 1;
+                end
+            end
+            rmIdx = cellfun(@isempty, pair(:,1));
+            pair(rmIdx, :) = [];
+        end
+        
     end
 
     methods (Access = private, Static)

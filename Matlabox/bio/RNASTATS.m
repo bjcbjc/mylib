@@ -14,96 +14,130 @@ classdef RNASTATS < handle
 %             rnametrics.spliceRate = RNASTATS.readSplicingRate('TCGA/rnaseq/project/Sample*/Stats/*.splicing_rate.txt');                        
         end
         
-        function generateQCFigure(rnametrics, figPath)
-            fig = offFigure(500, 300);
-            % gene body coverage
-            nk = nanmax(rnametrics.geneBodyCov.kmeans);
-            clf(fig);
-            lineHandles = NaN(1, nk);
-            hold on;
-            for kidx = 1:nk                
-                lineHandles(kidx) = plot(rnametrics.geneBodyCov.distribution(:, rnametrics.geneBodyCov.kmeans==kidx), '-');
-            end
-            hold off;
-            distinctColorMarker(lineHandles);            
-            xlabel('gene body 5'' to 3''', 'fontsize', 12);
-            ylabel('read count distribution', 'fontsize', 12);
-            xlim([0 size(rnametrics.geneBodyCov.distribution,1)+1]);
-            legend('on');
-            saveas(fig, [figPath, '/cluster_genebody_cov.png'], 'png');
+        function generateQCFigure(rnametrics, figPath, varargin)
+            para.doplot = {'genebody', 'gc', 'statsHist', 'statsClust', 'readDistribution'};
+            para = assignpara(para, varargin{:});
             
-            % gc heatmap
-            clf(fig);
-            nSample = length(rnametrics.GC.sample);            
-            set(fig, 'position', [0, 0, max(300, min(3*nSample, 1800)), 500]);
-            set(gca,'LooseInset',get(gca,'TightInset'));
-            ytickStart = find(any(rnametrics.GC.data>0,2), 1, 'first') - 1;
-            ytickEnd = find(any(rnametrics.GC.data>0,2), 1, 'last') + 1;
-            ytickStep = round((ytickEnd - ytickStart)/10);
-            si = hierOrder( rnametrics.GC.data, 'correlation', [false, true]);
-            nanimagesc(rnametrics.GC.data(ytickStart:ytickEnd, si), redbluecmap);            
-            set(gca, 'ytick', 1:ytickStep:yTickEnd-ytickStart+1, ...
-                'yticklabel',rnametrics.GC.GCContent(ytickStart:ytcikStep:ytickEnd));
-            saveas(fig, [figPath, '/GC_content_density.png'], 'png');
-            
-            %splicing rate
-            if ~ishandle(fig)
-                fig = figure('position',  [0, 0, 800, 300], 'visible', 'off', 'paperpositionmode', 'auto');
-            end
-            clf(fig);
-            set(0, 'currentfigure', fig);
-            spliceRate = RNASTATS.readSplicingRate('TCGA/rnaseq/project/Sample*/Stats/*.splicing_rate.txt');
-            if length(spliceRate.data) ~= n || length(spliceRate.sample) ~= n
-                fprintf('#number of splicing rate files (%d) ~= #samples (%d)\n', length(spliceRate.data), n);
-            else
-                set(fig, 'position', [0, 0, 400, 300]);
-                hist(spliceRate.data, 20);
-                xlabel('splicing rate', 'fontsize', 12);
-                ylabel('number of samples', 'fontsize', 12);
-                title('histogram of splicing rates', 'fontsize', 12);
-            end
-            saveas(fig, 'figure/tcga_exp/NYGCpipeline/histogram_splice_rate.png', 'png');
-            
-            %read distribution
-            if ~ishandle(fig)
-                fig = figure('position',  [0, 0, 1500, 1200], 'visible', 'off', 'paperpositionmode', 'auto');
-            end
-            clf(fig);
-            set(0, 'currentfigure', fig);
-            
-            [plotrow, plotcol] = numSubplot(length(readDistribution.label));
-            set(fig, 'position',  [0, 0, 400*plotcol, 300*plotrow], 'visible', 'off', 'paperpositionmode', 'auto');
-            plotfd = 'Tags_Kb';
-            for varIdx = 1:length(readDistribution.label)
-                subplot(plotrow, plotcol, varIdx);
-                hist(readDistribution.(plotfd)(varIdx, :), 20);
-                title(strrep(readDistribution.label{varIdx}, '_', ' '), 'fontsize', 12);
-                if strcmpi(plotfd, 'Tags_Kb')
-                    xlabel(strrep(plotfd, '_', '/'), 'fontsize', 12);
-                else
-                    xlabel(strrep(plotfd, '_', ' '), 'fontsize', 12);
+            if ismember('genebody', para.doplot)
+                fig = offFigure(500, 300);            
+                nk = nanmax(rnametrics.geneBodyCov.kmeans);
+                clf(fig);
+                color = {'b', 'r', 'g', 'o', 'k'};
+                hold on;
+                for kidx = 1:nk
+                    plot(rnametrics.geneBodyCov.distribution(:, rnametrics.geneBodyCov.kmeans==kidx), ...
+                        '-', 'color', ColorDict.translate(color{kidx}));
                 end
-                ylabel('# samples', 'fontsize', 12);
+                hold off;
+                xlabel('gene body 5'' to 3''', 'fontsize', 12);
+                ylabel('read count distribution', 'fontsize', 12);
+                xlim([0 size(rnametrics.geneBodyCov.distribution,1)+1]);
+                saveas(fig, [figPath, '/cluster_genebody_cov.png'], 'png');
+                close(fig);
             end
-            saveas(fig, sprintf('figure/tcga_exp/NYGCpipeline/histogram_read_distribution_%s.png',plotfd), 'png');
             
-            %
-            if ~ishandle(fig)
-                fig = figure('position',  [0, 0, 2500, 700], 'visible', 'off', 'paperpositionmode', 'auto');
+            if ismember('gc', para.doplot)
+                fig = offFigure(500, 300);                
+                nSample = length(rnametrics.GC.sample);
+                set(fig, 'position', [0, 0, max(300, min(3*nSample, 1200)), 500]);
+                %             set(fig, 'position', [0, 0, 12*nSample+100, 1000]);
+                %             set(gca,'LooseInset',get(gca,'TightInset'));
+                ytickStart = find(any(rnametrics.GC.data>0.01,2), 1, 'first') - 1;
+                ytickEnd = find(any(rnametrics.GC.data>0.01,2), 1, 'last') + 1;
+                ytickStep = round((ytickEnd - ytickStart)/10);
+                if nSample > 600 || nnz(isnan(rnametrics.GC.data(ytickStart:ytickEnd,:)))>0
+                    blocksize = round((ytickEnd-ytickStart)/3);
+                    tmp = rnametrics.GC.data(ytickStart:ytickEnd,:);
+                    [~, si] = sortrows([nanmean(tmp(1:blocksize,:),1); ...
+                        nanmean(tmp(blocksize+1:2*blocksize,:),1); ...
+                        nanmean(tmp(blocksize*2+1:end,:), 1)]');
+                else
+                    [~, si] = hierOrder( rnametrics.GC.data(ytickStart:ytickEnd,:), 'correlation', [false, true]);
+                end
+                nanimagesc(rnametrics.GC.data(ytickStart:ytickEnd, si), redbluecmap);
+                colorbar;
+                %             xlabel_rotate(1:length(rnametrics.GC.sample), 90, strrep(rnametrics.GC.sample(si), 'Sample_',''));
+                set(gca, 'ytick', 1:ytickStep:ytickEnd-ytickStart+1, ...
+                    'yticklabel',rnametrics.GC.GCContent(ytickStart:ytickStep:ytickEnd), ...
+                    'ticklength',[0.1/12/nSample, 0.1]);
+                saveas(fig, [figPath, '/GC_content_density.png'], 'png');
+                close(fig);
             end
-            clf(fig);
-            set(0, 'currentfigure', fig);
             
-            clustobj = clustergram(RNAMETRICS.report.data(idx,:), 'standardize', 'row', 'RowPDist', 'cosine', 'ColumnPDist', 'cosine', 'rowlabels', RNAMETRICS.report.label(idx),'colormap', redbluecmap, 'columnlabels', cellfun(@(x) x(13:23), RNAMETRICS.report.sample, 'unif', 0), 'displayratio', [1/6, 1/20]);
-            plot(clustobj, fig);
-            saveas(fig, 'figure/tcga_exp/NYGCpipeline/clusterRNAmetrics.cosine.png', 'png');            
-            close(fig);
+            if ismember('statsHist', para.doplot)                
+                nStat = length(rnametrics.report.label);
+                [plotrow, plotcol] = numSubplot(nStat);
+                fig = offFigure(plotcol*300+50, plotrow*300+50);
+                cmap = colormap;
+                cmap(1,:) = [0.7, 0.7, 0.7];
+                colormap(cmap);
+                for i = 1:nStat
+                    subplot(plotrow, plotcol, i);
+                    hist(rnametrics.report.data(i,:), 20);
+                    xlabel(strrep(rnametrics.report.label{i},'_',' '), 'fontsize', 12);
+                    ylabel('number of samples', 'fontsize', 12);
+                end
+                saveas(fig, [figPath, '/histogram_report_stats.png'], 'png');                
+                close(fig);
+            end
             
-            % correlate report metrics with PCA
+            if ismember('readDistribution', para.doplot)
+                fig = offFigure(800, 400);
+                %read distribution
+                tag = {'CDS_PCT', 'UTR_PCT', 'Intron_PCT', 'Intergenic_PCT'};
+                [~, idx] = ismember(tag, rnametrics.report.label);
+                [~, si] = sort(rnametrics.report.data(idx(end),:));
+                nSample = length(rnametrics.report.sample);
+                if nSample <= 50
+                    set(fig, 'position', [0, 0, 800, 600]);
+                    bar(rnametrics.report.data(idx, si)', 'stacked', 'barwidth',1, 'edgecolor','none');
+                    xlabel_rotate(1:nSample, 90, strrep(rnametrics.report.sample(si), 'Sample_', ''));
+                    xlim([0, nSample+1]);
+                    ylim([0,100]);
+                else
+                    set(fig, 'position', [0, 0, 1000, 600]);
+                    showTailSample = 10;
+                    showWidth = 12;                
+                    x1 = 1:showWidth:(1+showWidth*(showTailSample-1));
+                    xStep = (x1(end)*4-showWidth-1)/(nSample-2*showTailSample);
+                    x2 = (x1(end)+showWidth): xStep: (x1(end)+showWidth)+xStep*(nSample-2*showTailSample-1);
+    %                 x2 = (x1(end) + showWidth): + ((x1(end) + showWidth) + nSample - 2*showTailSample-1);
+                    x3 = (x2(end) + showWidth):showWidth:(x2(end)+showTailSample*showWidth);
+                    hold on;
+                    bar(x1, rnametrics.report.data(idx, si(1:showTailSample))', 'stacked', 'barwidth',1, 'edgecolor','none');
+                    bar(x2, rnametrics.report.data(idx, si(showTailSample+1:end-showTailSample))', 'stacked', 'barwidth',1, 'edgecolor','none');
+                    bar(x3, rnametrics.report.data(idx, si(end-showTailSample+1:end))', 'stacked', 'barwidth',1, 'edgecolor','none');
+                    hold off
+                    set(gca, 'position', [0.12, 0.4, 0.73, 0.5]);
+                    xlim([-showWidth, x3(end)+showWidth]);
+                    ylim([0,100]);                
+                    l = strrep(rnametrics.report.sample, 'Sample_', '');
+                    l(showTailSample+1:end-showTailSample) = {''};
+                    xlabel_rotate([x1,x2,x3], 90, l)
+                end
+                ylabel('PCT', 'fontsize', 12);
+                legend(strrep(tag, '_', ' '), 'location', 'SW');
+                saveas(fig, [figPath, 'read_distribution.png'], 'png');
+                close(fig);
+            end
             
-            metricfd = {'rRNA_rate_PCT', 'Mapping_rate_PCT', 'Splicing_rate_PCT', ...
-                'Assignment_to_genes_rate_PCT', '3prime_mean_coverage', 'Mean_GC_content'};
-            metriclim = {[0,20], [50,90], [16,25], [70,90], [],[]};
+            if ismember('statsClust', para.doplot)             
+                fig = offFigure(1000, 600);
+                idx = ~ismember(rnametrics.report.label, {'Total_reads', 'Strandedness_PCT'});
+                validSample = ~any(isnan(rnametrics.report.data),1);
+                clustobj = clustergram(rnametrics.report.data(idx,validSample), ...
+                    'standardize', 'row', 'RowPDist', 'cosine', 'ColumnPDist', 'cosine', ...
+                    'rowlabels', rnametrics.report.label(idx),'colormap', redbluecmap, ...
+                    'columnlabels', cellfun(@(x) x(13:23), rnametrics.report.sample(validSample), 'unif', 0), ...
+                    'displayratio', [1/6, 1/20]);
+                plot(clustobj, fig);
+                saveas(fig, [figPath, 'clusterRNAmetrics.cosine.png'], 'png');
+                close(fig);
+            end
+            % correlate report metrics with PCA            
+%             metricfd = {'rRNA_rate_PCT', 'Mapping_rate_PCT', 'Splicing_rate_PCT', ...
+%                 'Assignment_to_genes_rate_PCT', '3prime_mean_coverage', 'Mean_GC_content'};
+%             metriclim = {[0,20], [50,90], [16,25], [70,90], [],[]};
 
         end
         
@@ -373,7 +407,7 @@ classdef RNASTATS < handle
                     GC.data = zeros(m, length(GC.sample));
                     for i = 1:length(GC.sample)
                         [~, si] = ismember(tmp{1,i}, GC.GCContent);
-                        GC.data(si,i) = tmp{2,i};                        
+                        GC.data(si,i) = tmp{2,i}./sum(tmp{2,i});
                     end
                     RNASTATS.anyNaN(GC.data);
                 else
@@ -423,7 +457,8 @@ classdef RNASTATS < handle
             if reportpath(end) ~= '/', reportpath = [reportpath '/']; end
             
             for i = 1:length(para.fns)
-                t = parseText([reportpath para.fns{i}], 'nrowname', 1, 'ncolname', 1, 'numeric', true);
+                t = parseText([reportpath para.fns{i}], 'nrowname', 1, ...
+                    'ncolname', 1, 'numeric', true, 'treatasempty',{'NA'});
                 if i == 1
                     report.sample = t.rowname;
                     nlabel = length(t.colname);
