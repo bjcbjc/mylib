@@ -88,5 +88,27 @@ classdef RNACOUNT < handle
 %             tmm(1) = 1;
 %             tmm(2) = 2.^( sum(M(mask)./var(mask)) ./ sum(1./var(mask)));            
         end
+        function cpm = getCPM(count, takeLog, libSize, prior)                        
+            % based on edgeR R code by McCarthy and Gordon Smyth
+            if nargin < 3, libSize = []; end
+            if nargin < 4, prior = 0.25; end
+            if isempty(libSize)
+                libSize = sum(count, 1);
+            elseif strcmp(libSize, 'tmm')
+                libSize = sum(count, 1);
+                libSize = libSize .* RNACOUNT.getTmmNormalizationFacor(count);
+            end
+            if takeLog
+                prior = libSize ./ mean(libSize)*prior;
+                libSize = libSize + 2*prior;            
+            end
+            libSize = libSize * 1e-6;
+            if takeLog
+                cpm = log2( bsxfun(@rdivide, bsxfun(@plus, count, prior), libSize));
+            else
+                cpm = bsxfun(@rdivide, count, libSize);
+            end
+        end
+        
     end
 end
