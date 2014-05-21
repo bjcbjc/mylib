@@ -1,4 +1,4 @@
-function [res bound] = discdata(data, bin, varargin)
+function [res, bound] = discdata(data, bin, varargin)
     %discretize data
     %
     %data: #sample x #variable (eg, gene)
@@ -15,9 +15,10 @@ function [res bound] = discdata(data, bin, varargin)
     para.soft = 0.2;
     para.bound = [];
     para.stdfactor = [];
+    para.eqAnchor = 'right'; %{left, right} left: <= x <; right: < x <=
     para = assignpara(para, varargin{:});
     
-    [para.nsamp para.nvar] = size(data);
+    [para.nsamp, para.nvar] = size(data);
     
     if isempty(para.stdfactor)
         para.stdfactor = setdiff(-(bin-1)/2:(bin-1)/2,0)';
@@ -33,15 +34,15 @@ function [res bound] = discdata(data, bin, varargin)
         res = disc(data, bin, para);
         bound = para.bound;
     elseif strcmpi(para.method, 'bucket')
-        [res bound] = bucket(data, bin, para);
+        [res, bound] = bucket(data, bin, para);
     elseif strcmpi(para.method, 'softbucket')
-        [res lbound ubound] = softbucket(data, bin, para);
+        [res, lbound, ubound] = softbucket(data, bin, para);
         bound{1} = lbound;
         bound{2} = ubound;
     elseif strcmpi(para.method, 'std')
-        [res bound] = stddisc(data, bin, para);
+        [res, bound] = stddisc(data, bin, para);
     elseif strcmpi(para.method, 'soft')
-        [res lbound ubound] = softdisc(data, bin, para);
+        [res, lbound, ubound] = softdisc(data, bin, para);
         bound{1} = lbound;
         bound{2} = ubound;
     else
@@ -57,10 +58,17 @@ end
 
 function res = disc(data, bin, para)
     res = NaN(para.nsamp, para.nvar);
+    boundDim2 = size(para.bound,2);
     if strcmpi(para.method, 'std') || strcmpi(para.method, 'bucket')
         for i = 1:para.nvar
             for bi = 1:bin
-                index = data(:,i) > para.bound(bi,i) & data(:,i) <= para.bound(bi+1,i);
+                if strcmp(para.eqAnchor, 'right')
+                    index = data(:,i) > para.bound(bi,min(i,boundDim2)) & ...
+                        data(:,i) <= para.bound(bi+1,min(i,boundDim2));
+                else
+                    index = data(:,i) >= para.bound(bi,min(i,boundDim2)) & ...
+                        data(:,i) < para.bound(bi+1,min(i,boundDim2));
+                end
                 res(index,i) = bi;
             end
         end
@@ -79,8 +87,8 @@ function res = disc(data, bin, para)
     end
 end
 
-function [res bound] = bucket(data, bin, para)
-    [tmp si] = sort(data); %NaN is sorted at the end
+function [res, bound] = bucket(data, bin, para)
+    [tmp, si] = sort(data); %NaN is sorted at the end
     res = NaN(para.nsamp, para.nvar);
     bound = [-Inf*ones(1, para.nvar); NaN(bin-1, para.nvar); Inf*ones(1, para.nvar)];
     for i = 1:para.nvar
@@ -102,8 +110,8 @@ function [res bound] = bucket(data, bin, para)
     end    
 end
 
-function [res lbound ubound] = softbucket(data, bin, para)
-    [tmp si] = sort(data);    
+function [res, lbound, ubound] = softbucket(data, bin, para)
+    [tmp, si] = sort(data);    
     
     res = NaN(para.nsamp, para.nvar);
     lbound = [-Inf * ones(1, para.nvar); NaN(bin-1, para.nvar)]; %#bin x nvar
@@ -144,7 +152,7 @@ function [res lbound ubound] = softbucket(data, bin, para)
     end    
 end
 
-function [res bound] = stddisc(data, bin, para)
+function [res, bound] = stddisc(data, bin, para)
     if mod(bin,2) == 0
         error('#bin should be odd')
     end
@@ -163,7 +171,11 @@ function [res bound] = stddisc(data, bin, para)
     bound = repmat(m, bin+1, 1) + bound .* repmat(s, bin+1, 1);
     for i = 1:para.nvar
         for bi = 1:bin
-            index = data(:,i) > bound(bi,i) & data(:,i) <= bound(bi+1,i); %consistent with bucket
+            if strcmp(para.eqAnchor, 'right')
+                index = data(:,i) > bound(bi,i) & data(:,i) <= bound(bi+1,i); %consistent with bucket
+            else
+                index = data(:,i) >= bound(bi,i) & data(:,i) < bound(bi+1,i); %consistent with bucket
+            end
             res(index,i) = bi;
         end
     end

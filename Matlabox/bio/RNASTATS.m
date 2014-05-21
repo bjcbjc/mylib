@@ -339,20 +339,31 @@ classdef RNASTATS < handle
             RNASTATS.anyNaN(fcSummary.data, 'featureCountsSummary');
         end
         
-        function featureCount = readFeatureCountFast(pathPattern, sampleNamePattern)
+        function featureCount = readFeatureCountFast(pathPattern, sampleNamePattern, varargin)
             if nargin < 2, sampleNamePattern = '/(Sample_[\w\-\_]+)/'; end
-            
+            para.awkprog = '/nethome/bjchen/BJLib/shlib/getFeatureCountMatrix.awk';
+            para.saveFile = '';
+            para.useFile = '';
+            para = assignpara(para, varargin{:});
+                                    
             featureCount.fns = listfilename(pathPattern, true);
             featureCount.sample = RNASTATS.getSampleNameFromPath(featureCount.fns, sampleNamePattern);     
             nsample = length(featureCount.sample);
             
-            tmpfn = sprintf('tmp.rand%d.txt', randi(1000));
-            status = system(sprintf('gawk -f /nethome/bjchen/BJLib/shlib/getFeatureCountMatrix.awk %s > %s', ...
-                pathPattern, tmpfn));
-            if status > 0
-                error('status %d',status);
+            if isempty(para.saveFile)
+                tmpfn = sprintf('tmp.rand%d.txt', randi(1000));
+            else
+                tmpfn = para.saveFile;
             end
-            t = parseText(tmpfn,'nrowname',0,'ncolname',1,'numericcol',6:nsample+6);            
+            if isempty(para.useFile)
+                status = system(sprintf('gawk -f %s %s > %s', para.awkprog, pathPattern, tmpfn));
+                if status > 0
+                    error('status %d',status);
+                end
+                t = parseText(tmpfn,'nrowname',0,'ncolname',1,'numericcol',6:nsample+6);
+            else
+                t = parseText(para.useFile,'nrowname',0,'ncolname',1,'numericcol',6:nsample+6);
+            end
             featureCount.geneId = t.text(:,strcmpi(t.colname, 'geneid'));
             featureCount.chrm = regexp(t.text(:,strcmpi(t.colname, 'chr')), '^(\w+)', 'match', 'once');
             featureCount.strand = regexp(t.text(:,strcmpi(t.colname, 'strand')), '([\+\-])', 'match', 'once');
@@ -364,7 +375,9 @@ classdef RNASTATS < handle
                 error('sample names not matched');
             end
             RNASTATS.anyNaN(featureCount.count, 'featureCounts');
-            system(sprintf('rm -f %s',tmpfn));
+            if isempty(para.saveFile) && isempty(para.useFile)
+                system(sprintf('rm -f %s',tmpfn));
+            end
         end
         
         function featureCount = readFeatureCount(pathPattern, sampleNamePattern, multlen)
