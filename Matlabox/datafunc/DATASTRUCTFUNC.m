@@ -189,6 +189,41 @@ classdef DATASTRUCTFUNC < handle
             end
         end            
         
+        %append all fields as columns and return a table (cell or numeric
+        %matrix)
+        function table = fieldsToTable(datastruct, fields)            
+            if any(~ismember(fields, fieldnames(datastruct)))
+                error('some fields are not in datastruct');
+            end
+            nfd = length(fields);
+            n = size( datastruct.(fields{1}), 1);
+            ncol = zeros(1, n);
+            isCellData = false(nfd, 1);
+            for i = 1:nfd
+                [n0, ncol(i)] = size( datastruct.(fields{i}));
+                if n ~= n0
+                    error('%s has different number of rows', fields{i});
+                end                
+                isCellData(i) = iscell( datastruct.(fields{i}) );                
+            end
+            
+            if all(~isCellData)
+                table = NaN(n, sum(ncol));
+            else
+                table = cell(n, sum(ncol));
+            end
+            isMixData = sum(isCellData) > 0 & sum(isCellData) < nfd;
+            curCol = 0;
+            for i = 1:nfd
+                if isMixData && ~isCellData(i)
+                    table(:, curCol+1:curCol+ncol(i)) = numarray2strarray(datastruct.(fields{i}));                    
+                else
+                    table(:, curCol+1:curCol+ncol(i)) = datastruct.(fields{i});
+                end
+                curCol = curCol + ncol(i);
+            end
+        end
+        
         function newvar = allocateData(datatype, allocSize)
             if strcmp(datatype, 'cell')
                 newvar = cell(allocSize);

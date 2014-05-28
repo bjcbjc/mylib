@@ -127,7 +127,7 @@ classdef batchEffectPCA < handle
                 fig = gcf;
             end
             
-            [plotRow, plotCol] = numSubplot(para.nPC-1);
+            [plotRow, plotCol] = numSubplot(para.nPC);
             for i = 1:para.nPC
                 subplot(plotRow, plotCol, i);
                 boxplot(report.pcProjection(:,i), report.covariate(:,covIdx));                                                
