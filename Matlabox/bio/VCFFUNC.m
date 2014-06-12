@@ -57,7 +57,7 @@ classdef VCFFUNC < handle
             para.format = {};
             para.info = {};
             para.parseformatstr = '%s %f';
-            para.awkprog = 'shscripts/vcf.getdata.awk';
+            para.awkprog = '/nethome/bjchen/BJLib/shlib/vcf.getdata.awk';
             para = assignpara(para, varargin{:});            
             if size(para.returncol,1) > size(para.returncol,2)
                 para.returncol = para.returncol';

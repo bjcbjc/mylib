@@ -29,12 +29,14 @@
 %
 %
 function [pvalue, qvalue, score,cutoff,num_annotated,num_non_annotated] = ...
-    GSEA(r, annotations, score_func, P, num_permutations)
+    GSEA(r, annotations, score_func, P, num_permutations, varargin)
 
     %r: #gene x 1
     %annotations: #gene x #annotation
     %
-
+    para.quiet = false;
+    para.direction = [1, 1]; % large-value, small-value enrichment
+    
     if(nargin < 4)
         P = 1;
     end
@@ -42,6 +44,8 @@ function [pvalue, qvalue, score,cutoff,num_annotated,num_non_annotated] = ...
         num_permutations = 1000;
     end
 
+    para = assignpara(para, varargin{:});
+    
     [numgene, numannotation] = size(annotations);
     
     if issparse(annotations)
@@ -73,21 +77,25 @@ function [pvalue, qvalue, score,cutoff,num_annotated,num_non_annotated] = ...
     miss_penalty = 1 ./ sum(~annotations, 1); %1 x #annotation
     miss_penalty = repmat(-miss_penalty, numgene, 1);    
     
-    [score,num_annotated,num_non_annotated] = computeScore(tmpscore, sortedAnnotations, miss_penalty, NR);
+    [score,num_annotated,num_non_annotated] = computeScore(tmpscore, sortedAnnotations, miss_penalty, NR, para);
     cutoff = NaN(2, numannotation);
-    cutoff(1,:) = sortedR(num_annotated(1,:) + num_non_annotated(1,:));
-    cutoff(2,:) = sortedR(numgene - num_annotated(2,:) - num_non_annotated(2,:)+1);
+    if para.direction(1)
+        cutoff(1,:) = sortedR(num_annotated(1,:) + num_non_annotated(1,:));
+    end
+    if para.direction(2)
+        cutoff(2,:) = sortedR(numgene - num_annotated(2,:) - num_non_annotated(2,:)+1);
+    end
 
     distribution1 = zeros(num_permutations, numannotation);
     distribution2 = zeros(num_permutations, numannotation);
     for perm = 1 : num_permutations
-        if mod(perm, round(num_permutations/10)) == 0
+        if mod(perm, round(num_permutations/10)) == 0 && ~para.quiet
             fprintf('%d permutations done\n', perm);
         end
         random_annotation = annotations(randperm(numgene), :);
 %         NRrand = sum(abs(member_scores(random_annotation==1)).^P);
         NRrand = sum(bsxfun(@times, member_scores, random_annotation).^P, 1);
-        sc = computeScore(tmpscore, random_annotation, miss_penalty, NRrand);
+        sc = computeScore(tmpscore, random_annotation, miss_penalty, NRrand, para);
         distribution1(perm,:) = sc(1,:);
         distribution2(perm,:) = sc(2,:);
     end
@@ -103,13 +111,20 @@ function [pvalue, qvalue, score,cutoff,num_annotated,num_non_annotated] = ...
     psratio = [mean(bsxfun(@ge, normscore(1,:)', normscore(1,:)), 1); ...
         mean(bsxfun(@ge, normscore(2,:)', normscore(2,:)), 1)] ;
     qvalue = pvalue ./ psratio;
+    rmi = find(para.direction == 0);
+    pvalue(rmi,:) = [];
+    qvalue(rmi,:) = [];
+    score(rmi, :) = [];
+    cutoff(rmi,:) = [];
+    num_annotated(rmi,:) = [];
+    num_non_annotated(rmi,:) = [];
 %     pvalue = [ sum(distribution1 > repmat(score(1,:), num_permutations, 1) ); ...
 %                sum(distribution2 > repmat(score(2,:), num_permutations, 1) )] ...
 %                ./ num_permutations;
 end
 
 
-function [score,num_annotated,num_non_annotated] = computeScore(tmpscore, annotated, defaultscore, NR)
+function [score,num_annotated,num_non_annotated] = computeScore(tmpscore, annotated, defaultscore, NR, para)
     %member_scores: #gene x 1
     %annotated: #gene x #annotation
 
@@ -128,52 +143,55 @@ function [score,num_annotated,num_non_annotated] = computeScore(tmpscore, annota
     defaultscore(annotated) = tmp2(annotated);
     clear tmp2
     
-    [score(1,:), i] = max(cumsum(defaultscore,1), [], 1);
-    score(1,:) = max(score(1,:),0);
-    
-    if nargout > 1
-        I = repmat( (1 : ngene)', 1, nant);
-        idx = bsxfun(@le, I, i);
-        num_annotated(1,:) = sum( annotated .* idx, 1);
-        %     cp = annotated(idx);
-        %     annotated(idx) = 0;
-        %     num_annotated(1,:) = sum(annotated, 1);
-        num_non_annotated(1,:) = i - num_annotated(1,:);
-    
-        %     annotated(idx) = cp; %recover annotated
-        
-        %     for j = 1:nant
-        %         num_annotated(1,j) = sum(annotated(1:i(j),j)==1, 1); % 1 x #annotation
-        %         num_non_annotated(1,j) = sum(annotated(1:i(j),j)==0, 1);
-        %     end
-        
-        num_annotated(1, score(1,:)==0) = 0;
-        num_non_annotated(1, score(1,:)==0) = sum(annotated(:,score(1,:)==0),1);
+    if para.direction(1)
+        [score(1,:), i] = max(cumsum(defaultscore,1), [], 1);
+        score(1,:) = max(score(1,:),0);
+
+        if nargout > 1
+            I = repmat( (1 : ngene)', 1, nant);
+            idx = bsxfun(@le, I, i);
+            num_annotated(1,:) = sum( annotated .* idx, 1);
+            %     cp = annotated(idx);
+            %     annotated(idx) = 0;
+            %     num_annotated(1,:) = sum(annotated, 1);
+            num_non_annotated(1,:) = i - num_annotated(1,:);
+
+            %     annotated(idx) = cp; %recover annotated
+
+            %     for j = 1:nant
+            %         num_annotated(1,j) = sum(annotated(1:i(j),j)==1, 1); % 1 x #annotation
+            %         num_non_annotated(1,j) = sum(annotated(1:i(j),j)==0, 1);
+            %     end
+
+            num_annotated(1, score(1,:)==0) = 0;
+            num_non_annotated(1, score(1,:)==0) = sum(annotated(:,score(1,:)==0),1);
+        end
     end
-        
-    defaultscore = defaultscore(ngene:-1:1, :);
-    rannotated = annotated(ngene:-1:1, :);
-    [score(2,:), i] = max(cumsum(defaultscore,1), [], 1);
-    score(2,:) = max(score(2,:), 0);
-    
-    if nargout > 1
-        idx = bsxfun(@le, I, i);
-        num_annotated(2,:) = sum( rannotated .* idx, 1);
-        %     cp = rannotated(idx);
-        %     rannotated(idx) = 0;
-        %     num_annotated(2,:) = sum(rannotated, 1);
-        num_non_annotated(2,:) = i - num_annotated(2,:);
-        
-        %     rannotated(idx) = cp;
-        
-        %     for j = 1:nant
-        %         num_annotated(2,j) = sum(rannotated(1:i(j),j)==1, 1); % 1 x #annotation
-        %         num_non_annotated(2,j) = sum(rannotated(1:i(j),j)==0, 1);
-        %     end        
-        num_annotated(2, score(2,:)==0) = 0;
-        num_non_annotated(2, score(2,:)==0) = sum(rannotated(:,score(2,:)==0),1);
+       
+    if para.direction(2)
+        defaultscore = defaultscore(ngene:-1:1, :);
+        rannotated = annotated(ngene:-1:1, :);
+        [score(2,:), i] = max(cumsum(defaultscore,1), [], 1);
+        score(2,:) = max(score(2,:), 0);
+
+        if nargout > 1
+            idx = bsxfun(@le, I, i);
+            num_annotated(2,:) = sum( rannotated .* idx, 1);
+            %     cp = rannotated(idx);
+            %     rannotated(idx) = 0;
+            %     num_annotated(2,:) = sum(rannotated, 1);
+            num_non_annotated(2,:) = i - num_annotated(2,:);
+
+            %     rannotated(idx) = cp;
+
+            %     for j = 1:nant
+            %         num_annotated(2,j) = sum(rannotated(1:i(j),j)==1, 1); % 1 x #annotation
+            %         num_non_annotated(2,j) = sum(rannotated(1:i(j),j)==0, 1);
+            %     end        
+            num_annotated(2, score(2,:)==0) = 0;
+            num_non_annotated(2, score(2,:)==0) = sum(rannotated(:,score(2,:)==0),1);
+        end
     end
-        
 end
 
 function input = returnSelf(input)
