@@ -121,7 +121,7 @@ classdef DATASTRUCTFUNC < handle
             
         % order all fields in datastruct according to datastruct.(keyfield)
         % and orderBy (new order)
-        function newdb = orderDataStruct(datastruct, keyfield, orderBy)
+        function newdb = orderDataStruct(datastruct, keyfield, orderBy, missValue)
             % input:
             %   dbstruct, structure containing the database
             %   fd2align: string, the fieldname to align
@@ -129,6 +129,7 @@ classdef DATASTRUCTFUNC < handle
             %
             % Note: for those that are not in alignlist, create NaN in the matrix
             %
+            if nargin < 4, missValue = NaN; end
             [~, i] = ismember(orderBy, datastruct.(keyfield));
             
             if all(i==0)
@@ -173,6 +174,7 @@ classdef DATASTRUCTFUNC < handle
                             newdb.(fds{j}) = cell(newdim);
                         else
                             newdb.(fds{j}) = NaN(newdim);
+                            newdb.(fds{j})(:) = missValue;
                         end
                         s = '';
                         for k = 1:ndim-1

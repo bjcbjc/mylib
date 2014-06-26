@@ -75,7 +75,7 @@ function [pvalue, qvalue, score,cutoff,num_annotated,num_non_annotated] = ...
 
     %this will not change during permutation
     miss_penalty = 1 ./ sum(~annotations, 1); %1 x #annotation
-    miss_penalty = repmat(-miss_penalty, numgene, 1);    
+    miss_penalty = repmat(-miss_penalty, numgene, 1);    %gene x annotation
     
     [score,num_annotated,num_non_annotated] = computeScore(tmpscore, sortedAnnotations, miss_penalty, NR, para);
     cutoff = NaN(2, numannotation);
@@ -88,16 +88,32 @@ function [pvalue, qvalue, score,cutoff,num_annotated,num_non_annotated] = ...
 
     distribution1 = zeros(num_permutations, numannotation);
     distribution2 = zeros(num_permutations, numannotation);
-    for perm = 1 : num_permutations
-        if mod(perm, round(num_permutations/10)) == 0 && ~para.quiet
-            fprintf('%d permutations done\n', perm);
+    
+    if num_permutations < numannotation 
+        for perm = 1 : num_permutations
+            if mod(perm, round(num_permutations/10)) == 0 && ~para.quiet
+                fprintf('%d permutations done\n', perm);
+            end
+            random_annotation = annotations(randperm(numgene), :);
+    %         NRrand = sum(abs(member_scores(random_annotation==1)).^P);
+            NRrand = sum(bsxfun(@times, member_scores, random_annotation).^P, 1);
+            sc = computeScore(tmpscore, random_annotation, miss_penalty, NRrand, para);
+            distribution1(perm,:) = sc(1,:);
+            distribution2(perm,:) = sc(2,:);
         end
-        random_annotation = annotations(randperm(numgene), :);
-%         NRrand = sum(abs(member_scores(random_annotation==1)).^P);
-        NRrand = sum(bsxfun(@times, member_scores, random_annotation).^P, 1);
-        sc = computeScore(tmpscore, random_annotation, miss_penalty, NRrand, para);
-        distribution1(perm,:) = sc(1,:);
-        distribution2(perm,:) = sc(2,:);
+    else
+        permIdx = NaN(numgene, num_permutations);
+        for perm = 1:num_permutations
+            permIdx(:, perm) = randperm(numgene);
+        end        
+        for anti = 1:numannotation            
+            random_annotation = reshape(annotations(permIdx, anti), numgene, num_permutations);    
+            miss_penalty_perm = repmat(miss_penalty(:, anti), 1, num_permutations);
+            NRrand = sum(bsxfun(@times, member_scores, random_annotation).^P, 1);
+            sc = computeScore(tmpscore, random_annotation, miss_penalty_perm, NRrand, para);
+            distribution1(:,anti) = sc(1,:);
+            distribution2(:,anti) = sc(2,:);
+        end
     end
     %normalization of score; BJ, 11/09/2012
     meanscore = [mean(distribution1, 1); mean(distribution2, 1)];

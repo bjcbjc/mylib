@@ -22,6 +22,13 @@ classdef RNACOUNT < handle
             vl = bsxfun(@rdivide, bsxfun(@rdivide, count+pseudoCount, sum(count,1)), geneLength);
             tpm = bsxfun(@rdivide, vl, sum(vl, 1) ) * 1e6;
         end
+        function rpkm = getRPKM(count, geneLength, pseudoCount)
+            %count: gene x sample
+            %geneLength: gene x 1            
+            if nargin < 3, pseudoCount = 0.9; end
+            vl = bsxfun(@rdivide, bsxfun(@rdivide, count+pseudoCount, sum(count,1)), geneLength);
+            rpkm = vl * 1e9;
+        end
         function tmm = getTmmNormalizationFacor(count, varargin)
             %scale normalization; Based on Mark Robinson and Gordon Smyth's
             %R code

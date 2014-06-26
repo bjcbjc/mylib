@@ -2,8 +2,8 @@ classdef TCGASampleDecoder < handle
 
     properties (Constant)
         indextb = {'tss', 7; 'participant', 12; 'patient', 12; ...
-            'sample', 15; 'vial', 16; 'portion', 20; 'analyte', 21; ...
-            'plate', 26; 'center', 29};
+            'sample', 15; 'vial', 16; 'portion', 19; 'analyte', 20; ...
+            'plate', 25; 'center', 28};
         sampleTypeTb = { ...
             1, 'Primary solid Tumor', 'TP'; ...
             2, 'Recurrent Solid Tumor', 'TR'; ...
@@ -116,6 +116,11 @@ classdef TCGASampleDecoder < handle
             % {'TSS', 'Participant'(or 'patient'), 'Sample', 'Vial',
             % 'Analyte', 'Plate', 'Center'}, CASE-INSENSITIVE
             %
+            returnChar = false;
+            if ischar(barcode)
+                barcode = {barcode};
+                returnChar = true;
+            end
             
             newcode = barcode;
             if ischar(labelIndex)
@@ -132,6 +137,9 @@ classdef TCGASampleDecoder < handle
                 fprintf('Some barcodes are shorted than the requested length\n');
             end
             newcode(idx) = cellfun(@(x) x(1:labelIndex), barcode(idx), 'unif', 0);
+            if returnChar
+                newcode = newcode{1};
+            end
         end
         
         function [matchcode, idx] = longestMatch(barcodelist, query)

@@ -156,7 +156,6 @@ class jobManager:
             if f not in alljobs: continue
 
             job = self.jobs[ alljobs.index(f) ] #reference
-
             if not overwrite:
                 #delete existing log file if it os.path.exists
                 if os.path.exists(job.outpath + job.outfn):

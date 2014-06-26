@@ -403,5 +403,60 @@ classdef GENOMEFUNC < handle
             end
             [overlap, idx1, idx2] = intersect(gencodeId1, gencodeId2);
         end
+        
+        function result = searchAllOverlapGTF( loc, gtfFn, varargin )
+            para.padChr = true;
+            para.mt = 'M'; %or 'MT'
+            para.bedtools = 'bedtools ';
+            para.geneIdFormat = 'ENSG[\w\.]+';
+            para = assignpara(para, varargin{:});
+            
+            singleBase = false;
+            if size(loc, 2) == 2
+                loc(:,3) = loc(:,2);
+                singleBase = true;
+            end            
+            randfn = sprintf('/tmp/rand%05d.bed',randi(10000,1));
+            nTry = 1;
+            while exist(randfn, 'file') ~= 0
+                if nTry > 10
+                    error('more than 10 tries for random file generation');                    
+                end
+                randfn = sprintf('/tmp/rand%05d.bed',randi(10000,1));
+                nTry = nTry + 1;
+            end
+                
+            loctxt = numarray2strarray(loc);
+            loctxt(:,1) = strrep(loctxt(:,1), '23', 'X');
+            loctxt(:,1) = strrep(loctxt(:,1), '24', 'Y');
+            if strcmp(para.mt, 'M')
+                loctxt(:,1) = strrep(loctxt(:,1), 'MT', 'M');
+            elseif strcmp(para.mt, 'MT')
+                loctxt(:,1) = strrep(loctxt(:,1), 'M', 'MT');
+            end
+            if para.padChr
+                loctxt(:,1) = strcat('chr', loctxt(:,1));
+            end
+            tabwrite( randfn, loctxt);
+            
+            cmd = sprintf('%s intersect -wa -wb -a %s -b <(cut -f 1,4,5,9 %s)', ...
+                para.bedtools, randfn, gtfFn);
+            [status, output] = system(cmd);
+            if status ~= 0                
+                system(sprintf('rm -f %s',randfn));
+                error('bedtools error %d', status);                
+            else
+                t = textscan(output, '%s %s %s %*s %*s %*s %s', 'delimiter', '\t');
+%                 lockey = strcat(loctxt(:,1), '-', loctxt(:,2), '-', loctxt(:,3));
+                chrm = numericchrm( t{1} );
+                result.locidx_start = gloc2index(chrm, str2double_fast(t{2}));
+                if ~singleBase
+                    result.locidx_end = gloc2index(chrm, str2double_fast(t{3}));
+                end
+                result.geneId = regexp(t{4}, para.geneIdFormat, 'match', 'once');                
+                system(sprintf('rm -f %s',randfn));
+            end            
+        end
+        
     end
 end

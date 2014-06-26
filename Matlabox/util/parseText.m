@@ -91,7 +91,7 @@ function res = parseText(fn, varargin)
         line = fgetl(fid);
         i = i + 1;
     end
-    
+    offset = 0;
     if ~ischar(line)
         fpos = ftell(fid);
         line = fgetl(fid);
