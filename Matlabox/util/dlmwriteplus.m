@@ -39,33 +39,41 @@ function dlmwriteplus(filename, mtx, rowname, colname, delim, varargin)
     end
     
     if isempty(rowname)
+        cellarray = [rowname, num2cell(mtx)];        
+        formatstr = repmat({'%s'}, 1, size(cellarray,2));
+        formatstr( cellfun(@isnumeric, cellarray(1,:)) ) = {'%g'};
+        formatstr = strjoin(formatstr, '\\t');
+        cellarray = cellarray';        
+        fprintf(f, [formatstr '\n'], cellarray{:});
         fclose(f);
-        if ~isempty(colname)
-            dlmwrite(filename, mtx, '-append', 'delimiter', delim, varargin{:});
-        else
-            dlmwrite(filename, mtx, 'delimiter', delim, varargin{:});
-        end
-    else
-%         for ri = 1:row_nr
-%             fprintf(f, '%s\n', strjoin(rowname(ri,:), delim));
+        
+%         fclose(f);
+%         if ~isempty(colname)
+%             dlmwrite(filename, mtx, '-append', 'delimiter', delim, varargin{:});
+%         else
+%             dlmwrite(filename, mtx, 'delimiter', delim, varargin{:});
 %         end
-%         dlmwrite(filename, mtx, '-append', 'roffset', col_nr, 'coffset', row_nc, 'delimiter', delim);
-        tmpfn = sprintf('tmp%04d.txt', randi(1000));
-        dlmwrite(tmpfn, mtx, 'delimiter', delim, varargin{:});
-        ftmp = fopen(tmpfn, 'r');
-        
-        li = 1;
-        line = fgets(ftmp);
-        while ischar(line)
-            fprintf(f, '%s%s%s', strjoin(rowname(li,:),delim), delim, line);
-            line = fgets(ftmp);
-            li = li + 1;
-        end
-    
-        fclose(ftmp);
-        fclose(f);
-        
-        system(sprintf('rm -f %s',tmpfn));
+%     else
+% %         for ri = 1:row_nr
+% %             fprintf(f, '%s\n', strjoin(rowname(ri,:), delim));
+% %         end
+% %         dlmwrite(filename, mtx, '-append', 'roffset', col_nr, 'coffset', row_nc, 'delimiter', delim);
+%         tmpfn = sprintf('tmp%04d.txt', randi(1000));
+%         dlmwrite(tmpfn, mtx, 'delimiter', delim, varargin{:});
+%         ftmp = fopen(tmpfn, 'r');
+%         
+%         li = 1;
+%         line = fgets(ftmp);
+%         while ischar(line)
+%             fprintf(f, '%s%s%s', strjoin(rowname(li,:),delim), delim, line);
+%             line = fgets(ftmp);
+%             li = li + 1;
+%         end
+%     
+%         fclose(ftmp);
+%         fclose(f);
+%         
+%         system(sprintf('rm -f %s',tmpfn));
     end
                     
     
