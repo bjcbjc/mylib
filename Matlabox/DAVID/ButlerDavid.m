@@ -1,7 +1,7 @@
 classdef ButlerDavid < handle
     
     properties
-        davidfile = '/Users/bjc/Lab/Projects/DATA/DAVID/DAVID.mat';
+        davidfile = '/nethome/bjchen/DATA/DAVID/DAVID.mat';
         DAVID;                
         numAntMin = 15;
         numAntMax = Inf;   

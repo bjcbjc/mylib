@@ -39,21 +39,20 @@ function dlmwriteplus(filename, mtx, rowname, colname, delim, varargin)
     end
     
     if isempty(rowname)
-        cellarray = [rowname, num2cell(mtx)];        
+        fclose(f);
+        if ~isempty(colname)
+            dlmwrite(filename, mtx, '-append', 'delimiter', delim, varargin{:});
+        else
+            dlmwrite(filename, mtx, 'delimiter', delim, varargin{:});
+        end
+    else
+        cellarray = [rowname, num2cell(mtx)];
         formatstr = repmat({'%s'}, 1, size(cellarray,2));
         formatstr( cellfun(@isnumeric, cellarray(1,:)) ) = {'%g'};
         formatstr = strjoin(formatstr, '\\t');
         cellarray = cellarray';        
         fprintf(f, [formatstr '\n'], cellarray{:});
         fclose(f);
-        
-%         fclose(f);
-%         if ~isempty(colname)
-%             dlmwrite(filename, mtx, '-append', 'delimiter', delim, varargin{:});
-%         else
-%             dlmwrite(filename, mtx, 'delimiter', delim, varargin{:});
-%         end
-%     else
 % %         for ri = 1:row_nr
 % %             fprintf(f, '%s\n', strjoin(rowname(ri,:), delim));
 % %         end
