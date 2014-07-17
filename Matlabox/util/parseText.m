@@ -115,7 +115,7 @@ function res = parseText(fn, varargin)
         end
     end
     
-    if numeric
+    if numeric && isempty(numericcol)
         formattail = ' %f';     res.text = [];
     else
         formattail = ' %s';     res.text = {};

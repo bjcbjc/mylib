@@ -20,16 +20,17 @@ classdef Enrichment < handle
             ANT = Enrichment.filterAnnotation(ANT, background, para);
                         
             nSet = length(ANT.name);
-            nBackgroundGene = length(ANT.gene);
+            nBackgroundGene = length(background);
+%             nBackgroundGene = length(ANT.gene);
             nAnnotatedGene = sum(ANT.mtx~=0, 1)';
             
             if isstruct(testGene)
-                testMtx = false(nBackgroundGene, size(testGene.mtx,2));
+                testMtx = false(length(ANT.gene), size(testGene.mtx,2));
                 [~, i] = ismember(testGene.gene, ANT.gene);
                 testMtx(i(i~=0), :) = testGene.mtx(i~=0, :);
             elseif iscell(testGene)
                 if iscell(testGene{1}) %multiple lists of genes
-                    testMtx = false(nBackgroundGene, length(testGene));
+                    testMtx = false(length(ANT.gene), length(testGene));
                     for i = 1:length(testGene)
                         testMtx(:, i) = ismember(ANT.gene, testGene{i});
                     end
@@ -47,8 +48,11 @@ classdef Enrichment < handle
             if nTestSet < nSet
                 for i = 1:nTestSet
                     nTestAnt(:, i) = sum(bsxfun(@and, testMtx(:,i), ANT.mtx), 1);
+%                     pval(:, i) = ...
+%                         sum(hygecdf( nTestAnt(:, i):min(nTestGene(i), nAnnotatedGene) , ...
+%                         nBackgroundGene, nTestGene(i), nAnnotatedGene));
                     pval(:, i) = ...
-                        hygecdf( nTestAnt(:, i) , ...
+                        hygecdf( nTestAnt(:, i)-1 , ...
                         nBackgroundGene, nTestGene(i), nAnnotatedGene, 'upper');
                 end
             else

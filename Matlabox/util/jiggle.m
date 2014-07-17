@@ -16,7 +16,7 @@ function res = jiggle(data, scaleofvar, noise)
     if ~isempty(noise)
         res = data + randn(size(data)) .* noise;
     else
-        v = var(data);
+        v = nanvar(data);
         res = data + randn(size(data)) .* repmat(v,size(data,1),1) * scaleofvar;
     end
 end

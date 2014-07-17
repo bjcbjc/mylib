@@ -1,4 +1,4 @@
-function h=boxplot(varargin)
+function h=boxplotWithData(varargin)
 %BOXPLOT Displays box plots of multiple data samples.
 %   BOXPLOT(X) produces a box plot of the data in X.  If X is a matrix there
 %   is one box per column, and if X is a vector there is just one box. On
