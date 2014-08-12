@@ -128,6 +128,9 @@ function res = parseText(fn, varargin)
         %read one data line
         fpos = ftell(fid);
         line = fgetl(fid);
+        if ~ischar(line) %nothing to read
+            return
+        end
         offset = fpos - ftell(fid);
         fseek(fid, offset, 'cof');
         %decide the number of columns

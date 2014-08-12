@@ -1,15 +1,16 @@
 
 
 # First column of samplInfoFile is sample ID, used to match samples in read count (so they should match).
-# Usesage: path_rscipt deseq.template.r _var_=value _var_=\'string_value\'   
-# Example: /R/bin/rscript deseq.template.r deseq.method=\'blind\' deseq.maxIteration=200 sampleInfoFile=\'/data/sample.info.txt\'
+# Usesage: path_rscipt deseq.template.r _var_=value 
+# Example: /R/bin/rscript deseq.template.r deseq.method=blind deseq.maxIteration=200 sampleInfoFile=/data/sample.info.txt
+# Note there cannot be space before and after "="
 #
 # If deseq.formula0 and deseq.formula1 are specified, GLM comparing deseq.formula1 to deseq.formula0 is used to get the effects of 
 # the the addition varibles in formula 1. Variables in formula should correspond to column names in sampleInfoFile.
 # 
 # If only deseq.formula1 is specified, deseq.condA and deseq.condB can be specified for DE between condA and condB in the
-# variable specified in the formula. For example, if deseq.formulta1=\'count ~ treatment\' (treatment is a column in sampleInfoFile),
-# specify deseq.condA=\'treated\' and deseq.condB='\untreated\' (assume treated and untreated are the labels in the 'treatment'
+# variable specified in the formula. For example, if deseq.formulta1=count~treatment (treatment is a column in sampleInfoFile),
+# specify deseq.condA=treated and deseq.condB=untreated (assume treated and untreated are the labels in the 'treatment'
 # column in sampleInfoFile) to test DE between treated and untreated. 
 # 
 #
@@ -20,7 +21,7 @@
 
 
 #default variable values
-deseq.method = 'pool-CR'
+deseq.method = 'pooled-CR'
 deseq.sharingMode = 'fit-only'
 deseq.fitType = 'parametric'
 deseq.maxIteration = 2000
@@ -38,8 +39,14 @@ readCountFile = ''
 defVarName = ls()
 args = commandArgs(trailingOnly=T)
 for (i in 1:length(args)) {
-    if ( unlist(strsplit(args[i], '='))[1] %in% defVarName ) {
-        eval(parse(text=args[i]))
+    varVal = unlist(strsplit(args[i], '='))
+    varVal[2] = gsub('"|\'', '', varVal[2])
+    if ( varVal[1] %in% defVarName ) {
+        if ( suppressWarnings(!is.na(as.numeric(varVal[2]))) ) {
+            eval(parse(text=args[i]))
+	} else {
+	    eval(parse(text=paste0(varVal[1],'="',varVal[2],'"')))
+	}
     }
 }
 if ( substr(outputPath, nchar(outputPath), nchar(outputPath)) != '/') { outputPath = paste0(outputPath, '/') }
@@ -96,7 +103,7 @@ if (deseq.formula0 == '') {
     countDataFull = estimateDispersions(countDataFull, method=deseq.method, sharingMode=deseq.sharingMode, fitType=deseq.fitType)
 
     result = nbinomTest(countDataFull, deseq.condA, deseq.condB)
-    save(countDataFull, result, file=paste0(outputPath, outputTag, '.rdata'))
+    save(countDataFull, result, file=paste0(outputPath, outputTag, '.deseq.rdata'))
     write.table( result, file=paste0(outputPath, outputTag, '.deseq.txt'), sep='\t', row.names=F, quote=F)
 
 } else { 
@@ -111,7 +118,7 @@ if (deseq.formula0 == '') {
     padjGLM = p.adjust( pvalGLM, method="BH" )
     glmfit1$pvalGLM <- pvalGLM
     glmfit1$padjGLM <- padjGLM
-    save(countDataFull, glmfit1, glmfit0, file=paste0(outputPath, outputTag, '.rdata'))
+    save(countDataFull, glmfit1, glmfit0, file=paste0(outputPath, outputTag, '.deseq.rdata'))
     write.table( glmfit1, file=paste0(outputPath, outputTag, '.deseq.txt'), sep='\t', row.names=T, quote=F)
 }
 

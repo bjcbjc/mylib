@@ -49,9 +49,13 @@ def readConfig(configfn):
                 paraval = ''
             if ';' in paraval: paraval = map(lambda(a): a.strip(), paraval.split(';'))
             if paraval.count(':') == 2 and paraname != 'time':
-                paraval = map(lambda(a): a.strip(), paraval.split(':'))
-                paraval = map(int, paraval)
-                paraval = map(lambda(a): '%s'%a, range(paraval[0], paraval[2]+1, paraval[1]))
+                original_paraval = paraval
+                try:
+                    paraval = map(lambda(a): a.strip(), paraval.split(':'))
+                    paraval = map(int, paraval)
+                    paraval = map(lambda(a): '%s'%a, range(paraval[0], paraval[2]+1, paraval[1]))
+                except:
+                    paraval = original_paraval
                 
             if paraname in curset.keys():
                 if type(curset[paraname]) != type([]):

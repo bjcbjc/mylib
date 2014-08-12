@@ -3,6 +3,7 @@ function handles = distinctColorMarker(handles, varargin)
     %  be identified; for example, it can be used gscatter plot when the
     %  number of groups is large
     
+    para.line = {'-', '--', ':', '-.'};
     para.marker = {'.', 'sq', '^', 'o', 'x', '*'};
     para.color = [0.9, 0.1, 0.1; ... %red
         0, 0.8, 0; ... %green
@@ -14,6 +15,7 @@ function handles = distinctColorMarker(handles, varargin)
         0.7, 0.7, 0.7]; %grey
     para.markersize = [15, 8, 8, 8, 8];
     para.maxcolor = size(para.color, 1);
+    para.useLine = false;
     
     para = assignpara(para, varargin{:});
     if iscellstr(para.color)
@@ -22,6 +24,7 @@ function handles = distinctColorMarker(handles, varargin)
     
     ns = length(para.markersize);
     nm = length(para.marker);
+    nl = length(para.line);
     if ns < nm
         para.markersize(ns+1:nm) = para.markersize(ns);
     end
@@ -32,16 +35,32 @@ function handles = distinctColorMarker(handles, varargin)
     
     nc = size(para.color, 1);    
     nh = length(handles);
-    if nc*nm < nh
-        error('not enough color * marker');
-    end
-    [cidx, midx] = ind2sub([nc, nm], 1:nh);
-    for i = 1:nh
-        if isprop(handles(i), 'color')
-            set(handles(i), 'color', para.color(cidx(i), :));
+    if para.useLine
+        if nc*nl < nh
+            error('not enough color * line');
         end
-        if isprop(handles(i), 'marker')
-            set(handles(i), 'marker', para.marker{midx(i)}, 'markersize', para.markersize(midx(i)));
+        [cidx, midx] = ind2sub([nc, nl], 1:nh);
+        for i = 1:nh
+            if isprop(handles(i), 'color')
+                set(handles(i), 'color', para.color(cidx(i), :));
+            end
+            if isprop(handles(i), 'linestyle')
+                set(handles(i), 'linestyle', para.line{midx(i)});
+            end
+        end
+    else
+        if nc*nm < nh
+            error('not enough color * marker');
+        end
+        [cidx, midx] = ind2sub([nc, nm], 1:nh);
+        for i = 1:nh
+            if isprop(handles(i), 'color')
+                set(handles(i), 'color', para.color(cidx(i), :));
+            end
+            if isprop(handles(i), 'marker')
+                set(handles(i), 'marker', para.marker{midx(i)}, 'markersize', para.markersize(midx(i)));
+            end
         end
     end
+    
         

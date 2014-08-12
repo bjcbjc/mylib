@@ -1,0 +1,39 @@
+#java -cp /nethome/bjchen/programs/GSEA/gsea2-2.0.14.jar -Xmx512m xtools.gsea.Gsea \
+#     -res /nethome/bjchen/Projects/HoltP/gsea/TPM.delta.txt \
+#     -cls /nethome/bjchen/Projects/HoltP/gsea/phenotype.delta.cls#BMI_diff \
+#     -gmx gseaftp.broadinstitute.org://pub/gsea/gene_sets/c7.all.v4.0.symbols.gmt \
+#     -collapse false -mode Max_probe -norm meandiv -nperm 1000 -permute phenotype \
+#     -rnd_type no_balance -scoring_scheme weighted -rpt_label deltaTPM_diffBMI_IM \
+#     -metric Pearson -sort real -order descending -include_only_symbols true \
+#     -make_sets true -median false -num 100 -plot_top_x 20 -rnd_seed 149 \
+#     -save_rnd_lists false -set_max 500 -set_min 15 -zip_report false \
+#     -out /nethome/bjchen/Projects/HoltP/gsea -gui false
+#
+#java -Xmx512m xtools.gsea.Gsea -res /nethome/bjchen/Projects/SprattD/data/gsea/SprattD.noExprFilter.excludeVCAP.exp.txt \
+#     -cls /nethome/bjchen/Projects/SprattD/data/gsea/SprattD.noExprFilter.excludeVCAP.phenotype.radiation.categorical.cls#8Gy_versus_NoRT \
+#     gmx example:
+#     -gmx /nethome/bjchen/gsea_home/output/jul28/AR_geneset.gseaftp.broadinstitute.org___pub_gsea_annotations_GENE_SYMBOL.chip.gmt,/nethome/bjchen/Projects/SprattD/table/AR_signatures.updatedGeneNames.gmt \
+#     -scoring_scheme:  {weighted, classic}
+#     -sort:  {abs, real}
+#     -metric:  {Signal2Noise, Diff_of_Classes, tTest, Pearson etc}
+#     -permute: {phenotype, gene_set}
+
+{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.0.14.jar -Xmx4g xtools.gsea.Gsea \
+     -res {expression_file} \
+     -cls {phenotype_file}#{phenotype_label} \
+     -gmx {gene_sets} \
+     -collapse false -mode Max_probe -norm meandiv -nperm 1000 \
+     -permute {permute} \
+     -rnd_type no_balance \
+     -scoring_scheme {scoring_scheme} \
+     -rpt_label {report_label} \
+     -metric {metric} \
+     -sort {sort} \
+     -order descending \
+     -include_only_symbols true \
+     -make_sets true -median false -num 100 -plot_top_x 20 -rnd_seed 149 \
+     -save_rnd_lists false -zip_report false \
+     -set_max {set_max} \
+     -set_min {set_min} \
+     -gui false \
+     -out {outputpath}

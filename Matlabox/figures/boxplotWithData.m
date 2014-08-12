@@ -3386,7 +3386,8 @@ function drawDataPoints(gparent, gpos, grouping, xDat, datajitter, datamarkersiz
     end
     ugroup = unique(grouping);
     for i = 1:length(ugroup)
-        datax = gpos(i) + datajitter .* (rand(sum(grouping == ugroup(i)),1)-.5);
+        datax = gpos(i) + 0.5 .* (rand(sum(grouping == ugroup(i)),1)-.5);
+%         datax = gpos(i) + datajitter .* (rand(sum(grouping == ugroup(i)),1)-.5);
         datay = xDat(grouping == ugroup(i)) + datajitter .* (rand(sum(grouping == ugroup(i)), 1)-.5);
         hold on;
         plot(datax, datay, '.', 'color', [0.7, 0.7, 0.7], 'parent', gparent, 'markersize', datamarkersize);
