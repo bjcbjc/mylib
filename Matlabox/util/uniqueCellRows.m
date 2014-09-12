@@ -1,6 +1,7 @@
-function [u, m, n] = uniqueCellRows(cellarrays)
+function [u, m, n] = uniqueCellRows(cellarrays, sortOrder)
     %because matlab ignores 'rows' in unique() when input is cell array
     %
+    if nargin < 2, sortOrder = 'sorted'; end
     
     n = size(cellarrays,2);
     txt = cellarrays(:,1);
@@ -8,5 +9,5 @@ function [u, m, n] = uniqueCellRows(cellarrays)
         txt = strcat(txt, cellarrays(:,i));
     end
     
-    [~, m, n] = unique(txt);
+    [~, m, n] = unique(txt, sortOrder);
     u = cellarrays(m,:);

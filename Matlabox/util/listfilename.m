@@ -11,3 +11,5 @@ function fns = listfilename(pattern, usels)
         fns = textscan(f, '%s');
         fns = fns{1};
     end
+    
+    fns = sort(fns);

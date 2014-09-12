@@ -202,7 +202,6 @@ argp.add_argument('-indelMinReadBothStrand', default=0, metavar='INT', type=int,
 #argp.add_argument('-ignore3', default=0, metavar='INT', type=int, help='ignore INT bp from 3'' end of each read')
 argp.add_argument('-samtools', type=str, default='/data/NYGC/Software/samtools/samtools-0.1.19/samtools', help='samtools path, [/data/NYGC/Software/samtools/samtools-0.1.19]')
 argp.add_argument('-tmpdir', type=str, default='./', help='path for temporary files, [./]')
-argp.add_argument('-keepTmpLoc', action='store_true', help='keep temporary location file, for debug, [false]' )
 #argp.add_argument('-refbasecheck', nargs='?', action='store_true', help='a switch to turn on double checking of reference bases in vcf and in genome; only valid if location file is in vcf format, [false]')
 argp.add_argument('-samtools_mpileup_option', nargs='?', metavar='value', help='options that are passed to samtools mpileup')
 
@@ -282,7 +281,7 @@ try:
             count = 0
             outbuffer = ''
             for chrm, site in siteloc:
-                #tic = time.time()
+                tic = time.time()
                 sampipe = subprocess.Popen(cmd%(chrm,site,site), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 samout, samerr = sampipe.stdout, sampipe.stderr
             
@@ -297,11 +296,11 @@ try:
                     out.write(outbuffer)
                     outbuffer = ''
                 closefiles([samout, samerr])
-                #print '%d, %s'%(count, time.time()-tic)
+                print '%d, %s'%(count, time.time()-tic)
             if outbuffer != '':
                 out.write(outbuffer)
                 outbuffer = ''
-        if len(tmpfiles) > 0 and not args.keepTmpLoc:
+        if len(tmpfiles) > 0:
             #remove temp file
             subprocess.call( 'rm -f ' + ' '.join(tmpfiles), shell=True )
         closefiles([samout, samerr, out])
@@ -317,7 +316,7 @@ try:
             closefiles([samout, samerr, out])
 except:
     print 'Error somewhere, closing streaming pipes'
-    if len(tmpfiles) > 0 and not args.keepTmpLoc:
+    if len(tmpfiles) > 0:
         #remove temp file
         subprocess.call(  'rm -f ' + ' '.join(tmpfiles), shell=True )
     closefiles([samout, samerr, out])

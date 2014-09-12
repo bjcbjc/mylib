@@ -22,11 +22,13 @@ function [counts, uniqElements, uindex] = eleCounts(data, sortByCount)%, group)
     if nargout == 3, sortByCount = false; end
     data = data(:);
     [uniqElements, ~, uindex] = unique(data);
-    n = length(uniqElements);
-    counts = zeros(n,1);
-    for i = 1:n
-        counts(i) = sum(uindex==i);
-    end
+    
+    counts = accumarray(uindex, 1);
+%     n = length(uniqElements);
+%     counts = zeros(n,1);
+%     for i = 1:n
+%         counts(i) = sum(uindex==i);
+%     end
     if sortByCount
         [~,si] = sort(counts, 'descend');
         counts = counts(si);

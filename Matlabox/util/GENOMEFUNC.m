@@ -443,8 +443,8 @@ classdef GENOMEFUNC < handle
                 para.bedtools, randfn, gtfFn);
             [status, output] = system(cmd);
             if status ~= 0                
-                system(sprintf('rm -f %s',randfn));
-                error('bedtools error %d', status);                
+%                 system(sprintf('rm -f %s',randfn));
+                error('bedtools error %s, %d', randfn, status);                
             else
                 t = textscan(output, '%s %s %s %*s %*s %*s %s', 'delimiter', '\t');
 %                 lockey = strcat(loctxt(:,1), '-', loctxt(:,2), '-', loctxt(:,3));
