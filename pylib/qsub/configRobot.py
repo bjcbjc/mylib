@@ -91,3 +91,41 @@ def makeParasList(paraset, paranames):
         if type(paraset[a]) != type([]):
             paraset[a] = [ paraset[a] ]
     return paraset
+
+def popLoopOver(paraset):
+    loopOver = {}
+    for k in paraset.keys():
+        if 'LoopOver' in k:
+            if type(paraset[k]) != type([]):
+                loopOver[k] = [ paraset[k] ]
+            else:
+                loopOver[k] = paraset[k]
+            del paraset[k]
+    return loopOver, paraset
+
+def getLoopOverList(paraset):
+    import itertools
+    loopOver, paraset = popLoopOver(paraset)
+    keys = loopOver.keys()
+    iterlist = list( itertools.product( *[ loopOver[k] for k in keys]) )
+    #keys will be names in cmdset that start with 'LoopOver'
+    #iterlist will be the list containg tuples (same number of LoopOver variables) for looping
+    #the reason to convert it to list is so that it can be used within a loop
+    return keys, iterlist, paraset
+
+def translateAllValues(paraset, maxiter=10):
+    n = 0
+    while n < maxiter:
+        for k in paraset.keys():
+            if '{' in paraset[k]:
+                paraset[k] = paraset[k].format( **paraset)
+        invalid = [ k for k, v in paraset.iteritems() if '{' in v ]
+        if len(invalid) == 0:
+            break
+        else:
+            n = n + 1
+    if len(invalid) > 0:
+        print 'not filled parameters:'
+        print invalid
+        exit()
+    return paraset

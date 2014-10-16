@@ -3381,9 +3381,9 @@ end
 end
 
 function drawDataPoints(gparent, gpos, grouping, xDat, datajitter, datamarkersize)
-    if datajitter == 0
-        datajitter = 0.25;
-    end
+%     if datajitter == 0
+%         datajitter = 0.25;
+%     end
     ugroup = unique(grouping);
     for i = 1:length(ugroup)
         datax = gpos(i) + 0.5 .* (rand(sum(grouping == ugroup(i)),1)-.5);

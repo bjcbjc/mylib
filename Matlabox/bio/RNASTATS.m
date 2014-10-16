@@ -532,15 +532,28 @@ classdef RNASTATS < handle
             
             fdname = strrep(para.fns, para.stripstr, '');
             for i = 1:length(para.fns)
-                if ~isempty(strfind(lower(para.fns{i}), 'featurecounts'))
-                    t = parseText([reportpath para.fns{i}], 'nrowname', 2, 'ncolname', 1, 'numeric', true);
-                    rmi = strcmpi(t.colname, 'Length');
-                    readcount.geneLength = t.text(:, rmi);
-                    t.colname(rmi) = [];
-                    t.text(:, rmi) = [];
-                    rmi = strcmpi(t.rownamelabel, 'Chromosome');
-                    t.rownamelabel(rmi) = [];
-                    t.rowname(:, rmi) = [];
+                if ~isempty(strfind(lower(para.fns{i}), 'featurecounts'))                    
+                    f = fopen([reportpath para.fns{i}], 'r');
+                    header = fgetl(f);
+                    fclose(f);
+                    %new format?
+                    if ~isempty(strfind(header, 'Ensembl_Gene_ID'))
+                        t = parseText([reportpath para.fns{i}], 'nrowname', 11, 'ncolname', 1, 'numeric', true);
+                        geneStartIdx = strcmpi(t.rownamelabel, 'Gene_start');
+                        geneEndIdx = strcmpi(t.rownamelabel, 'Gene_end');
+                        readcount.geneLength = str2double(t.rowname(:, geneEndIdx)) - str2double(t.rowname(:, geneStartIdx)) + 1;
+                        t.rowname = t.rowname(:,1);
+                        t.rownamelabel = t.rownamelabel(1);
+                    else
+                        t = parseText([reportpath para.fns{i}], 'nrowname', 2, 'ncolname', 1, 'numeric', true);
+                        rmi = strcmpi(t.colname, 'Length');
+                        readcount.geneLength = t.text(:, rmi);
+                        t.colname(rmi) = [];
+                        t.text(:, rmi) = [];
+                        rmi = strcmpi(t.rownamelabel, 'Chromosome');
+                        t.rownamelabel(rmi) = [];
+                        t.rowname(:, rmi) = [];
+                    end                                        
                 else
                     t = parseText([reportpath para.fns{i}], 'nrowname', 1, 'ncolname', 1, 'numeric', true);
                 end
@@ -553,8 +566,13 @@ classdef RNASTATS < handle
                     end
                     if nnz(~strcmp(t.rowname, readcount.geneId)) > 0
                         error('gene names are not the same, %s', para.fns{i});
-                    end
-                    
+%                         [~, sortOrder] = ismember(readcount.geneId, t.rowname);
+%                         t.rowname = t.rowname(sortOrder, :);
+%                         t.text = t.text(sortOrder,:);
+%                         if nnz(~strcmp(t.rowname, readcount.geneId)) > 0
+%                             error('gene names are not the same, %s', para.fns{i});
+%                         end
+                    end                    
                 end
                 readcount.(fdname{i}) = t.text;
                 RNASTATS.anyNaN(readcount.(fdname{i}), sprintf('readReportReadCount, %s', fdname{i}));
