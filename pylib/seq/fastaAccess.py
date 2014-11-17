@@ -1,13 +1,13 @@
 
 
-def readFAI(faifile):
+def readFai(faifile):
     data = [ line.strip().split() for line in open(faifile) ]
     fai = {}
     for line in data:
         fai[ line[0] ] = map(int, line[1:]) #chrm length, offset, nt/line, byte_len/line
     return fai
 
-def getChrmByteRange(fai, chrm):
+def getChrmIndex(fai, chrm):
     if chrm not in fai:
         if 'chr' in chrm: 
             chrm = chrm.replace('chr', '').replace('M', 'MT')
@@ -27,10 +27,10 @@ def getChrmByteRange(fai, chrm):
         total = nWholeLine * ntBlen + remainder
         return offset, total
 
-def getChrm(fai, fastaFile, chrm):
+def getChrmSeq(fai, fastaFile, chrm):
     if type(fastaFile) == type('str'):
         fastaFile = open(fastaFile)
-    offset, total = getChrmByteRange(fai, chrm)
+    offset, total = getChrmIndex(fai, chrm)
     fastaFile.seek(offset)
     seq = fastaFile.read(total).replace('\n', '')
     if len(seq) != fai[chrm][0]:
