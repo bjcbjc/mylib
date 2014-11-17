@@ -212,9 +212,13 @@ classdef AlleleCountData < handle
                 dataNoStrand.count(:, remove) = [];
                 dataNoStrand.ref = upper(dataNoStrand.ref);
             end
-            if size(data.indelcount, 2) > 1
-                dataNoStrand.indelcount = cellfun(@(x,y) x+y, data.indelcount(:,1), data.indelcount(:,2), 'unif', 0);
-            end            
+            if isnumeric(data.indelcount)
+                if size(data.indelcount, 2) > 1
+                    dataNoStrand.indelcount = cellfun(@(x,y) x+y, data.indelcount(:,1), data.indelcount(:,2), 'unif', 0);
+                end            
+            else
+                fprintf('ignore indel, as it is not numeric\n');
+            end
         end
         
         function [count, indel] = parseIndel(data)

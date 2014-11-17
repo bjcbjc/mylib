@@ -166,7 +166,8 @@ classdef ButlerDavid < handle
             end
         end
         
-        function setupDavidWebService(obj, backgroundGene, testGene, testCategories)
+        function setupDavidWebService(obj, backgroundGene, testGene, testCategories, geneId_type)
+            if nargin < 5, geneId_type = 'ENTREZ_GENE_ID'; end
             if nargin < 4, testCategories = {}; end;
             if nargin < 3, testGene = []; end
             if nargin < 2, backgroundGene = []; end
@@ -180,20 +181,28 @@ classdef ButlerDavid < handle
             end
             if ~isempty(testCategories)
                 setCategories(obj.davidwebservice, cellarray2str(testCategories, ','));            
-            end
+            end            
             if ~isempty(backgroundGene)
                 backgroundGene = backgroundGene(:)';
-                backgroundGene = mat2str(backgroundGene);
-                backgroundGene = strrep(backgroundGene, ' ', ',');
-                backgroundGene([1 end]) = [];
-                addList(obj.davidwebservice, backgroundGene, 'ENTREZ_GENE_ID', 'background', 1);
+                if isnumeric(backgroundGene)
+                    backgroundGene = mat2str(backgroundGene);
+                    backgroundGene = strrep(backgroundGene, ' ', ',');
+                    backgroundGene([1 end]) = [];
+                else
+                    backgroundGene = strjoin( backgroundGene, ',');
+                end
+                addList(obj.davidwebservice, backgroundGene, geneId_type, 'background', 1);
             end
             if ~isempty(testGene)
                 testGene = testGene(:)';
-                testGene = mat2str(testGene);
-                testGene = strrep(testGene, ' ', ',');
-                testGene([1 end]) = [];
-                addList(obj.davidwebservice, testGene, 'ENTREZ_GENE_ID', 'list', 0);
+                if isnumeric(testGene)
+                    testGene = mat2str(testGene);
+                    testGene = strrep(testGene, ' ', ',');
+                    testGene([1 end]) = [];
+                else
+                    testGene = strjoin(testGene, ',');
+                end
+                addList(obj.davidwebservice, testGene, geneId_type, 'list', 0);
             end
         end
         
@@ -203,12 +212,13 @@ classdef ButlerDavid < handle
             para.finalGroup = 4;
             para.linkage = 0.5;
             para.kappa = 20; %lowest stringency, more aggresive merging
+            para.geneId_type = 'ENTREZ_GENE_ID';
             if nargin < 4, testCategories = {}; end;
             if ~isempty(varargin)
                 para = assignpara(para, varargin{:});
             end
             
-            setupDavidWebService(obj, backgroundGene, testGene, testCategories);
+            setupDavidWebService(obj, backgroundGene, testGene, testCategories, para.geneId_type);
             
             report = getGeneClusterReport(obj.davidwebservice, para.overlap, ...
                 para.initGroup, para.finalGroup, para.linkage, para.kappa);
@@ -221,12 +231,13 @@ classdef ButlerDavid < handle
             para.finalGroup = 3;
             para.linkage = 0.5;
             para.kappa = 20; %lowest stringency
+            para.geneId_type = 'ENTREZ_GENE_ID';
             if nargin < 4, testCategories = {}; end;            
             if ~isempty(varargin)
                 para = assignpara(para, varargin{:});
             end
             
-            setupDavidWebService(obj, backgroundGene, testGene, testCategories);
+            setupDavidWebService(obj, backgroundGene, testGene, testCategories, para.geneId_type);
             
             report = getTermClusterReport(obj.davidwebservice, para.overlap, ...
                 para.initGroup, para.finalGroup, para.linkage, para.kappa);            

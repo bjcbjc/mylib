@@ -541,7 +541,7 @@ classdef RNASTATS < handle
                         t = parseText([reportpath para.fns{i}], 'nrowname', 11, 'ncolname', 1, 'numeric', true);
                         geneStartIdx = strcmpi(t.rownamelabel, 'Gene_start');
                         geneEndIdx = strcmpi(t.rownamelabel, 'Gene_end');
-                        readcount.geneLength = str2double(t.rowname(:, geneEndIdx)) - str2double(t.rowname(:, geneStartIdx)) + 1;
+%                         readcount.geneLength = str2double(t.rowname(:, geneEndIdx)) - str2double(t.rowname(:, geneStartIdx)) + 1;
                         t.rowname = t.rowname(:,1);
                         t.rownamelabel = t.rownamelabel(1);
                     else
