@@ -14,22 +14,50 @@ function [handles, setnum] = fixvenn(setdata, varargin)
     %	'labelfontsize': font size for the labels of sets, def = 16
     %
     
-    if iscell(setdata)
-        u = setdata{1};
-        for i = 2:length(setdata)
-            u = union(u, setdata{i});
+    [~, i] = ismember('precalculated', varargin(1:2:end));
+    [~, j] = ismember('setflag', varargin(1:2:end));
+    i = max(2*i - 1, 0);
+    j = max(2*j - 1, 0);
+    if i ~= 0 
+        precalculated  = varargin{i+1};
+    else
+        precalculated = false;
+        if j ~= 0
+            varargin(j:j+1) = [];
         end
-        newsetdata = false(length(u), length(setdata));
-        for i = 1:length(setdata);
-            newsetdata(:,i) = ismember(u, setdata{i});            
+    end
+    if ~precalculated
+        if iscell(setdata)
+            u = setdata{1};
+            for i = 2:length(setdata)
+                u = union(u, setdata{i});
+            end
+            newsetdata = false(length(u), length(setdata));
+            for i = 1:length(setdata);
+                newsetdata(:,i) = ismember(u, setdata{i});            
+            end
+            setdata = newsetdata;
+            clear newsetdata
         end
-        setdata = newsetdata;
-        clear newsetdata
-    end
-    if ~islogical(setdata)
-        setdata = setdata ~= 0;
-    end
-    nset = size(setdata,2);
+        if ~islogical(setdata)
+            setdata = setdata ~= 0;
+        end
+        nset = size(setdata,2);
+    else
+        if ~isnumeric(setdata)
+            error('precalculated data must be numeric');
+        end
+        setdata = setdata(:)';
+        if length(setdata) == 3
+            nset = 2;
+        elseif length(setdata) == 7
+            nset = 3;
+        elseif length(setdata) == 15
+            nset = 4;
+        else 
+            nset = -1;
+        end
+    end    
     
     
     %para = assignpara(para, varargin{:});
@@ -52,15 +80,27 @@ function [handles, setnum] = venn2(setdata, varargin)
     para.alpha = 0.4;
     para.numfontsize = 16;
     para.labelfontsize = 16;
+    para.precalculated = false;
+    para.setflag = [0,1; 1,0; 1,1];
+    para.setflagOrder = para.setflag;
     
     para = assignpara(para, varargin{:});
+    
+    if nnz(para.setflag ~= para.setflagOrder) && para.precalculated
+        d1 = numarray2strarray(para.setflag);
+        d2 = numarray2strarray(para.setflagOrder);
+        k1 = arrayfun(@(x) strjoin(d1(x,:), '_'), 1:size(para.setflag, 1), 'unif', 0);
+        k2 = arrayfun(@(x) strjoin(d2(x,:), '_'), 1:size(para.setflag, 1), 'unif', 0);
+        [~, si] = ismember(k2, k1);
+        para.setflag = para.setflag(si,:);
+        setdata = setdata(si);
+    end
     
     t = (0:2*pi/39:2*pi);    
     offset = [0, 0; -1, 0];
     labeloffset = [0.1, -0.1; -0.15, -0.1];
     labelanchorpoint = [16, 25];
-    numlabelpos = [0.5,0; -1.5,0; -0.5,0];
-    setflag = [0,1; 1,0; 1,1];
+    numlabelpos = [0.5,0; -1.5,0; -0.5,0];    
     
     x = 1;
     y = 1;
@@ -91,10 +131,14 @@ function [handles, setnum] = venn2(setdata, varargin)
     end
     
     %fill in numbers of intersections
-    setnum.set = setflag;
-    setnum.num = zeros(size(setflag, 1), 1);    
-    for i = 1:size(setflag,1)
-        setnum.num(i) = sum(all(bsxfun(@eq, setdata, setflag(i,:)), 2));
+    setnum.set = para.setflag;
+    setnum.num = zeros(size(para.setflag, 1), 1);    
+    for i = 1:size(para.setflag,1)
+        if ~para.precalculated
+            setnum.num(i) = sum(all(bsxfun(@eq, setdata, para.setflag(i,:)), 2));
+        else
+            setnum.num(i) = setdata(i);
+        end
         handles.numlabel(i) = text( numlabelpos(i,1), numlabelpos(i,2), ...
             num2str(setnum.num(i)), 'fontsize', para.numfontsize);
         twidth = get(handles.numlabel(i), 'extent');
@@ -115,16 +159,28 @@ function [handles, setnum] = venn3(setdata, varargin)
     para.alpha = 0.4;
     para.numfontsize = 16;
     para.labelfontsize = 16;
+    para.precalculated = false;
+    para.setflag = [0,0,1; 0,1,0; 1,0,0; 0,1,1; 1,0,1; 1,1,0; 1,1,1];
+    para.setflagOrder = para.setflag;
     
     para = assignpara(para, varargin{:});
+    
+    if nnz(para.setflag ~= para.setflagOrder) && para.precalculated
+        d1 = numarray2strarray(para.setflag);
+        d2 = numarray2strarray(para.setflagOrder);
+        k1 = arrayfun(@(x) strjoin(d1(x,:), '_'), 1:size(para.setflag, 1), 'unif', 0);
+        k2 = arrayfun(@(x) strjoin(d2(x,:), '_'), 1:size(para.setflag, 1), 'unif', 0);
+        [~, si] = ismember(k2, k1);
+        para.setflag = para.setflag(si,:);
+        setdata = setdata(si);
+    end
     
     t = (0:2*pi/39:2*pi);    
     offset = [0, 0; -0.5, 1; -1, 0];
     labeloffset = [0.1, -0.1; 0, 0.1; -0.3, -0.1];
     labelanchorpoint = [16, 1, 25];
     numlabelpos = [0.20,-0.27; -0.76,1.36; -1.70,-0.27; -0.16,0.65; ...
-        -0.76,-0.44; -1.36,0.65; -0.76,0.26];
-    setflag = [0,0,1; 0,1,0; 1,0,0; 0,1,1; 1,0,1; 1,1,0; 1,1,1];
+        -0.76,-0.44; -1.36,0.65; -0.76,0.26];    
     
     x = 1;
     y = 1;
@@ -158,10 +214,14 @@ function [handles, setnum] = venn3(setdata, varargin)
     end
     
     %fill in numbers of intersections
-    setnum.set = setflag;
-    setnum.num = zeros(size(setflag, 1), 1);    
-    for i = 1:size(setflag,1)
-        setnum.num(i) = sum(all(bsxfun(@eq, setdata, setflag(i,:)), 2));
+    setnum.set = para.setflag;
+    setnum.num = zeros(size(para.setflag, 1), 1);    
+    for i = 1:size(para.setflag,1)
+        if ~para.precalculated
+            setnum.num(i) = sum(all(bsxfun(@eq, setdata, para.setflag(i,:)), 2));
+        else
+            setnum.num(i) = setdata(i);
+        end        
         handles.numlabel(i) = text( numlabelpos(i,1), numlabelpos(i,2), ...
             num2str(setnum.num(i)), 'fontsize', para.numfontsize);
     end
@@ -179,8 +239,23 @@ function [handles, setnum] = venn4(setdata, varargin)
     para.alpha = 0.4;
     para.numfontsize = 16;
     para.labelfontsize = 16;
+    para.precalculated = false;
+    para.setflag = [0,0,0,1; 0,0,1,0; 0,0,1,1; 0,1,0,0; 0,1,0,1; 0,1,1,0; ...
+        0,1,1,1; 1,0,0,0; 1,0,0,1; 1,0,1,0; 1,0,1,1; 1,1,0,0; 1,1,0,1; ...
+        1,1,1,0; 1,1,1,1];
+    para.setflagOrder = para.setflag;
     
     para = assignpara(para, varargin{:});
+    
+    if nnz(para.setflag ~= para.setflagOrder) && para.precalculated
+        d1 = numarray2strarray(para.setflag);
+        d2 = numarray2strarray(para.setflagOrder);
+        k1 = arrayfun(@(x) strjoin(d1(x,:), '_'), 1:size(para.setflag, 1), 'unif', 0);
+        k2 = arrayfun(@(x) strjoin(d2(x,:), '_'), 1:size(para.setflag, 1), 'unif', 0);
+        [~, si] = ismember(k2, k1);
+        para.setflag = para.setflag(si,:);
+        setdata = setdata(si);
+    end
     
     t = (0:2*pi/39:2*pi);
     angles = [pi/4, pi/3.5, pi*2.5/3.5, pi*3/4];
@@ -188,10 +263,7 @@ function [handles, setnum] = venn4(setdata, varargin)
     labeloffset = [0, 0.2; -0.2, 0.2; -0.4, 0.2; -0.4, 0.2];
     numlabelpos = [0.78,0.46; -0.53,1.63; -0.30,0.74; -2.83,1.63; ...
         -0.67,-1.05; -1.60,0.74; -0.99,-0.16; -3.82,0.46; -1.55,-1.67; ...
-        -2.47,-1.05; -1.85,-1.23; -2.90,0.74; -1.15,-1.23; -2.14,-0.16; -1.59,-0.80];
-    setflag = [0,0,0,1; 0,0,1,0; 0,0,1,1; 0,1,0,0; 0,1,0,1; 0,1,1,0; ...
-        0,1,1,1; 1,0,0,0; 1,0,0,1; 1,0,1,0; 1,0,1,1; 1,1,0,0; 1,1,0,1; ...
-        1,1,1,0; 1,1,1,1];
+        -2.47,-1.05; -1.85,-1.23; -2.90,0.74; -1.15,-1.23; -2.14,-0.16; -1.59,-0.80];    
     
     x = 2.5;
     y = 1;
@@ -221,10 +293,14 @@ function [handles, setnum] = venn4(setdata, varargin)
     end
     
     %fill in numbers of intersections
-    setnum.set = setflag;
-    setnum.num = zeros(size(setflag, 1), 1);    
-    for i = 1:size(setflag,1)
-        setnum.num(i) = sum(all(bsxfun(@eq, setdata, setflag(i,:)), 2));
+    setnum.set = para.setflag;
+    setnum.num = zeros(size(para.setflag, 1), 1);    
+    for i = 1:size(para.setflag,1)
+        if ~para.precalculated
+            setnum.num(i) = sum(all(bsxfun(@eq, setdata, para.setflag(i,:)), 2));
+        else
+            setnum.num(i) = setdata(i);
+        end
         handles.numlabel(i) = text( numlabelpos(i,1), numlabelpos(i,2), ...
             num2str(setnum.num(i)), 'fontsize', para.numfontsize);
     end

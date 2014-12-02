@@ -4,7 +4,7 @@ function modz = modzscore(obsData, sampleData, dim)
     % if sampleData is a matrix, dim suggests which dimension is "variable"
     % and which is samples of the variable
     % if obsData is a vector or a matrix, and sampleData is a matrix, the
-    % "variable" dimension of obsData much match sampleData:
+    % "variable" dimension of obsData must match sampleData:
     %   obsData: variable x obs, sampleData: variable x samples, modz:
     %       variable x obs
     %   obsData: 1 x obs, sampleData: variable x sample, modz: 1 x obs

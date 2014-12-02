@@ -8,6 +8,7 @@ def readFai(faifile):
     return fai
 
 def getChrmIndex(fai, chrm):
+    originalChrm = chrm
     if chrm not in fai:
         if 'chr' in chrm: 
             chrm = chrm.replace('chr', '').replace('M', 'MT')
@@ -15,8 +16,8 @@ def getChrmIndex(fai, chrm):
             chrm = 'chr' + chrm
             chrm = chrm.replace('chrMT', 'chrM')
     if chrm not in fai:
-        print 'chrm not in index'
-        return None
+        print 'chrm not in index: "%s"'%originalChrm
+        return None, None
     else:
         chrmLen, offset, ntLen, ntBlen = fai[chrm]
         nWholeLine = chrmLen/ntLen
@@ -31,11 +32,14 @@ def getChrmSeq(fai, fastaFile, chrm):
     if type(fastaFile) == type('str'):
         fastaFile = open(fastaFile)
     offset, total = getChrmIndex(fai, chrm)
-    fastaFile.seek(offset)
-    seq = fastaFile.read(total).replace('\n', '')
-    if len(seq) != fai[chrm][0]:
-        seq = seq.replace('\r', '')
-    if len(seq) != fai[chrm][0]:
-        print 'cannot read the chrm %s correctly, %d nt read, but %d indexed'%(chrm, len(seq), fai[chrm][0])
-        exit()
+    if offset is None:
+        seq = ''
+    else:
+        fastaFile.seek(offset)
+        seq = fastaFile.read(total).replace('\n', '')
+        if len(seq) != fai[chrm][0]:
+            seq = seq.replace('\r', '')
+        if len(seq) != fai[chrm][0]:
+            print 'cannot read the chrm %s correctly, %d nt read, but %d indexed'%(chrm, len(seq), fai[chrm][0])
+            exit()
     return seq

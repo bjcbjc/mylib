@@ -1,6 +1,10 @@
 BEGIN { \
     split(col,columns, ":"); 
     split(formatname, formatfields, ":");
+    split(infoname, infofields, ":");
+    if (regexp == "") {
+	regexp = "([a-zA-Z0-9\\+\\.\\,\\_]+)"
+    }
     #split(filterexactmatch, filtermatches, ":");
     #pat = "$1 !~ /^#/ "
     #filterpat = ""
@@ -19,6 +23,16 @@ $1 !~ /^#/ {					\
    oidx = 1
    delete output
    split($9, format, ":")
+
+   for (j=1; j<=length(infofields); j++) {
+       found = match($8, infofields[j]"="regexp, tmpInfoData)
+       if (found != 0) {
+	   output[oidx++] = tmpInfoData[1]
+       } else { 
+	   output[oidx++] = "NA"
+       }
+   }
+
    for (colidx=10; colidx<=NF; colidx++) {
        split($colidx, data, ":")
        for (i=1; i<=length(format); i++) {
