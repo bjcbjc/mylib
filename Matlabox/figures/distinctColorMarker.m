@@ -6,7 +6,7 @@ function handles = distinctColorMarker(handles, varargin)
     para.line = {'-', '--', ':', '-.'};
     para.marker = {'.', 'sq', '^', 'o', 'x', '*'};
     para.color = [0.9, 0.1, 0.1; ... %red
-        0, 0.8, 0; ... %green
+        0.1, 0.8, 0.1; ... %green
         0.1, 0.1, 0.9; ... %blue        
         1, 0, 1; ... %magenta
         0.1, 0.8, 0.8; ... %cyan
@@ -16,6 +16,7 @@ function handles = distinctColorMarker(handles, varargin)
     para.markersize = [15, 8, 8, 8, 8];
     para.maxcolor = size(para.color, 1);
     para.useLine = false;
+    para.loopColorFirst = true;
     
     para = assignpara(para, varargin{:});
     if iscellstr(para.color)
@@ -39,7 +40,11 @@ function handles = distinctColorMarker(handles, varargin)
         if nc*nl < nh
             error('not enough color * line');
         end
-        [cidx, midx] = ind2sub([nc, nl], 1:nh);
+        if para.loopColorFirst
+            [cidx, midx] = ind2sub([nc, nl], 1:nh);
+        else
+            [midx, cidx] = ind2sub([nl, nc], 1:nh);
+        end
         for i = 1:nh
             if isprop(handles(i), 'color')
                 set(handles(i), 'color', para.color(cidx(i), :));
@@ -52,7 +57,11 @@ function handles = distinctColorMarker(handles, varargin)
         if nc*nm < nh
             error('not enough color * marker');
         end
-        [cidx, midx] = ind2sub([nc, nm], 1:nh);
+        if para.loopColorFirst
+            [cidx, midx] = ind2sub([nc, nm], 1:nh);
+        else
+            [midx, cidx] = ind2sub([nm, nc], 1:nh);
+        end
         for i = 1:nh
             if isprop(handles(i), 'color')
                 set(handles(i), 'color', para.color(cidx(i), :));
