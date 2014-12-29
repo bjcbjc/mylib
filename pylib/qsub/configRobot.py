@@ -115,10 +115,17 @@ def getLoopOverList(paraset):
 
 def translateAllValues(paraset, maxiter=10):
     n = 0
+    for k in paraset.keys():
+        paraset[k] = paraset[k].replace('\{', '#(').replace('\}', '#)')
     while n < maxiter:
         for k in paraset.keys():
             if '{' in paraset[k]:
-                paraset[k] = paraset[k].format( **paraset)
+                try:
+                    paraset[k] = paraset[k].format( **paraset)
+                except:
+                    print k
+                    print paraset[k]
+                    exit()
         invalid = [ k for k, v in paraset.iteritems() if '{' in v ]
         if len(invalid) == 0:
             break
@@ -128,4 +135,6 @@ def translateAllValues(paraset, maxiter=10):
         print 'not filled parameters:'
         print invalid
         exit()
+    for k in paraset.keys():
+        paraset[k] = paraset[k].replace('#(', '{{').replace('#)', '}}')
     return paraset
