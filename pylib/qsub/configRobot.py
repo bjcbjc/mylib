@@ -16,7 +16,7 @@
 #
 
 
-
+import traceback
 def readConfig(configfn):
     t = map(lambda(l):l.strip(), open(configfn).readlines())
     t = filter(lambda(l): len(l) > 0 and l[0] != '#', t)
@@ -125,6 +125,7 @@ def translateAllValues(paraset, maxiter=10):
                 except:
                     print k
                     print paraset[k]
+                    print traceback.print_exc()
                     exit()
         invalid = [ k for k, v in paraset.iteritems() if '{' in v ]
         if len(invalid) == 0:

@@ -94,7 +94,9 @@ sampleInfo = read.table(sampleInfoFile, sep='\t', header=T, check.names=F) #don'
 readCount = read.table(readCountFile, header=T, sep='\t', row.name=1, check.names=F) #don't pad X for number-starting sample names
 
 #remove NA sample in varOfInterest
-sampleInfo = sampleInfo[!is.na(sampleInfo[,deseq.varOfInterest]), ]
+if (deseq.test != 'LRT') {
+    sampleInfo = sampleInfo[!is.na(sampleInfo[,deseq.varOfInterest]), ]
+}
 
 validSample = intersect(colnames(readCount), sampleInfo[,1])
 if (length(validSample) == 0) {
@@ -130,8 +132,27 @@ if ( length(deseq.condA) != length(deseq.condB) ) {
 
 library(DESeq2)
 
+#### LRT test, all samples
+if (deseq.test == 'LRT') { 
+    countDataFull = DESeqDataSetFromMatrix(countData=readCount, colData=sampleInfo, design=as.formula(deseq.design))
+    countDataFull = DESeq(countDataFull, test=deseq.test, fitType=deseq.fitType, minReplicatesForReplace=deseq.minReplicatesForReplace, betaPrior=deseq.betaPrior, reduced=as.formula(deseq.reduced))
+    save(countDataFull, file=paste0(outputPath, outputTag, '.LRT.deseq2.rdata'))
+
+    cat('LRT: ', deseq.design, ' vs ', deseq.reduced, '\n')
+    result = results( countDataFull, independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering ) 
+    comparisonName = paste0('LRT', '_', paste(setdiff(all.vars(as.formula(deseq.design)), all.vars(as.formula(deseq.reduced))), collapse='+'))
+
+    write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
+    png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+    plotMA(result)
+    dev.off()
+    png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+    plotDispEsts(countDataFull)
+    dev.off()
+
+        
 ##### subsetting samples in condA and condB
-if ( filterSample && all(deseq.condA != '') && all(deseq.condB != '')  ) {
+} else if ( filterSample && all(deseq.condA != '') && all(deseq.condB != '')  ) {
 
     for ( comparisonIdx in 1:length(deseq.condA)) {
      	 condA = deseq.condA[ comparisonIdx ]
@@ -155,6 +176,12 @@ if ( filterSample && all(deseq.condA != '') && all(deseq.condB != '')  ) {
     	 save(countDataFull, file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.rdata'))
 	 result = results( countDataFull, contrast=c(deseq.varOfInterest, condB, condA), independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering ) 	     
 	 write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
+         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+         plotMA(result)
+         dev.off()
+         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+         plotDispEsts(countDataFull)
+         dev.off()
     }
 
 ##### use all samples
@@ -176,6 +203,13 @@ if ( filterSample && all(deseq.condA != '') && all(deseq.condB != '')  ) {
 	 }
 
 	 write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
+         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+         plotMA(result)
+         dev.off()
+         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+         plotDispEsts(countDataFull)
+         dev.off()
+
     }
 }
 
