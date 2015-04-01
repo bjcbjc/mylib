@@ -1,5 +1,6 @@
 function Yest = pava(Y, x)
-    
+    %Y: n x #test
+    %x: 1 x n or n x 1
     [x, indx] = sort(x, 'ascend');
     [~, indxinv] = sort( indx );
     

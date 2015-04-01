@@ -8,8 +8,8 @@ function fns = listfilename(pattern, usels)
         end
     else
         f = ls(pattern);
-        fns = textscan(f, '%s');
+        fns = textscan(f, '%s', 'delimiter', ' \t\n');
         fns = fns{1};
     end
-    
+    fns(cellfun(@isempty, fns)) = [];
     fns = sort(fns);

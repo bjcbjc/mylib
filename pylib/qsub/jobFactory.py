@@ -46,9 +46,9 @@ class jobManager:
             self.overwrite = True
         return
 
-    def createJob(self, fn, cmd, outfn='', outpath='/nethome/bjchen/', sgeopt=[], mem='', time='', trackcmd=True, tracklen=100, quiet=False, sgeJob=True, runOnServer=''):
+    def createJob(self, fn, cmd, outfn='', outpath='/nethome/bjchen/', sgeopt=[], mem='', time='', trackcmd=True, tracklen=100, quiet=False, sgeJob=True, runOnServer='', toShell=[]):
         #check parameters
-        if type(cmd) != type([]): cmd = [cmd]
+        if type(cmd) is not list: cmd = [cmd]
         if outpath[-1] != '/': outpath = outpath + '/'
         if fn[-4:] != self.ext: fn = fn + self.ext
         if len(sgeopt) > 0 and type(sgeopt) != type([]): sgeopt = [sgeopt]
@@ -59,6 +59,8 @@ class jobManager:
             outpathfn = outpath + outfn
         if mem == '': mem = self.defaultmem
         if time == '': time = self.defaulttime
+        if type(trackcmd) is str:
+            trackcmd = trackcmd == 'True'
 
         if self.checkExists(fn):
             if self.overwrite:
@@ -88,7 +90,7 @@ class jobManager:
             f.write('#$ -j y\n')
             #f.write('#$ -m ea\n')
             #f.write('#$ -M bjchen@nygenome.org\n')
-            f.write('#$ -l mem=%s\n'%mem)
+            f.write('#$ -l h_vmem=%s,h_rt=%s\n'%(mem, time))
             #f.write('#$ -l mem=%s,time=%s\n'%(mem, time))
             #f.write('#$ -l mem_free=%s'%(mem))
             for i in sgeopt:
@@ -104,6 +106,9 @@ class jobManager:
         f.write('echo hostname: `hostname`\n')
         if sgeJob:
             f.write('echo jobID: $JOB_ID\n')
+        if len(toShell) > 0:
+            for line in toShell:
+                f.write(line + '\n')
         
         cmdlineidx = []
         noncmdkey = ['echo', 'printf', 'export', 'if', 'fi', 'set ', 'shopt','alias']
@@ -118,11 +123,11 @@ class jobManager:
             logstr = cmd[lineidx].logstr
             if lineidx in cmdlineidx:
                 if logstr != '':
-                    cmdtxt = cmdtxt + 'printf "\\n======= jobCMD %d/%d: %s\\n\\n"\n'%(cmdlineidx.index(lineidx)+1, totalcmd, logstr.replace('"','""').replace('\1','\\1').replace('\2','\\2'))
+                    cmdtxt = cmdtxt + ('printf "\\n======= jobCMD %d/%d: %s\\n\\n"\n'%(cmdlineidx.index(lineidx)+1, totalcmd, logstr.replace('"','""').replace('\1','\\1').replace('\2','\\2'))).replace('%', '%%')
             cmdtxt = cmdtxt + '%s\n\n'%cmdstr
             if trackcmd and lineidx in cmdlineidx:
                 if logstr != '':
-                    cmdtxt = cmdtxt + 'printf "finished %s\n\n"\n\n'%logstr#[:min(len(line),tracklen)]
+                    cmdtxt = cmdtxt + ('printf "finished %s\n\n"\n\n'%logstr).replace('%','%%')#[:min(len(line),tracklen)]
         cmdtxt = cmdtxt + 'echo Finish %s\n'%fn
 
         if runOnServer == '':

@@ -234,6 +234,54 @@ classdef DATASTRUCTFUNC < handle
                 newvar = NaN(allocSize);
             end
         end
+        
+        function data = initStruct(exampledata, exampleN, n)
+            fds = fieldnames(exampledata);
+            for fdIdx = 1:length(fds)
+                [dim1, dim2] = size(exampledata.(fds{fdIdx}));
+                if dim1 == exampleN && dim2 == exampleN
+                    error('cannot determine which dimension is sample');
+                end
+                
+                if iscell(exampledata.(fds{fdIdx})(1))
+                    datafun = @cell;
+                elseif islogical(exampledata.(fds{fdIdx})(1))
+                    datafun = @false;
+                else
+                    datafun = @NaN;
+                end
+                
+                if dim1 == exampleN
+                    data.(fds{fdIdx}) = datafun(n, dim2);
+                elseif dim2 == exampleN
+                    data.(fds{fdIdx}) = datafun(dim1, n);
+                else
+                    fprintf('ignore %s\n', fds{fdIdx});
+                end
+            end
+        end
+        
+        function [data, curSampleIdx] = fillInData(data, substruct, curSampleIdx)
+            fds = fieldnames(data);
+            n = length(substruct.sample);
+            idx = curSampleIdx:curSampleIdx+n-1;
+            for fdIdx = 1:length(fds)
+                if ~isfield(substruct, fds{fdIdx})
+                    fprintf('ignore  %s\n', fds{fdIdx});
+                    continue;
+                end
+                [dim1, dim2] = size(data.(fds{fdIdx}));
+                [d1, d2] = size(substruct.(fds{fdIdx}));
+                if dim1 == d1
+                    data.(fds{fdIdx})(:, idx) = substruct.(fds{fdIdx});
+                elseif dim2 == d2
+                    data.(fds{fdIdx})(idx, :) = substruct.(fds{fdIdx});
+                else
+                    fprintf('ignore  %s\n', fds{fdIdx});
+                end                    
+            end
+            curSampleIdx = curSampleIdx + n;
+        end
     end
     
 end

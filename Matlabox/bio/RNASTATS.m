@@ -523,7 +523,7 @@ classdef RNASTATS < handle
         end
         
         function readcount = readReportReadCount(reportpath, varargin)
-            para.fns = {'DESeq_normalized_count_matrix.txt', ...
+            para.fns = {'DESeq2_normalized_count_matrix.txt', ...
                 'featureCounts_count_matrix.txt'};
             para.stripstr = '_count_matrix.txt';
             
@@ -544,7 +544,7 @@ classdef RNASTATS < handle
 %                         readcount.geneLength = str2double(t.rowname(:, geneEndIdx)) - str2double(t.rowname(:, geneStartIdx)) + 1;
                         t.rowname = t.rowname(:,1);
                         t.rownamelabel = t.rownamelabel(1);
-                    else
+                    elseif ~isempty(strfind(header, 'Length'))
                         t = parseText([reportpath para.fns{i}], 'nrowname', 2, 'ncolname', 1, 'numeric', true);
                         rmi = strcmpi(t.colname, 'Length');
                         readcount.geneLength = t.text(:, rmi);
@@ -552,7 +552,9 @@ classdef RNASTATS < handle
                         t.text(:, rmi) = [];
                         rmi = strcmpi(t.rownamelabel, 'Chromosome');
                         t.rownamelabel(rmi) = [];
-                        t.rowname(:, rmi) = [];
+                        t.rowname(:, rmi) = [];                        
+                    else
+                        t = parseText([reportpath para.fns{i}], 'nrowname', 1, 'ncolname', 1, 'numeric', true);                        
                     end                                        
                 else
                     t = parseText([reportpath para.fns{i}], 'nrowname', 1, 'ncolname', 1, 'numeric', true);

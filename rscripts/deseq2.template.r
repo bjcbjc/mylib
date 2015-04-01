@@ -57,10 +57,28 @@ outputPath = './'
 outputTag = ''
 sampleInfoFile = ''
 readCountFile = ''
+readCountFile2 = ''
+codingOnly = FALSE
+gencodeFlat = '/nethome/bjchen/DATA/GenomicInfo/GENCODE/gencode.v18.gene.flat.txt'
+
+GencodeMatch <- function(list1, list2) {
+    # return the indices in list2 that match list1
+    list1 <- sub('\\.\\d+', '', list1)
+    list2 <- sub('\\.\\d+', '', list2)
+    return( match(list1, list2))
+}
+
+GencodeIntersect <- function(list1, list2) {
+    # return the indices in list2 that match list1
+    list1 <- sub('\\.\\d+', '', list1)
+    list2 <- sub('\\.\\d+', '', list2)
+    return( intersect(list1, list2))
+}
+
 
 
 #overwite default variables if passed by command line
-defVarName = ls()
+defVarName = setdiff(ls(), lsf.str())
 args = commandArgs(trailingOnly=T)
 for (i in 1:length(args)) {
     varVal = unlist(strsplit(args[i], '='))
@@ -92,6 +110,18 @@ cat('\n\n')
 ###### preapre data
 sampleInfo = read.table(sampleInfoFile, sep='\t', header=T, check.names=F) #don't pad X for number-starting column names
 readCount = read.table(readCountFile, header=T, sep='\t', row.name=1, check.names=F) #don't pad X for number-starting sample names
+if (nchar(readCountFile2) >0 ) {
+    #if there is a second read count file, only take the intersection of genes
+    #there might be duplicated columns such as chromosomal locations; but they will be filtered out later by sample info
+    readCount2 = read.table(readCountFile2, header=T, sep='\t', row.name=1, check.names=F)
+    validGene <- GencodeIntersect(rownames(readCount), rownames(readCount2))
+    validGeneIdx1 <- GencodeMatch(validGene, rownames(readCount))
+    validGeneIdx2 <- GencodeMatch(validGene, rownames(readCount2))
+    readCount <- cbind(readCount[validGeneIdx1,], readCount2[validGeneIdx2, ])
+    rownames(readCount) <- validGene
+    cat('Combined two read count files: ', length(validGene), ' genes in total.\n\n')
+    rm('validGene', 'validGeneIdx1', 'validGeneIdx2', 'readCount2')
+}
 
 #remove NA sample in varOfInterest
 if (deseq.test != 'LRT') {
@@ -124,6 +154,16 @@ if (any( readCount %% 1 != 0)) {
    readCount = floor(readCount)
 }
 
+if (codingOnly) { #filter to consider only coding genes
+    gencode <- read.table(gencodeFlat, header=TRUE)
+    gencodeIdx <- GencodeMatch( rownames(readCount), gencode[, 'gencode_id'])
+    validGeneIdx <- gencode[gencodeIdx, 'type'] == 'protein_coding' & !is.na(gencode[gencodeIdx, 'type'])
+    readCount <- readCount[validGeneIdx, ]
+    cat('Use only protein coding genes: ', sum(validGeneIdx), '\n\n')
+    rm('gencode', 'gencodeIdx', 'validGeneIdx')
+}
+
+
 if ( length(deseq.condA) != length(deseq.condB) ) {
    cat('deseq.condA and deseq.condB have different numbers of elements\n')
    cat('exit!\n')
@@ -143,12 +183,14 @@ if (deseq.test == 'LRT') {
     comparisonName = paste0('LRT', '_', paste(setdiff(all.vars(as.formula(deseq.design)), all.vars(as.formula(deseq.reduced))), collapse='+'))
 
     write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
-    png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
-    plotMA(result)
-    dev.off()
-    png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
-    plotDispEsts(countDataFull)
-    dev.off()
+    if ( capabilities('png') ) { 
+        png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+        plotMA(result)
+        dev.off()
+        png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+        plotDispEsts(countDataFull)
+        dev.off()
+    }
 
         
 ##### subsetting samples in condA and condB
@@ -176,12 +218,14 @@ if (deseq.test == 'LRT') {
     	 save(countDataFull, file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.rdata'))
 	 result = results( countDataFull, contrast=c(deseq.varOfInterest, condB, condA), independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering ) 	     
 	 write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
-         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
-         plotMA(result)
-         dev.off()
-         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
-         plotDispEsts(countDataFull)
-         dev.off()
+         if ( capabilities('png') ) { 
+             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+             plotMA(result)
+             dev.off()
+             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+             plotDispEsts(countDataFull)
+             dev.off()
+         }
     }
 
 ##### use all samples
@@ -203,17 +247,19 @@ if (deseq.test == 'LRT') {
 	 }
 
 	 write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
-         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
-         plotMA(result)
-         dev.off()
-         png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
-         plotDispEsts(countDataFull)
-         dev.off()
+         if ( capabilities('png') ) {  
+             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+             plotMA(result)
+             dev.off()
+             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+             plotDispEsts(countDataFull)
+             dev.off()
+         }
 
     }
 }
 
-
+sessionInfo()
 
 
 

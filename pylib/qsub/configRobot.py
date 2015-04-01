@@ -15,8 +15,12 @@
 #Configure files can have comments. Lines starting with '#' will be ignored.
 #
 
-
+import glob
+import itertools
+import operator                
 import traceback
+import copy
+import re
 def readConfig(configfn):
     t = map(lambda(l):l.strip(), open(configfn).readlines())
     t = filter(lambda(l): len(l) > 0 and l[0] != '#', t)
@@ -30,15 +34,17 @@ def readConfig(configfn):
 
     #print setnames
     settb = {}
-    curset = {}
+    defaultset = {'sgeopt':'', 'toShell':[], 'trackcmd':True}
+    defaultn = len(defaultset)
+    curset = copy.deepcopy( defaultset)
     #multivalpara = {}
     #multispecification = [] 
     for l in t:
         if l[0] in setnames: #new set
-            if len(curset) > 0:
+            if len(curset) > defaultn:
                 settb[curset_name] = curset
                 #multivalpara[curset_name] = multispecification
-            curset = {}
+            curset = copy.deepcopy(defaultset)
             #multispecification = []
             curset_name = l[0].strip(':')
         else: #parameter line
@@ -57,12 +63,18 @@ def readConfig(configfn):
                 except:
                     paraval = original_paraval
                 
-            if paraname in curset.keys():
-                if type(curset[paraname]) != type([]):
-                    curset[paraname] = [curset[paraname]]
-                curset[paraname].append(paraval)
+            if paraname in curset:
+                if paraname in defaultset:
+                    if type(curset[paraname]) is list:
+                        curset[paraname].append(paraval)
+                    else:
+                        curset[paraname] = paraval
+                else:
+                    if type(curset[paraname]) is not list:
+                        curset[paraname] = [curset[paraname]]
+                    curset[paraname].append(paraval)
                 #if paraname not in multispecification:
-                #    multispecification.append(paraname)
+                #    multispecification.append(paraname)                
             else:
                 curset[paraname] = paraval
     #append last curset
@@ -101,10 +113,12 @@ def popLoopOver(paraset):
             else:
                 loopOver[k] = paraset[k]
             del paraset[k]
+            #see if there are wildcards
+            if any( [ w in x for x in loopOver[k] for w in ['*', '?']] ):
+                loopOver[k] = reduce(operator.add, map(glob.glob, loopOver[k]))
     return loopOver, paraset
 
 def getLoopOverList(paraset):
-    import itertools
     loopOver, paraset = popLoopOver(paraset)
     keys = loopOver.keys()
     iterlist = list( itertools.product( *[ loopOver[k] for k in keys]) )
@@ -116,9 +130,11 @@ def getLoopOverList(paraset):
 def translateAllValues(paraset, maxiter=10):
     n = 0
     for k in paraset.keys():
-        paraset[k] = paraset[k].replace('\{', '#(').replace('\}', '#)')
+        if type(paraset[k]) is str:
+            paraset[k] = paraset[k].replace('\{', '#(').replace('\}', '#)')
     while n < maxiter:
         for k in paraset.keys():
+            if type(paraset[k]) is not str: continue
             if '{' in paraset[k]:
                 try:
                     paraset[k] = paraset[k].format( **paraset)
@@ -127,7 +143,7 @@ def translateAllValues(paraset, maxiter=10):
                     print paraset[k]
                     print traceback.print_exc()
                     exit()
-        invalid = [ k for k, v in paraset.iteritems() if '{' in v ]
+        invalid = [ k for k, v in paraset.iteritems() if type(v) is str if '{' in v ]
         if len(invalid) == 0:
             break
         else:
@@ -137,5 +153,17 @@ def translateAllValues(paraset, maxiter=10):
         print invalid
         exit()
     for k in paraset.keys():
-        paraset[k] = paraset[k].replace('#(', '{{').replace('#)', '}}')
+        if type(paraset[k]) is str:
+            paraset[k] = paraset[k].replace('#(', '{{').replace('#)', '}}')
+    return paraset
+
+def evalRegExp(paraset):
+    for key, value in paraset.iteritems():
+        if type(value) is str:
+            if 're.' in value and '(' in value:
+                #translate first
+                if '{' in value:
+                    value = value.format( **paraset )
+                paraset[key] = eval( value )
+
     return paraset

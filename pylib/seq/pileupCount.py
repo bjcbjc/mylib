@@ -39,7 +39,7 @@ def createTempLocFile(args, validChrms):
     elif len(line.split('\t')) > 2:
         locfile = args.tmpdir + randstr() + '.loc'
         #create temporary location file
-        subprocess.call('cut -f1,2 %s > %s'%(args.loc, locfile), shell=True)
+        subprocess.call('cut -f1,3 %s > %s'%(args.loc, locfile), shell=True)
         removelater.append( locfile )
     else:
         locfile = args.loc
@@ -193,7 +193,7 @@ argp.add_argument('-r',  metavar='INT', required=True, type=int, default=10, hel
 argp.add_argument('-o', type=str, default='test.out', metavar='file', help='file name for the output, [<bam>.out]')
 argp.add_argument('-tableformat', action='store_true', help='make table output instead; this option is turned off by default')
 argp.add_argument('-stranded', action='store_true', help='a switch to specify if it is strand-specific data, [false]' )
-argp.add_argument('-useSingleSiteCall', action='store_true', help='a switch to specify calling samtools with -r; this may be faster for sites with very high coverage, [false]' )
+argp.add_argument('-useSingleSiteCall', action='store_true', help='a switch to specify calling samtools with -r; this may be faster if the list of positions is short, [false]' )
 argp.add_argument('-ignoreEnd', default=0, metavar='INT', type=int, help='ignore INT bp from both end of each read [0]' )
 argp.add_argument('-readLength', default=0, metavar='INT', type=int, help='used when -ignoreEnd is specified; if not -readLength is not specified, it will be inferred from a random read from the bam file [0]')
 argp.add_argument('-Phred64', action='store_true', help='a switch to specify base quality encoding is Phred+64; default is Phred+33; [false]')
