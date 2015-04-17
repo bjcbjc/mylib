@@ -46,7 +46,7 @@ class jobManager:
             self.overwrite = True
         return
 
-    def createJob(self, fn, cmd, outfn='', outpath='/nethome/bjchen/', sgeopt=[], mem='', time='', trackcmd=True, tracklen=100, quiet=False, sgeJob=True, runOnServer='', toShell=[]):
+    def createJob(self, fn, cmd, outfn='', outpath='/nethome/bjchen/', sgeopt=[], mem='', time='', trackcmd=True, tracklen=100, quiet=False, sgeJob=True, runOnServer='', toShell=[], runThru=False):
         #check parameters
         if type(cmd) is not list: cmd = [cmd]
         if outpath[-1] != '/': outpath = outpath + '/'
@@ -61,6 +61,9 @@ class jobManager:
         if time == '': time = self.defaulttime
         if type(trackcmd) is str:
             trackcmd = trackcmd == 'True'
+        if type(runThru) is str:
+            runThru = runThru == 'True'
+
 
         if self.checkExists(fn):
             if self.overwrite:
@@ -102,7 +105,8 @@ class jobManager:
             cmdtxt = 'exec &>%s\n'%outpathfn
 
         f.write('\n')
-        f.write('set -e\n')
+        if not runThru:
+            f.write('set -e\n')
         f.write('echo hostname: `hostname`\n')
         if sgeJob:
             f.write('echo jobID: $JOB_ID\n')

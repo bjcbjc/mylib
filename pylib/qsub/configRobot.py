@@ -34,7 +34,7 @@ def readConfig(configfn):
 
     #print setnames
     settb = {}
-    defaultset = {'sgeopt':'', 'toShell':[], 'trackcmd':True}
+    defaultset = {'sgeopt':'', 'toShell':[], 'trackcmd':True, 'runThru':False}
     defaultn = len(defaultset)
     curset = copy.deepcopy( defaultset)
     #multivalpara = {}

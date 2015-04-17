@@ -409,6 +409,7 @@ classdef GENOMEFUNC < handle
             para.mt = 'M'; %or 'MT'
             para.bedtools = 'bedtools ';
             para.geneIdFormat = 'ENSG[\w\.]+';
+            para.getUnique = false;
             para = assignpara(para, varargin{:});
             
             singleBase = false;
@@ -449,12 +450,26 @@ classdef GENOMEFUNC < handle
                 t = textscan(output, '%s %s %s %*s %*s %*s %s', 'delimiter', '\t');
 %                 lockey = strcat(loctxt(:,1), '-', loctxt(:,2), '-', loctxt(:,3));
                 chrm = numericchrm( t{1} );
-                result.locidx_start = gloc2index(chrm, str2double_fast(t{2}));
+                result.locidx_start = gloc2index(chrm, str2double_fast(t{2}));                
                 if ~singleBase
                     result.locidx_end = gloc2index(chrm, str2double_fast(t{3}));
                 end
                 result.geneId = regexp(t{4}, para.geneIdFormat, 'match', 'once');                
                 system(sprintf('rm -f %s',randfn));
+                %get unique entries
+                if para.getUnique
+                    if ~singleBase
+                        [~, uidx] = unique(strcat(numarray2strarray(result.locidx_start), '_', ...
+                            numarray2strarray(result.locidx_end), '_', ...
+                            result.geneId));                        
+                        result.locidx_end = result.locidx_end(udix);
+                    else
+                        [~, uidx] = unique(strcat(numarray2strarray(result.locidx_start), '_', ...                         
+                            result.geneId));                        
+                    end
+                    result.locidx_start = result.locidx_start(uidx);                        
+                    result.geneId = result.geneId(uidx);
+                end
             end            
         end
         
