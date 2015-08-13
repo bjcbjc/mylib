@@ -80,7 +80,7 @@ class SamtoolsPileup(object):
             self.tempFile.append(locFile)
         cmd = shlex.split(self.samtools + ' mpileup ' + self.passOnArg + ' -l {locFile} '.format(locFile=locFile) + bam)
         try:
-            print cmd
+            # print cmd
             sampipe = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pipe = [sampipe.stdout, sampipe.stderr]
             self.pipe.extend(pipe)
@@ -146,7 +146,7 @@ class SamtoolsPileup(object):
         elementType = type(loc[0])
         if elementType is not list and elementType is not tuple:
             loc = [loc]
-        fn = ''.join(random.choice(string.ascii_letters + string.digits) for x in xrange(10)) + '.pilepuploc.txt'
+        fn = ''.join(random.choice(string.ascii_letters + string.digits) for x in xrange(10)) + '.pileuploc.txt'
         with open(fn, 'w') as f:
             for chrm, pos in loc:
                 f.write('%s\t%s\n'%(chrm, pos))

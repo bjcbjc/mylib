@@ -1,7 +1,7 @@
 #java -Xmx512m xtools.gsea.GseaPreranked -gmx gseaftp.broadinstitute.org://pub/gsea/gene_sets/c2.cp.biocarta.v4.0.symbols.gmt -collapse false -mode Max_probe -norm meandiv -nperm 1000 -rnk /nethome/bjchen/Projects/HoltP/gsea/DESeq_log2FoldChange.flt.rnk -scoring_scheme classic -rpt_label my_analysis -include_only_symbols true -make_sets true -plot_top_x 20 -rnd_seed timestamp -set_max 500 -set_min 15 -zip_report false -out /nethome/bjchen/gsea_home/output/jun23 -gui false
 
 
-{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.0.14.jar -Xmx4g xtools.gsea.GseaPreranked \
+{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.2.0.jar -Xmx4g xtools.gsea.GseaPreranked \
        -gmx {gene_sets} \
        -collapse false -mode Max_probe -norm meandiv -nperm 1000 \
        -rnk {rank_file} \

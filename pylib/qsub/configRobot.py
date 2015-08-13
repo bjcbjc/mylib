@@ -154,7 +154,8 @@ def translateAllValues(paraset, maxiter=10):
         exit()
     for k in paraset.keys():
         if type(paraset[k]) is str:
-            paraset[k] = paraset[k].replace('#(', '{{').replace('#)', '}}')
+            paraset[k] = paraset[k].replace('#(', '{').replace('#)', '}')
+            #paraset[k] = paraset[k].replace('#(', '{{').replace('#)', '}}')
     return paraset
 
 def evalRegExp(paraset):
@@ -167,3 +168,13 @@ def evalRegExp(paraset):
                 paraset[key] = eval( value )
 
     return paraset
+
+def evalGlob(paraset):
+    for key, value in paraset.iteritems():
+        if type(value) is str:
+            if 'glob.' in value and '(' in value:
+                if '{' in value:
+                    value = value.format( **paraset )
+                paraset[key] = eval( value )
+    return paraset
+    

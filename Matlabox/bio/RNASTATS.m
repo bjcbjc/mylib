@@ -524,14 +524,19 @@ classdef RNASTATS < handle
         
         function readcount = readReportReadCount(reportpath, varargin)
             para.fns = {'DESeq2_normalized_count_matrix.txt', ...
-                'featureCounts_count_matrix.txt'};
+                'featureCounts_count_matrix.txt', ...
+                'DESeq2_regularized_log_transformed.txt'};
             para.stripstr = '_count_matrix.txt';
             
             para = assignpara(para, varargin{:});
             if reportpath(end) ~= '/', reportpath = [reportpath '/']; end
             
             fdname = strrep(para.fns, para.stripstr, '');
+            fdname = strrep(fdname, '.txt', '');
             for i = 1:length(para.fns)
+                if ~exist([reportpath para.fns{i}], 'file')
+                    continue
+                end
                 if ~isempty(strfind(lower(para.fns{i}), 'featurecounts'))                    
                     f = fopen([reportpath para.fns{i}], 'r');
                     header = fgetl(f);

@@ -473,5 +473,13 @@ classdef GENOMEFUNC < handle
             end            
         end
         
+        function result = simplifyGenecodeGeneType( genetype, keep)
+            if nargin < 2
+                keep = {'pseudogene', 'lincRNA', 'protein_coding', 'antisense'};
+            end
+            result = genetype;
+            result(~ismember(genetype, keep)) = {'others'};
+        end
+        
     end
 end

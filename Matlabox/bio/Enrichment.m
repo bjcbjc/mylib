@@ -29,7 +29,7 @@ classdef Enrichment < handle
                 [~, i] = ismember(testGene.gene, ANT.gene);
                 testMtx(i(i~=0), :) = testGene.mtx(i~=0, :);
             elseif iscell(testGene)
-                if iscell(testGene{1}) %multiple lists of genes
+                if ~iscell(testGene{1}) %multiple lists of genes
                     testMtx = false(length(ANT.gene), length(testGene));
                     for i = 1:length(testGene)
                         testMtx(:, i) = ismember(ANT.gene, testGene{i});

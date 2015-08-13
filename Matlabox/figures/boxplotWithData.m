@@ -16,7 +16,7 @@ if ~isempty(i)
 end
 
 horizontal = ismember('horizontal', passthrough(cellfun(@ischar,passthrough)));
-if size(data,2)>1
+if size(data,2)>1 && nargin < 2
     group = repmat(1:size(data,2), size(data, 1), 1);
     data = data(:);
     group = group(:);

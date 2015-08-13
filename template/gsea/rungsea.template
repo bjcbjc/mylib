@@ -18,7 +18,7 @@
 #     -metric:  {Signal2Noise, Diff_of_Classes, tTest, Pearson etc}
 #     -permute: {phenotype, gene_set}
 
-{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.0.14.jar -Xmx4g xtools.gsea.Gsea \
+{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.2.0.jar -Xmx4g xtools.gsea.Gsea \
      -res {expression_file} \
      -cls {phenotype_file}#{phenotype_label} \
      -gmx {gene_sets} \

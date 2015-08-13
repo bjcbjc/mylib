@@ -1,0 +1,64 @@
+
+#examples
+pileup:
+cmd	runJobs
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/utils:/nethome/bjchen/BJLib/pylib/seq
+call	awk -v OFS='\t' '$1 !~/#/ && length($4)==1 && length($5)==1 \{print $1,$2\}' {line0} > {outputpath}{dnaSample}_{rnaSample}.marker.loc.txt; {python} {script} -tableformat -bam {line1} -r 1 -o {outputpath}{dnaSample}_{rnaSample}.rna.pileup.txt -B -loc {outputpath}{dnaSample}_{rnaSample}.marker.loc.txt -d 10000 -q 0 -Q 13 -samtools /nfs/sw/samtools/samtools-1.1/samtools -f {ref}
+python	/data/NYGC/Software/python/bin/python2.7
+script	/nethome/bjchen/BJLib/pylib/seq/pileupCount.py
+ref	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+dnaSample	re.findall('Sample_[\w\-]+','{line0}')[0]
+rnaSample	re.findall('Sample_[\w\-]+','{line1}')[0]
+LoopOverLine	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/dna_vcf.rna_bam.list.txt
+outputpath	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/rna_pileup/
+logpath	{outputpath}/log/
+prefix	{dnaSample}_{rnaSample}.rna.pileup
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q
+runThru	False
+
+
+pileup.TCGA_GBM_RNA:
+cmd	runJobs
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/utils:/nethome/bjchen/BJLib/pylib/seq
+call	{python} {script} -tableformat -bam {LoopOverSample} -r 1 -o {outputpath}{sample}.rna.pileup.txt -B -loc {marker_loc} -d 10000 -q 0 -Q 13 -samtools /nfs/sw/samtools/samtools-1.1/samtools -f {ref}
+python	/data/NYGC/Software/python/bin/python2.7
+script	/nethome/bjchen/BJLib/pylib/seq/pileupCount.py
+ref	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+marker_loc	/nethome/bjchen/Projects/DnaRnaConcord/data/markers.TN.bed
+LoopOverSample	/data/research/GBM/Project_GBM_TCGA_RNA/Sample*/STAR*/*.sorted.bam
+sample	re.findall('Sample_([\d\w\-]+)', '{LoopOverSample}')[0].replace('-','_')
+njob	10
+outputpath	/nethome/bjchen/Projects/DnaRnaConcord/data/pileup_TCGA_GBM_RNA/
+logpath	{outputpath}/log/
+prefix	{sample}.rna.pileup
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q,dev.q
+runThru	True
+
+gsea.cluster_AllGenes.deseq.Wald.lfc:
+cmd	runJobs
+java	/data/NYGC/Software/java/jre1.7.0_25/bin/java
+call	{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.2.0.jar -Xmx4g xtools.gsea.GseaPreranked -gmx {gene_sets} -collapse false -mode Max_probe -norm meandiv -nperm 1000 -rnk {rank_file} -scoring_scheme {scoring_scheme} -rpt_label {report_label} -include_only_symbols true -make_sets true -plot_top_x {plot_top_x} -rnd_seed {rnd_seed} -set_max {set_max} -set_min {set_min} -zip_report false -out {outputpath} -gui false
+gene_sets	/nethome/bjchen/DATA/MSigDB_v5.0/msigdb_v5.0_GMTs/c2.cp.biocarta.v5.0.symbols.gmt,/nethome/bjchen/DATA/MSigDB_v5.0/msigdb_v5.0_GMTs/h.all.v5.0.symbols.gmt
+rank_file	/data/analysis/ChapmanP/Project_CHA_10579_RNA/Results_Apr29/Analysis/cluster_AllGenes/DESeq2.cluster_AllGenes.Wald_{{LoopOverCluster}}.filtered.lfc.rnk
+scoring_scheme	classic
+report_label	{{LoopOverCluster}}
+LoopOverCluster	1_vs_others; 2_vs_others; 3_vs_others
+plot_top_x	50
+rnd_seed	100
+set_max	500
+set_min	3
+outputpath	/data/analysis/ChapmanP/Project_CHA_10579_RNA/Results_Apr29/Analysis/cluster_AllGenes/gsea/
+logpath	{outputpath}/log/
+prefix	gsea.deseq.lfc.cluster_AllGenes.{{LoopOverCluster}}
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q,dev.q
+
+

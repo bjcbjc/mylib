@@ -1,6 +1,15 @@
 classdef RNACOUNT < handle
     
     methods (Static)
+        function normalizeCount = percentileNormalizedCount(cohortCount, sampleCount, p)
+            if nargin < 2, sampleCount = cohortCount; end
+            if nargin < 3, p = 75; end
+            cohortPt = prctile(cohortCount, p, 1);
+            samplePt = prctile(sampleCount, p, 1);
+            normFactor = median(cohortPt) ./ samplePt;
+            normalizeCount = bsxfun(@times, sampleCount, normFactor);
+        end
+        
         function normalizedCount = getDESeqNormalizedCount(cohortCount, sampleCount)
             if nargin < 2, sampleCount = cohortCount; end
             normalizedCount = bsxfun(@rdivide, sampleCount, RNACOUNT.getDESeqSizeFactor(cohortCount, sampleCount));
@@ -18,15 +27,18 @@ classdef RNACOUNT < handle
         function tpm = getTPM(count, geneLength, pseudoCount)
             %count: gene x sample
             %geneLength: gene x 1            
-            if nargin < 3, pseudoCount = 0.9; end
-            vl = bsxfun(@rdivide, bsxfun(@rdivide, count+pseudoCount, sum(count,1)), geneLength);
-            tpm = bsxfun(@rdivide, vl, sum(vl, 1) ) * 1e6;
+            if nargin < 3, pseudoCount = 0; end
+            count = count + pseudoCount;
+            vl = bsxfun(@rdivide, bsxfun(@rdivide, count, nansum(count,1)), geneLength);
+%             vl = bsxfun(@rdivide, count, geneLength); same as above
+            tpm = bsxfun(@rdivide, vl, nansum(vl, 1) ) * 1e6;
         end
         function rpkm = getRPKM(count, geneLength, pseudoCount)
             %count: gene x sample
             %geneLength: gene x 1            
-            if nargin < 3, pseudoCount = 0.9; end
-            vl = bsxfun(@rdivide, bsxfun(@rdivide, count+pseudoCount, sum(count,1)), geneLength);
+            if nargin < 3, pseudoCount = 0; end
+            count = count + pseudoCount;
+            vl = bsxfun(@rdivide, bsxfun(@rdivide, count, nansum(count,1)), geneLength);
             rpkm = vl * 1e9;
         end
         function tmm = getTmmNormalizationFacor(count, varargin)

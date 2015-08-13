@@ -11,7 +11,8 @@ function modz = modzscore(obsData, sampleData, dim)
     %   
     %
     
-    medAbsDev = mad(sampleData, 1, dim) * 1.486; %median abs dev
+    %medAbsDev = mad(sampleData, 1, dim) * 1.486; %median abs dev
+    medAbsDev = mad(sampleData, 1, dim) * 1.4826; %median abs dev
     meanAbsDev = mad(sampleData, 0, dim) * 1.253314;
     i = medAbsDev == 0;
     medAbsDev(i) = meanAbsDev(i);

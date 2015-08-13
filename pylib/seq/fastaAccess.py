@@ -17,7 +17,7 @@ def getChrmIndex(fai, chrm):
             chrm = chrm.replace('chrMT', 'chrM')
     if chrm not in fai:
         print 'chrm not in index: "%s"'%originalChrm
-        return None, None
+        return None, None, None
     else:
         chrmLen, offset, ntLen, ntBlen = fai[chrm]
         nWholeLine = chrmLen/ntLen
@@ -26,12 +26,12 @@ def getChrmIndex(fai, chrm):
         else:
             remainder = chrmLen - nWholeLine * ntLen + (ntBlen - ntLen)
         total = nWholeLine * ntBlen + remainder
-        return offset, total
+        return offset, total, chrm
 
 def getChrmSeq(fai, fastaFile, chrm):
     if type(fastaFile) == type('str'):
         fastaFile = open(fastaFile)
-    offset, total = getChrmIndex(fai, chrm)
+    offset, total, chrm = getChrmIndex(fai, chrm)
     if offset is None:
         seq = ''
     else:

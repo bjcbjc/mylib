@@ -1,4 +1,5 @@
 
+### /nfs/sw/R/R-3.1.1/bin/R
 
 # First column of samplInfoFile is sample ID, used to match samples in read count (so they should match).
 # Usesage: path_rscipt deseq2.template.r _var_=value 
@@ -59,6 +60,7 @@ sampleInfoFile = ''
 readCountFile = ''
 readCountFile2 = ''
 codingOnly = FALSE
+excludeChrY = FALSE
 gencodeFlat = '/nethome/bjchen/DATA/GenomicInfo/GENCODE/gencode.v18.gene.flat.txt'
 
 GencodeMatch <- function(list1, list2) {
@@ -75,6 +77,11 @@ GencodeIntersect <- function(list1, list2) {
     return( intersect(list1, list2))
 }
 
+AddGeneName <- function(gencodeData, resultData) {
+    gencodeIdx <- GencodeMatch( rownames(resultData), gencodeData[, 'gencode_id'])
+    resultData = cbind(data.frame(gene=gencodeData[gencodeIdx,'symbol']), resultData)
+    return(resultData)
+}
 
 
 #overwite default variables if passed by command line
@@ -106,6 +113,9 @@ for (i in 1:length(defVarName)) {
 }
 cat('\n\n')
 
+if (outputTag != "") {
+    outputTag <- paste0(outputTag, '.')
+}
 
 ###### preapre data
 sampleInfo = read.table(sampleInfoFile, sep='\t', header=T, check.names=F) #don't pad X for number-starting column names
@@ -142,6 +152,7 @@ idx = match(validSample, colnames(readCount))
 readCount = readCount[, idx]
 idx = match(validSample, sampleInfo[,1])
 sampleInfo = sampleInfo[idx, ]
+gencode <- read.table(gencodeFlat, header=TRUE)
 
 if (any( colnames(readCount) != sampleInfo[,1]) ) {
    cat('Samples not matching\n\n')
@@ -154,13 +165,19 @@ if (any( readCount %% 1 != 0)) {
    readCount = floor(readCount)
 }
 
-if (codingOnly) { #filter to consider only coding genes
-    gencode <- read.table(gencodeFlat, header=TRUE)
+if (codingOnly || excludeChrY) { #filter to consider only coding genes
     gencodeIdx <- GencodeMatch( rownames(readCount), gencode[, 'gencode_id'])
-    validGeneIdx <- gencode[gencodeIdx, 'type'] == 'protein_coding' & !is.na(gencode[gencodeIdx, 'type'])
+    validGeneIdx <- !logical(length(gencodeIdx))
+    if (codingOnly) {
+        validGeneIdx <- validGeneIdx & ( gencode[gencodeIdx, 'type'] == 'protein_coding' & !is.na(gencode[gencodeIdx, 'type']))
+        cat('Use only protein coding genes: ', sum(validGeneIdx), '\n\n')
+    }
+    if (excludeChrY) {
+        validGeneIdx <- validGeneIdx & (gencode[gencodeIdx, 'chrm'] != 'Y' & !is.na(gencode[gencodeIdx, 'chrm']))
+        cat('Use only non-chrY genes: ', sum(validGeneIdx), '\n\n')
+    }
     readCount <- readCount[validGeneIdx, ]
-    cat('Use only protein coding genes: ', sum(validGeneIdx), '\n\n')
-    rm('gencode', 'gencodeIdx', 'validGeneIdx')
+    rm('gencodeIdx', 'validGeneIdx')
 }
 
 
@@ -170,24 +187,27 @@ if ( length(deseq.condA) != length(deseq.condB) ) {
    quit(save='no')
 }
 
-library(DESeq2)
+
+.libPaths("/data/NYGC/Resources/RNASeqPipelineResources/R_packages")
+library(DESeq2, lib.loc="/data/NYGC/Resources/RNASeqPipelineResources/R_packages")
+###library(DESeq2)
 
 #### LRT test, all samples
 if (deseq.test == 'LRT') { 
     countDataFull = DESeqDataSetFromMatrix(countData=readCount, colData=sampleInfo, design=as.formula(deseq.design))
     countDataFull = DESeq(countDataFull, test=deseq.test, fitType=deseq.fitType, minReplicatesForReplace=deseq.minReplicatesForReplace, betaPrior=deseq.betaPrior, reduced=as.formula(deseq.reduced))
-    save(countDataFull, file=paste0(outputPath, outputTag, '.LRT.deseq2.rdata'))
+    save(countDataFull, file=paste0(outputPath, outputTag, 'LRT.deseq2.rdata'))
 
     cat('LRT: ', deseq.design, ' vs ', deseq.reduced, '\n')
     result = results( countDataFull, independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering ) 
     comparisonName = paste0('LRT', '_', paste(setdiff(all.vars(as.formula(deseq.design)), all.vars(as.formula(deseq.reduced))), collapse='+'))
-
-    write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
+    resultTable = AddGeneName(gencode, as.data.frame(result))
+    write.table( resultTable, file=paste0(outputPath, outputTag, comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
     if ( capabilities('png') ) { 
-        png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+        png(filename=paste0(outputPath, outputTag, comparisonName, '.MA.png'), type='cairo')
         plotMA(result)
         dev.off()
-        png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+        png(filename=paste0(outputPath, outputTag, comparisonName, '.dispersion.png'), type='cairo')
         plotDispEsts(countDataFull)
         dev.off()
     }
@@ -215,14 +235,15 @@ if (deseq.test == 'LRT') {
 	 countDataFull = DESeqDataSetFromMatrix(countData=curReadCount, colData=curSampleInfo, design=as.formula(deseq.design))
     	 countDataFull = DESeq(countDataFull, test=deseq.test, fitType=deseq.fitType, minReplicatesForReplace=deseq.minReplicatesForReplace, betaPrior=deseq.betaPrior, reduced=as.formula(deseq.reduced))
 
-    	 save(countDataFull, file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.rdata'))
-	 result = results( countDataFull, contrast=c(deseq.varOfInterest, condB, condA), independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering ) 	     
-	 write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
+    	 save(countDataFull, file=paste0(outputPath, outputTag, comparisonName, '.deseq2.rdata'))
+	 result = results( countDataFull, contrast=c(deseq.varOfInterest, condB, condA), independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering )
+         resultTable = AddGeneName(gencode, as.data.frame(result))
+	 write.table( resultTable, file=paste0(outputPath, outputTag, comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
          if ( capabilities('png') ) { 
-             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+             png(filename=paste0(outputPath, outputTag, comparisonName, '.MA.png'), type='cairo')
              plotMA(result)
              dev.off()
-             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+             png(filename=paste0(outputPath, outputTag, comparisonName, '.dispersion.png'), type='cairo')
              plotDispEsts(countDataFull)
              dev.off()
          }
@@ -232,7 +253,7 @@ if (deseq.test == 'LRT') {
 } else {
     countDataFull = DESeqDataSetFromMatrix(countData=readCount, colData=sampleInfo, design=as.formula(deseq.design))
     countDataFull = DESeq(countDataFull, test=deseq.test, fitType=deseq.fitType, minReplicatesForReplace=deseq.minReplicatesForReplace, betaPrior=deseq.betaPrior, reduced=as.formula(deseq.reduced))
-    save(countDataFull, file=paste0(outputPath, outputTag, '.deseq2.rdata'))
+    save(countDataFull, file=paste0(outputPath, outputTag, 'deseq2.rdata'))
     for ( comparisonIdx in 1:length(deseq.condA)) {
      	 condA = deseq.condA[ comparisonIdx ]
      	 condB = deseq.condB[ comparisonIdx ]
@@ -245,13 +266,13 @@ if (deseq.test == 'LRT') {
 	     result = results( countDataFull, name=deseq.varOfInterest, independentFiltering=deseq.independentFiltering, alpha=deseq.alphaForIndependentFiltering ) 
 	     comparisonName = deseq.varOfInterest
 	 }
-
-	 write.table( as.data.frame(result), file=paste0(outputPath, outputTag, '.', comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
+         resultTable = AddGeneName(gencode, as.data.frame(result))
+	 write.table( resultTable, file=paste0(outputPath, outputTag, comparisonName, '.deseq2.txt'), sep='\t', row.names=T, quote=F)
          if ( capabilities('png') ) {  
-             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.MA.png'), type='cairo')
+             png(filename=paste0(outputPath, outputTag, comparisonName, '.MA.png'), type='cairo')
              plotMA(result)
              dev.off()
-             png(filename=paste0(outputPath, outputTag, '.', comparisonName, '.dispersion.png'), type='cairo')
+             png(filename=paste0(outputPath, outputTag, comparisonName, '.dispersion.png'), type='cairo')
              plotDispEsts(countDataFull)
              dev.off()
          }
