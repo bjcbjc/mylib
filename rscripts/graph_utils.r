@@ -21,7 +21,8 @@ numSubplot = function(nplots) {
 
 matrixHeatmap = function(mtx,
     color= c(scales::muted('red'), 'white', scales::muted('blue')),
-    clim= NULL, gridColor= NULL) {
+    clim= NULL, gridColor= NULL, xTickLabel= NULL, yTickLabel= NULL, textData= NULL, textSize=8) {
+
     if(is.null(clim)) {
         clim = c(min(mtx), max(mtx))
         midPoint = mean(clim)
@@ -30,8 +31,21 @@ matrixHeatmap = function(mtx,
         mtx[mtx < clim[1]] = clim[1]
         mtx[mtx > clim[2]] = clim[2]
     }
+
+    if(!is.null(textData)) {
+        if (!all(dim(textData) == dim(mtx))) {
+            stop('textData does not have the same dim as mtx')
+        }
+    }
+    
     # mtx is a matrix
     data = melt(t(mtx))
+    if(!is.null(textData)) {
+        data$mtxText = as.vector(t(textData))
+        data$mtxText[is.na(data$mtxText)] = ''
+    }
+    colnames(data)[1:2] = c('Var1', 'Var2')
+    
     p = ggplot(data, aes(x= as.factor(Var1), y= as.factor(Var2)))
     if (is.null(gridColor)) {
         p = p + geom_tile(aes(fill= value)) 
@@ -48,7 +62,17 @@ matrixHeatmap = function(mtx,
               axis.title.x= element_blank(),
               axis.title.y= element_blank(),
               legend.title= element_blank(),
-              panel.background= element_rect(color= 'white', fill= 'white')) 
+              panel.background= element_rect(color= 'white', fill= 'white'))
+    if (!is.null(xTickLabel)) {
+        p = p %+% scale_x_discrete(labels= xTickLabel)
+    }
+    if (!is.null(yTickLabel)) {
+        p = p %+% scale_y_discrete(labels= yTickLabel)
+    }
+    if (!is.null(textData)) {
+        p = p %+% geom_text(aes(fill= value, label= mtxText), size= textSize)
+    }
+        
     return(p)
 }
 
@@ -59,4 +83,5 @@ hclustOrder = function(data, distance='cor') {
     } else {
         idx = hclust(dist(t(data), distance))$order
     }
+    return(idx)
 }

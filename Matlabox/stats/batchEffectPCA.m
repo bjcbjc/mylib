@@ -9,6 +9,7 @@ classdef batchEffectPCA < handle
             para.test = @anova1;
             para.nPC = 20;
             para.covLabel = {};
+            para.returnWeight = false;
                         
             para = assignpara(para, varargin{:});            
             para.nPC = min( para.nPC, size(readCount,2)-1);
@@ -24,7 +25,12 @@ classdef batchEffectPCA < handle
                 readCount = zeromean_univar_normalization(readCount, 2);
             end
             report.validGeneIdx = ~any(isnan(readCount),2);
-            [~, sc, l] = princomp(readCount(report.validGeneIdx,:)', 'econ');            
+            if para.returnWeight
+                [report.pc, sc, l] = pca(readCount(report.validGeneIdx,:)');
+            else
+                [~, sc, l] = pca(readCount(report.validGeneIdx,:)');
+            end
+%             [~, sc, l] = princomp(readCount(report.validGeneIdx,:)', 'econ');            
             l = l ./ sum(l);
             report.para = para;
             report.covariate = covariate;
@@ -75,6 +81,7 @@ classdef batchEffectPCA < handle
             end
             
             [plotRow, plotCol] = numSubplot(para.nPC-1);
+            [~, sortDataIdx] = sort(report.covariate(:, covIdx));
             for i = 1:para.nPC-1
                 subplot(plotRow, plotCol, i);
                 if strcmp(func2str(report.para.test), 'corr')                    
@@ -85,21 +92,25 @@ classdef batchEffectPCA < handle
                         colorbar
                     end
                 else
-                    h = gscatter(report.pcProjection(:,i), report.pcProjection(:,i+1), ...
-                        report.covariate(:,covIdx));
+                    h = gscatter(report.pcProjection(sortDataIdx,i), ...
+                        report.pcProjection(sortDataIdx,i+1), ...
+                        report.covariate(sortDataIdx,covIdx));
                     distinctColorMarker(h);
-                    if ~para.legendAll && i ~= para.nPC-1
+                    if ~para.legendAll && i ~= 1%para.nPC-1
                         legend off; 
                     end
                 end
                 xlim([min(report.pcProjection(:,i))-0.1, max(report.pcProjection(:,i)+0.1)]);
                 ylim([min(report.pcProjection(:,i+1))-0.1, max(report.pcProjection(:,i+1)+0.1)]);
-                xlabel(sprintf('PC%d, %0.1f%%',i,report.pcVarExplained(i)*100),'fontsize',12);
-                ylabel(sprintf('PC%d, %0.1f%%',i+1,report.pcVarExplained(i+1)*100),'fontsize',12);
+                xlabel(sprintf('PC%d, %0.1f%%',i,report.pcVarExplained(i)*100),'fontsize',10);
+                ylabel(sprintf('PC%d, %0.1f%%',i+1,report.pcVarExplained(i+1)*100),'fontsize',10);
                 title(sprintf('%s pval w/ x,y:\n%0.1e, %0.1e',func2str(report.para.test), ...
                     report.pcCovAssociationPval(i,covIdx), ...
-                    report.pcCovAssociationPval(i+1,covIdx)), 'fontsize',12);                                
+                    report.pcCovAssociationPval(i+1,covIdx)), 'fontsize',10);                                
             end
+            suptitle(sprintf('Sample labeled by %s', report.para.covLabel{covIdx}));
+            lh = findobj(fig, 'type', 'axes', 'tag', 'legend');
+            uistack(lh, 'top');
         end
         
         function fig = boxplot(report, covIdx, varargin)
@@ -128,9 +139,11 @@ classdef batchEffectPCA < handle
             end
             
             [plotRow, plotCol] = numSubplot(para.nPC);
+            [~, covSortIdx] = sort(report.covariate(:, covIdx));
             for i = 1:para.nPC
                 subplot(plotRow, plotCol, i);
-                boxplot(report.pcProjection(:,i), report.covariate(:,covIdx));                                                
+                boxplotWithData(report.pcProjection(covSortIdx,i), report.covariate(covSortIdx,covIdx));
+%                 boxplot(report.pcProjection(covSortIdx,i), report.covariate(covSortIdx,covIdx));                                                
                 ylabel(sprintf('PC%d, %0.1f%%',i,report.pcVarExplained(i)*100),'fontsize',12);
                 title(sprintf('%s pval: %0.1e',func2str(report.para.test), ...
                     report.pcCovAssociationPval(i,covIdx)), 'fontsize',12);                                
@@ -138,6 +151,7 @@ classdef batchEffectPCA < handle
                     set(gca, 'xticklabel', {' '});
                 end
             end
+            suptitle(sprintf('Distribution of PC by %s', report.para.covLabel{covIdx}));
         end
         
         function table = makeTable(report)

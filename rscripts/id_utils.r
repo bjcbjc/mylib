@@ -13,6 +13,6 @@ Gencode.Intersect <- function(list1, list2) {
     return( intersect(list1, list2))
 }
 
-Gencode.strip <- function(list1) {
+Gencode.Strip <- function(list1) {
     return( sub('\\.\\d+', '', list1))
 }

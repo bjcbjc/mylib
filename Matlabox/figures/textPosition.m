@@ -21,7 +21,7 @@ function [x, y] = textPosition(axesHandle, loc, marginPct)
     else
         loc = strrep(loc, 'South', '');
         loc = strrep(loc, 'S', '');
-        y = x(y) + diff(y) * marginPct(2);
+        y = x(2) + diff(y) * marginPct(2);
     end
     
     if loc(1) == 'E'

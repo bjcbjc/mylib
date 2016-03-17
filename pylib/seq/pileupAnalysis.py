@@ -34,7 +34,7 @@ def get_allele(fn):
         header = line.strip().split('\t')
         idx = [header.index(x) for x in query ]
         for line in f:
-            line = line.split('\t')
+            line = line.strip('\n').split('\t')
             data = [line[i] for i in idx]
             data[0] = correct_chrm(data[0])
             if fileType == 'maf':
@@ -200,7 +200,7 @@ class PileupTable(rnaVariantCount):
         upperHeader = [x.upper() for x in self.header]
         with open(outputFn, 'w') as fout:
             fout.write('\t'.join(['chr', 'pos', 'ref', 'alt', 'dp', 'vaf', 'incompatible']) + '\n')
-            for record in self.data:
+            for record in self.data.itervalues():
                 pos = [record[i] for i in self.keyIdx]
                 key = '_'.join(pos)
                 refCount, altCount, otherCount = 0, 0, 0

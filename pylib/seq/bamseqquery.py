@@ -5,7 +5,7 @@ import traceback
 import collections
 import shlex
 import re
-
+import tempfile
 
 __author__ = 'bjchen'
 
@@ -93,11 +93,23 @@ class SamtoolsView(object):
         minDiffDist = self._min_diff_seq(seqList)
         if minDiffDist is None:
             print 'seqList:', seqList
-            raise ValueError('cannot find minimum sequence distingushing seq-list\n')
+            raise ValueError('cannot find minimum sequence distinguishing seq-list\n')
         try:
             samPipe = subprocess.Popen(shlex.split(cmd), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            pipe = [samPipe.stdout, samPipe.stderr]
-            for line in pipe[0]:
+            # pipe = [samPipe.stdout, samPipe.stderr]
+            pipe = samPipe.communicate()
+            # print chrm, start
+            # if chrm == 'chr4' and start == 167658613:
+            #     print pipe[1]
+            #     print 'out'
+            #     print pipe[0].split('\n')
+            #     print cmd
+            #     print pipe[1]
+            #     exit()
+            if 'random alignment retrieval only works for indexed' in pipe[1]:
+                raise ValueError('index of bam %s not found'%bam)
+
+            for line in pipe[0].split('\n'):
                 line = line.split('\t') #
                 if len(line) > 9: #if has reads
                     read = line[9]
@@ -164,7 +176,7 @@ class SamtoolsView(object):
         return sum([x != y for x, y in zip(seq1, seq2)])
 
     @staticmethod
-    def _min_diff_seq(seqList):
+    def _min_diff_seq_v0(seqList):
         """
 
         :param seqList: list of sequence
@@ -174,6 +186,22 @@ class SamtoolsView(object):
         mdist = None
         for i in xrange(mlen):
             seq = [ x[i] for x in seqList]
+            if len(seq) == len(set(seq)): #all unique
+                mdist = i + 1
+                break
+        return mdist
+
+    @staticmethod
+    def _min_diff_seq(seqList):
+        """
+
+        :param seqList: list of sequence
+        :return: minimum length of sequence (from 0, first character) that differ all sequences in the list
+        """
+        mlen = min(map(len, seqList))
+        mdist = mlen
+        for i in xrange(mlen):
+            seq = [ x[:i+1] for x in seqList]
             if len(seq) == len(set(seq)): #all unique
                 mdist = i + 1
                 break

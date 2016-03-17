@@ -6,6 +6,7 @@ import collections
 import shlex
 import random
 import string
+import sys
 
 
 class SamtoolsPileup(object):
@@ -64,19 +65,19 @@ class SamtoolsPileup(object):
                 baseCounterTable.update(self.pileup_count(pipe[0], exclude))
             except:
                 self._clean()
-                print c, s, e
+                sys.stderr.write('chrm, start, end: %s, %s, %s\n'%(c, s, e))
                 traceback.print_exc()
                 raise
             finally:
                 self._clean_pipe()
         return baseCounterTable
 
-    def pileup_by_l(self, bam, loc, exclude=''):
+    def pileup_by_l(self, bam, loc, exclude='', tmpDir=''):
         # call this when the list of queries is long (thousands for example)
         if type(loc) is str:
             locFile = loc
         else:
-            locFile = self._make_temp_file(loc)
+            locFile = self._make_temp_file(loc, tmpDir)
             self.tempFile.append(locFile)
         cmd = shlex.split(self.samtools + ' mpileup ' + self.passOnArg + ' -l {locFile} '.format(locFile=locFile) + bam)
         try:
@@ -88,8 +89,8 @@ class SamtoolsPileup(object):
         except:
             traceback.print_exc()
             raise
-        # finally:
-        #     self._clean()
+        finally:
+            self._clean()
 
     def pileup_count(self, samout, exclude=''):
         #pileup special chars in read_bases: ^: start of read, followed by an additional char for mapping qual
@@ -142,11 +143,11 @@ class SamtoolsPileup(object):
         return data
 
     @staticmethod
-    def _make_temp_file(loc):
+    def _make_temp_file(loc, outDir):
         elementType = type(loc[0])
         if elementType is not list and elementType is not tuple:
             loc = [loc]
-        fn = ''.join(random.choice(string.ascii_letters + string.digits) for x in xrange(10)) + '.pileuploc.txt'
+        fn = outDir + '/' + ''.join(random.choice(string.ascii_letters + string.digits) for x in xrange(10)) + '.pileuploc.txt'
         with open(fn, 'w') as f:
             for chrm, pos in loc:
                 f.write('%s\t%s\n'%(chrm, pos))

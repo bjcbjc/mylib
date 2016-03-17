@@ -24,7 +24,7 @@ rnaUtils.getDESeqReferenceCount = function(cohortCount) {
     apply(cohortCount, 1, rnaUtils.geomean)
 }
                 
-rnaUtil.getTPM = function(sampleCount, geneLength, pseudoCount = 0) {
+rnaUtils.getTPM = function(sampleCount, geneLength, pseudoCount = 0) {
     sampleCount = sampleCount + pseudoCount
     data = sweep(sampleCount, 1, geneLength, FUN='/')
     return( sweep(data, 2, colSums(data), FUN='/') * 1e6 )

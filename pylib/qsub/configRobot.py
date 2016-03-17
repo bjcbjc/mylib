@@ -158,6 +158,15 @@ def translateAllValues(paraset, maxiter=10):
             #paraset[k] = paraset[k].replace('#(', '{{').replace('#)', '}}')
     return paraset
 
+def evalListAccess(paraset):
+    for key, value in paraset.iteritems():
+        if type(value) is str:
+            if '[' in value and ']' in value and 're.' not in value:
+                if '{' in value:
+                    value = value.format( **paraset )
+                paraset[key] = eval( value, None, paraset )
+    return paraset
+
 def evalRegExp(paraset):
     for key, value in paraset.iteritems():
         if type(value) is str:

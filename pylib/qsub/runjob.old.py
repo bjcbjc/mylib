@@ -23,17 +23,10 @@ def readSampleList(fn):
     sample = [line.strip().split('\t')[0] for line in open(fn)]
     return sample
 
-def readInputList(fn):
-    data = [line.strip().split('\t') for line in open(fn)]
-    return data
-
 def runJobs(cmdset, runmode='test'):
-
     jobmanager = jobFactory.jobManager(mem=cmdset['mem'], time=cmdset['time'], overwrite=cmdset.pop('overwrite'))
     if 'sampleList' in cmdset:
         cmdset['LoopOverSample'] = readSampleList(cmdset['sampleList'])
-    if 'LoopOverLine' in cmdset:
-        cmdset['LoopOverLine'] = readInputList(cmdset['LoopOverLine'])
     loopVarName, loopList, cmdset = configRobot.getLoopOverList( cmdset )
 
     if type(cmdset['call']) is not list:
@@ -61,17 +54,11 @@ def runJobs(cmdset, runmode='test'):
         if 'randstr' in paraset:
             paraset['randstr'] = randstr(20)
         paraset.update( zip( loopVarName, loopValue))
-        if 'LoopOverLine' in paraset:
-            if type(paraset['LoopOverLine']) is not list:
-                paraset['LoopOverLine'] = [paraset['LoopOverLine']]
-            for fdIdx in xrange(len(paraset['LoopOverLine'])):
-                paraset['line%d'%fdIdx] = paraset['LoopOverLine'][fdIdx]
         if 'sample' not in paraset:
             if 'LoopOverFile' in paraset:
                 if 'Sample_' in paraset['LoopOverFile']:
                     paraset['sample'] = sampleParser.findall(paraset['LoopOverFile'])[0]
         if 'logpath' not in paraset: paraset['logpath'] = paraset['outputpath']
-        paraset = configRobot.evalListAccess( paraset )
         paraset = configRobot.evalRegExp( paraset )
         paraset = configRobot.translateAllValues( paraset )
         
@@ -101,7 +88,7 @@ def runJobs(cmdset, runmode='test'):
 
 
 ###main
-def main(module = '', runmode = 'test', config=os.path.dirname(os.path.abspath(__file__))+'/job.config.txt'):
+def main(module = '', runmode = 'test', config=os.path.dirname(__file__)+'/job.config.txt'):
     cmdsets = configRobot.readConfig(config)
     setnames = cmdsets.keys()
 
