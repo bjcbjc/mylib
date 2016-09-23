@@ -1,8 +1,16 @@
-function [curvehandle, pval] = plotKM(survivalData, sample, alteredSample, nonAlteredSample, label)
+function [curvehandle, pval] = plotKM(survivalData, sample, alteredSample, nonAlteredSample, label, idx)
+    if nargin < 6
+        idx = false;
+    end
     
-    validSample = ~isnan(survivalData(:,1));
-    alterIdx = ismember(sample,alteredSample) & validSample;
-    nonAlterIdx = ismember(sample,nonAlteredSample) & validSample;
+    if ~idx
+        validSample = ~isnan(survivalData(:,1));
+        alterIdx = ismember(sample,alteredSample) & validSample;
+        nonAlterIdx = ismember(sample,nonAlteredSample) & validSample;
+    else
+        alterIdx = alteredSample;
+        nonAlterIdx = nonAlteredSample;
+    end
     [~, ~, ~, ~, plotdata] = logrank( ...
         survivalData(alterIdx,:), ...
         survivalData(nonAlterIdx,:), ...

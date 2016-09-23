@@ -1,0 +1,47 @@
+
+
+gsea.cluster_AllGenes.deseq.Wald.lfc:
+cmd	runJobs
+java	/data/NYGC/Software/java/jre1.7.0_25/bin/java
+call	{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.2.0.jar -Xmx4g xtools.gsea.GseaPreranked -gmx {gene_sets} -collapse false -mode Max_probe -norm meandiv -nperm 1000 -rnk {rank_file} -scoring_scheme {scoring_scheme} -rpt_label {report_label} -include_only_symbols true -make_sets true -plot_top_x {plot_top_x} -rnd_seed {rnd_seed} -set_max {set_max} -set_min {set_min} -zip_report false -out {outputpath} -gui false
+gene_sets	/nethome/bjchen/DATA/MSigDB_v5.0/msigdb_v5.0_GMTs/c2.cp.biocarta.v5.0.symbols.gmt,/nethome/bjchen/DATA/MSigDB_v5.0/msigdb_v5.0_GMTs/h.all.v5.0.symbols.gmt
+rank_file	/data/analysis/ChapmanP/Project_CHA_10579_RNA/Results_Apr29/Analysis/cluster_AllGenes/DESeq2.cluster_AllGenes.Wald_{{LoopOverCluster}}.filtered.lfc.rnk
+scoring_scheme	classic
+report_label	{{LoopOverCluster}}
+LoopOverCluster	1_vs_others; 2_vs_others; 3_vs_others
+plot_top_x	50
+rnd_seed	100
+set_max	500
+set_min	3
+outputpath	/data/analysis/ChapmanP/Project_CHA_10579_RNA/Results_Apr29/Analysis/cluster_AllGenes/gsea/
+logpath	{outputpath}/log/
+prefix	gsea.deseq.lfc.cluster_AllGenes.{{LoopOverCluster}}
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q,dev.q
+
+
+
+gsea.cluster_AllGenes.deseq.LRT.padj:
+cmd	runJobs
+java	/data/NYGC/Software/java/jre1.7.0_25/bin/java
+call	{java} -cp /nethome/bjchen/programs/GSEA/gsea2-2.2.0.jar -Xmx4g xtools.gsea.GseaPreranked -gmx {gene_sets} -collapse false -mode Max_probe -norm meandiv -nperm 1000 -rnk {rank_file} -scoring_scheme {scoring_scheme} -rpt_label {report_label} -include_only_symbols true -make_sets true -plot_top_x {plot_top_x} -rnd_seed {rnd_seed} -set_max {set_max} -set_min {set_min} -zip_report false -out {outputpath} -gui false
+gene_sets	/nethome/bjchen/DATA/MSigDB_v5.0/msigdb_v5.0_GMTs/c2.cp.biocarta.v5.0.symbols.gmt,/nethome/bjchen/DATA/MSigDB_v5.0/msigdb_v5.0_GMTs/h.all.v5.0.symbols.gmt
+rank_file	/data/analysis/ChapmanP/Project_CHA_10579_RNA/Results_Apr29/Analysis/cluster_AllGenes/DESeq2.cluster_AllGenes.LRT.filtered.padj.rnk
+scoring_scheme	classic
+report_label	DEG_padj
+plot_top_x	50
+rnd_seed	100
+set_max	500
+set_min	3
+outputpath	/data/analysis/ChapmanP/Project_CHA_10579_RNA/Results_Apr29/Analysis/cluster_AllGenes/gsea/
+logpath	{outputpath}/log/
+prefix	gsea.deseq.padj.cluster_AllGenes
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q,dev.q
+
+
+

@@ -11,12 +11,17 @@ function [sortdata, sortidx] = sortInGroup(data, group, direction)
         error('data and group must have the same dimension');
     end
     
+    if iscell(data)
+        [~, ~, useForSort] = unique(data);
+    else
+        useForSort = data;
+    end
     [~, ~, ui] = unique(group);
     sortidx = zeros( max([n1, n2]), 1);
     cur = 0;
     for i = 1:length(ui)
         si = find(ui == i);
-        [~, ii] = sort(data(si), direction);
+        [~, ii] = sort(useForSort(si), direction);
         groupsize = length(si);
         sortidx(cur+1 : cur+groupsize) = si(ii);
         cur = cur + groupsize;

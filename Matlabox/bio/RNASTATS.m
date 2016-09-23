@@ -498,6 +498,9 @@ classdef RNASTATS < handle
             if reportpath(end) ~= '/', reportpath = [reportpath '/']; end
             
             for i = 1:length(para.fns)
+                if ~exist([reportpath para.fns{i}], 'file')
+                        continue
+                end
                 t = parseText([reportpath para.fns{i}], 'nrowname', 1, ...
                     'ncolname', 1, 'numeric', true, 'treatasempty',{'NA'});
                 if i == 1
@@ -507,7 +510,7 @@ classdef RNASTATS < handle
                     report.data = NaN(nlabel+50, length(report.sample));
                     report.label(1:nlabel) = strrep(t.colname, '(%)', '_PCT');
                     report.data(1:nlabel, :) = t.text';
-                else
+                else                    
                     if nnz(~strcmp(t.rowname, report.sample)) > 0
                         error('sample names are not the same, %s', para.fns{i});
                     end
@@ -580,10 +583,22 @@ classdef RNASTATS < handle
 %                             error('gene names are not the same, %s', para.fns{i});
 %                         end
                     end                    
-                end
+                end                
                 readcount.(fdname{i}) = t.text;
                 RNASTATS.anyNaN(readcount.(fdname{i}), sprintf('readReportReadCount, %s', fdname{i}));
-            end            
+            end
+            if ~isfield(readcount, 'geneLength') %try to find the length file
+                if exist([reportpath 'featureCounts_length_per_gene.txt'], 'file')
+                    t = parseText([reportpath 'featureCounts_length_per_gene.txt'], 'nrowname', 1, ...
+                        'ncolname', 1, 'numeric', true, 'delimiter', ' ');
+                    [~, idx] = ismember(readcount.geneId, t.rowname);
+                    if any(idx == 0)
+                        printf('cannot fnid all gene length\n');
+                    else
+                        readcount.geneLength = t.text(idx);
+                    end
+                end
+            end
         end
         
         function alleleCount = readAlleleCount(pathPattern, sampleNamePattern, locfile, stranded)

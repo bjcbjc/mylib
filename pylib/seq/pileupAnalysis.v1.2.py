@@ -89,7 +89,7 @@ class VCF(object):
         :return:
         """
         indelTable = indel.get_vaf_dp()
-        header = ['#chr', 'start', 'ref', 'alt', 'nRef', 'nAlt', 'nOther', 'DP', 'VAF']
+        header = ['#chr', 'start', 'ref', 'alt', 'nRef', 'nAlt', 'nOther', 'DP', 'VAF', 'RAF']
         with open(outputFn, 'w') as f:
             f.write('\t'.join(header) + '\n')
             for key in self.keys: #keep the order
@@ -99,13 +99,13 @@ class VCF(object):
                 line = [self.data[key][fd] for fd in ['CHROM', 'POS', 'REF', 'ALT']]
                 if refLen != altLen: #indel
                     if key in indelTable:
-                        line.extend([str(indelTable[key][fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf']])
+                        line.extend([str(indelTable[key][fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf', 'raf']])
                     else:
                         line.extend(['0']*5)
                 else: #SNV
                     poskey = '_'.join([self.data[key][fd] for fd in ['CHROM', 'POS']])
                     tb = pileup.get_vaf_dp_single(poskey, self.data[key]['REF'], self.data[key]['ALT'])
-                    line.extend([str(tb[fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf']])
+                    line.extend([str(tb[fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf', 'raf']])
                 f.write('\t'.join(line) + '\n')
 
 
@@ -156,20 +156,20 @@ class MAF(object):
         :return:
         """
         indelTable = indel.get_vaf_dp()
-        header = ['gene', 'chr', 'start', 'ref', 'alt', 'nRef', 'nAlt', 'nOther', 'DP', 'VAF']
+        header = ['gene', 'chr', 'start', 'ref', 'alt', 'nRef', 'nAlt', 'nOther', 'DP', 'VAF', 'RAF']
         with open(outputFn, 'w') as f:
             f.write('\t'.join(header) + '\n')
             for key in self.keys: #keep the order
                 line = [self.data[key][fd] for fd in ['Gene_Symbol', 'Chromosome', 'Start_Position', 'Tumor_Seq_Allele1', 'Tumor_Seq_Allele2']]
                 if '-' in self.data[key]['Tumor_Seq_Allele1'] or '-' in self.data[key]['Tumor_Seq_Allele2']:
                     if key in indelTable:
-                        line.extend([str(indelTable[key][fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf']])
+                        line.extend([str(indelTable[key][fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf', 'raf']])
                     else:
                         line.extend(['0']*5)
                 else:
                     poskey = '_'.join([self.data[key][fd] for fd in ['Chromosome', 'Start_Position']])
                     tb = pileup.get_vaf_dp_single(poskey, self.data[key]['Tumor_Seq_Allele1'], self.data[key]['Tumor_Seq_Allele2'])
-                    line.extend([str(tb[fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf']])
+                    line.extend([str(tb[fd]) for fd in ['refCount', 'altCount', 'otherCount', 'dp', 'vaf', 'raf']])
                 f.write('\t'.join(line) + '\n')
 
 
@@ -198,13 +198,16 @@ class IndelCountTable(rnaVariantCount):
             key = [record[i] for i in self.keyIdx]
             key.extend([record[i] for i in alleleIdx])
             refCount, altCount, otherCount = map(int, [record[i] for i in self.countIdx])
-            dp = refCount + altCount
+            #dp = refCount + altCount
+            dp = refCount + altCount + otherCount
             if dp > 0:
                 vaf = altCount / dp
+                raf = refCount / dp
             else:
                 vaf = 0
+                raf = 0
             res['_'.join(key)] = {'refCount': refCount, 'altCount': altCount, 'otherCount': otherCount,
-                                  'dp': dp, 'vaf': vaf}
+                                  'dp': dp, 'vaf': vaf, 'raf': raf}
         return res
 
 
@@ -232,13 +235,16 @@ class PileupTable(rnaVariantCount):
                     altCount += int(record[i])
                 else:
                     otherCount += int(record[i])
-        dp = refCount + altCount
+        ##dp = refCount + altCount
+        dp = refCount + altCount + otherCount
         if dp > 0:
             vaf = altCount / dp
+            raf = refCount / dp
         else:
             vaf = 0
+            raf = 0
         res = {'refCount': refCount, 'altCount': altCount, 'otherCount': otherCount,
-                    'dp': dp, 'vaf': vaf}
+                    'dp': dp, 'vaf': vaf, 'raf': raf}
         return  res
 
     # def get_vaf_dp(self, variantAllele):

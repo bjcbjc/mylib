@@ -16,6 +16,7 @@ function res = parseText(fn, varargin)
     %       file should be read as the "name" for columns
     %   'numericcol': vector to specify which columns are numeric (indices
     %   are counted from the first column, including row names
+    %   'getncol': true/false; return ncol only
     %   
     %
     %Note: to make sure it reads file correctly, put NaN for ''
@@ -38,12 +39,13 @@ function res = parseText(fn, varargin)
     bufsize = 4095;
     numericcol = [];
     commentstyle = '#';
+    getncol = false;
     
     passpara = {};
     i = 1;
     while i < length(varargin)
         switch lower(varargin{i})
-            case {'colname','rowname','numeric'}
+            case {'colname','rowname','numeric', 'getncol'}
                 eval(sprintf('%s = logical(%d);',varargin{i},varargin{i+1}));
             case {'skip','ncol', 'nrowname', 'ncolname', 'bufsize'}
                 eval(sprintf('%s = %d;',varargin{i},varargin{i+1}));
@@ -146,6 +148,10 @@ function res = parseText(fn, varargin)
             end
         else            
             ncol = length(a{1});
+        end
+        if getncol
+            res = ncol;
+            return
         end
     end
     for i = 1:nrowname

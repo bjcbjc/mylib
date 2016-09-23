@@ -9,6 +9,7 @@ from collections import Counter, OrderedDict, namedtuple
 #from baseStrLib import BaseString
 import time
 import numpy
+import shlex
 
 
 import string
@@ -265,7 +266,7 @@ def pileupToCount(samout, out, args, para, singlesite=False):
     return outbuffer
 
 def bamChrms(args):
-    sampipe = subprocess.Popen(args.samtools + ' view -H ' + args.bam, shell=True, stdout=subprocess.PIPE)
+    sampipe = subprocess.Popen(shlex.split(args.samtools + ' view -H ' + args.bam), stdout=subprocess.PIPE)
     samheader = sampipe.stdout.read().split('\n')
     sampipe.stdout.close()
     samheader = filter(lambda(l): l[:3]=='@SQ', samheader)
@@ -330,7 +331,7 @@ if args.ignoreEnd > 0:
     if '-O' not in passon: passon = passon + ' -O '
     #if '-B' not in passon: passon = passon + ' -B '
     if args.readLength == 0: 
-        sampipe = subprocess.Popen(args.samtools + ' view ' + args.bam, shell=True, stdout=subprocess.PIPE)
+        sampipe = subprocess.Popen(shlex.split(args.samtools + ' view ' + args.bam), stdout=subprocess.PIPE)
         line = sampipe.stdout.readline().split('\t')
         sampipe.stdout.close()
         args.readLength = len(line[9])
@@ -366,7 +367,7 @@ try:
     #run samtools and pipe the output for further process (save space)
     if args.loc != '':
         if not args.useSingleSiteCall:
-            sampipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            sampipe = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             samout, samerr = sampipe.stdout, sampipe.stderr
             out = open(args.o, 'w')
             pileupToCount(samout, out, args, para, singlesite=False)
@@ -379,7 +380,7 @@ try:
             outbuffer = ''
             for chrm, site in siteloc:
                 #tic = time.time()
-                sampipe = subprocess.Popen(cmd%(chrm,site,site), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                sampipe = subprocess.Popen(shlex.split(cmd%(chrm,site,site)), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 samout, samerr = sampipe.stdout, sampipe.stderr
             
                 #out = open(args.o, 'w')
@@ -399,11 +400,11 @@ try:
                 outbuffer = ''
         if len(tmpfiles) > 0:
             #remove temp file
-            subprocess.call( 'rm -f ' + ' '.join(tmpfiles), shell=True )
+            subprocess.call( shlex.split('rm -f ' + ' '.join(tmpfiles)) )
         closefiles([samout, samerr, out])
     else: #regions; call mpileup with one region at a time; this is faster than -l
         for subr in regions:
-            sampipe = subprocess.Popen(cmd%(subr), shell=True, stdout=subprocess.PIPE)#, stderr=subprocess.PIPE)
+            sampipe = subprocess.Popen(shlex.split(cmd%(subr)), stdout=subprocess.PIPE)#, stderr=subprocess.PIPE)
             samout = sampipe.stdout #, sampipe.stderr
 
             subr = subr.replace(',','')
@@ -415,7 +416,7 @@ except:
     print 'Error somewhere, closing streaming pipes'
     if len(tmpfiles) > 0:
         #remove temp file
-        subprocess.call(  'rm -f ' + ' '.join(tmpfiles), shell=True )
+        subprocess.call(  shlex.split('rm -f ' + ' '.join(tmpfiles)) )
     closefiles([samout, samerr, out])
     traceback.print_exc()
 

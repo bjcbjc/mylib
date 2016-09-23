@@ -51,17 +51,18 @@ classdef batchEffectPCA < handle
             end
         end
         
-        function fig = plot(report, covIdx, varargin)
+        function [fig, cbarh] = plot(report, covIdx, varargin)
             %report: from test function
             %covIdx: index to report.covariate or a string (name of the
             %   covariate)
             para.fig = [];
             para.nPC = 10;
             para.legendAll = false;
-            para.colormap = genColorMap([0,0,0; 0.8,0.8,0.8],10);
+            para.colormap = genColorMap([1, 0.8, 0.3; 0.3, 0.3, 0.8],10);
             para = assignpara(para, varargin{:});            
             para.nPC = min(para.nPC, report.para.nPC);
             
+            cbarh = NaN;
             if ischar(covIdx)
                 [~, i] = ismember(covIdx, report.para.covLabel);
                 if i == 0
@@ -88,8 +89,15 @@ classdef batchEffectPCA < handle
                     scatter(report.pcProjection(sortDataIdx,i), report.pcProjection(sortDataIdx,i+1), ...
                         50, report.covariate(sortDataIdx,covIdx), 'fill');
                     colormap(para.colormap);
+                    if i == 1
+                        apos = get(gca, 'position');
+                    end
                     if i == para.nPC-1
-                        colorbar
+                        cbarh = colorbar;
+                        cpos = get(cbarh, 'position');
+                        set(cbarh, 'position', [0.93, 0.4, cpos(3), cpos(4)]);
+                        curapos = get(gca, 'position');
+                        set(gca, 'position', [curapos(1), curapos(2), apos(3), curapos(3)]);
                     end
                 else
                     h = gscatter(report.pcProjection(sortDataIdx,i), ...
@@ -108,9 +116,47 @@ classdef batchEffectPCA < handle
                     report.pcCovAssociationPval(i,covIdx), ...
                     report.pcCovAssociationPval(i+1,covIdx)), 'fontsize',10);                                
             end
-            suptitle(sprintf('Sample labeled by %s', report.para.covLabel{covIdx}));
+            suptitle(sprintf('Sample labeled by %s', strrep(report.para.covLabel{covIdx}, '_', ' ')));
             lh = findobj(fig, 'type', 'axes', 'tag', 'legend');
             uistack(lh, 'top');
+        end
+        
+        function fig = linearplot(report, covIdx, varargin)
+            %report: from test function
+            %covIdx: index to report.covariate or a string (name of the
+            %   covariate)
+            para.fig = [];
+            para.nPC = 9;                       
+            para = assignpara(para, varargin{:});            
+            para.nPC = min(para.nPC, report.para.nPC);            
+            
+            if ischar(covIdx)
+                [~, i] = ismember(covIdx, report.para.covLabel);
+                if i == 0
+                    error('cannot find %s', covIdx);
+                end
+                covIdx = i;
+            end            
+            if ~isempty(para.fig)
+                set(0, 'CurrentFigure', para.fig);
+                fig = para.fig;
+            else
+                fig = gcf;
+            end
+                        
+            [plotRow, plotCol] = numSubplot(para.nPC);
+            [~, sortDataIdx] = sort(report.covariate(:, covIdx));
+            for i = 1:para.nPC
+                subplot(plotRow, plotCol, i);
+                plot(report.pcProjection(sortDataIdx,i), report.covariate(sortDataIdx,covIdx),'.');                
+                xlim([min(report.pcProjection(:,i))-0.1, max(report.pcProjection(:,i))+0.1]);
+                ylim([min(report.covariate(sortDataIdx,covIdx))-0.1, max(report.covariate(sortDataIdx,covIdx))+0.1]);
+                xlabel(sprintf('PC%d, %0.1f%%',i,report.pcVarExplained(i)*100),'fontsize',10);
+                ylabel(sprintf('covariate'),'fontsize',10);
+                title(sprintf('%s pval: %0.1e',func2str(report.para.test), ...
+                    report.pcCovAssociationPval(i,covIdx)), 'fontsize',10);                                
+            end
+            suptitle(sprintf('Sample labeled by %s', strrep(report.para.covLabel{covIdx}, '_', ' ')));
         end
         
         function fig = boxplot(report, covIdx, varargin)

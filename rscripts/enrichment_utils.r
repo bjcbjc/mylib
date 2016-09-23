@@ -61,7 +61,7 @@ enrich.go <- function (testGene, backgroundGene, inputGeneId= 'ENSEMBL', databas
             binaryTable = cbind(geneInfo, binaryTable)
 
             #write.table(binaryTable, paste0(outputTag,'.geneByGo_binaryTable_',ontologyList[ontIdx], '.txt'), sep='\t',quote=F,col.names=NA)
-            enrichRes[[paste0(ontologyList[ontIdx], '_binaryTable')]] = binrayTable
+            enrichRes[[paste0(ontologyList[ontIdx], '_binaryTable')]] = binaryTable
         }
     }
 
@@ -91,22 +91,26 @@ enrich.go.parallel <- function (testGeneLists, backgroundGene, inputGeneId= 'ENS
     #remove genes not in GO or duplicates
     univGeneVector = intersect(backgroundGene, goGenes) 
     allEnrichRes = foreach (eachIdx = 1:length(testGeneLists)) %dopar% {
-        library(database, character.only= TRUE)
-        library(GOstats)
-        testGeneVector = intersect(testGeneLists[[eachIdx]], goGenes)
-        cat(sprintf('%d, %d\n', eachIdx, length(testGeneVector)))
-        enrichRes = list()
-        if (length(testGeneVector) > 0) { 
-            for (ontIdx in 1:length(ontologyList)) {
-                enrichRes[[ontologyList[ontIdx]]] = tryCatch ({
-                    param = new('GOHyperGParams', geneIds=testGeneVector, universeGeneIds=univGeneVector, annotation=database, ontology=ontologyList[ontIdx], pvalueCutoff=pvalCutoff, conditional=FALSE, testDirection='over')
-                    hyp = hyperGTest(param)
-                    sum_hyp = summary(hyp)
-                    sum_hyp
-                }, error = function(err) {
-                    cat(sprintf('Caught error, %s\n', err))
-                    return(NA)
-                })
+        if (is.null(testGeneLists[[eachIdx]])) {
+            enrichRes = list()
+        } else {
+            library(database, character.only= TRUE)
+            library(GOstats)
+            testGeneVector = intersect(testGeneLists[[eachIdx]], goGenes)
+            cat(sprintf('%d, %d\n', eachIdx, length(testGeneVector)))
+            enrichRes = list()
+            if (length(testGeneVector) > 0) { 
+                for (ontIdx in 1:length(ontologyList)) {
+                    enrichRes[[ontologyList[ontIdx]]] = tryCatch ({
+                        param = new('GOHyperGParams', geneIds=testGeneVector, universeGeneIds=univGeneVector, annotation=database, ontology=ontologyList[ontIdx], pvalueCutoff=pvalCutoff, conditional=FALSE, testDirection='over')
+                        hyp = hyperGTest(param)
+                        sum_hyp = summary(hyp)
+                        sum_hyp
+                    }, error = function(err) {
+                        cat(sprintf('Caught error, listIdx=%d, %d genes, %s\n', eachIdx, length(testGeneVector), err))
+                        return(NA)
+                    })
+                }
             }
             detach('package:GOstats', unload= TRUE)
             detach(paste0('package:', database), unload= TRUE, character.only= TRUE)

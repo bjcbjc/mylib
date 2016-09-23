@@ -44,7 +44,7 @@ class SamtoolsPileup(object):
         sampipe.stdout.close()
         samheader = filter(lambda(l): l[:3]=='@SQ', samheader)
         chrms = map(lambda(l): l.split()[1].replace('SN:',''), samheader)
-        if 'chr' in chrms[0]:
+        if chrms[0].startswith('chr'):
             return 'chr'
         else:
             return ''

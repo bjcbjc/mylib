@@ -1,0 +1,64 @@
+
+calculate_vaf:
+cmd	runJobs
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/utils:/nethome/bjchen/BJLib/pylib/seq
+call	{python} {script} -pileup {line1} -variant {line0} -output {outputpath}{outputPrefix}.txt
+python	/data/NYGC/Software/python/bin/python2.7
+script	/nethome/bjchen/BJLib/pylib/seq/pileupAnalysis.py
+dnaSample	re.findall('Sample_[\w\-]+','{line0}')[0]
+rnaSample	re.findall('Sample_[\w\-]+','{line1}')[0]
+outputFull	re.sub('.txt', '.vaf', '{line1}')
+outputPrefix	re.sub('[\w/]+/', '', '{outputFull}')
+LoopOverLine	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/dna_vcf_rna_pileup_list.txt
+outputpath	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/rna_pileup/
+logpath	{outputpath}/log/
+prefix	{outputPrefix}.rna
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q
+runThru	False
+
+
+
+pileup.somatic:
+cmd	runJobs
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/utils:/nethome/bjchen/BJLib/pylib/seq
+call	{python} {script} -tableformat -bam {line1} -r 1 -o {outputpath}{dnaSample}_{rnaSample}.rna.pileup.somatic.txt -B -loc {line0} -d 10000 -q 0 -Q 13 -samtools /nfs/sw/samtools/samtools-1.1/samtools -f {ref}
+python	/data/NYGC/Software/python/bin/python2.7
+script	/nethome/bjchen/BJLib/pylib/seq/pileupCount.py
+ref	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+dnaSample	re.findall('Sample_[\w\-]+','{line0}')[0]
+rnaSample	re.findall('Sample_[\w\-]+','{line1}')[0]
+LoopOverLine	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/dna_vcf_rna_bam_list.somatic.txt
+outputpath	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/rna_pileup/
+logpath	{outputpath}/log/
+prefix	{dnaSample}_{rnaSample}.rna.pileup.somatic
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q
+runThru	False
+
+
+
+pileup:
+cmd	runJobs
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/utils:/nethome/bjchen/BJLib/pylib/seq
+call	awk -v OFS='\t' '$1 !~/#/ && length($4)==1 && length($5)==1 \{print $1,$2\}' {line0} > {outputpath}{dnaSample}_{rnaSample}.marker.loc.txt; {python} {script} -tableformat -bam {line1} -r 1 -o {outputpath}{dnaSample}_{rnaSample}.rna.pileup.txt -B -loc {outputpath}{dnaSample}_{rnaSample}.marker.loc.txt -d 10000 -q 0 -Q 13 -samtools /nfs/sw/samtools/samtools-1.1/samtools -f {ref}
+python	/data/NYGC/Software/python/bin/python2.7
+script	/nethome/bjchen/BJLib/pylib/seq/pileupCount.py
+ref	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+dnaSample	re.findall('Sample_[\w\-]+','{line0}')[0]
+rnaSample	re.findall('Sample_[\w\-]+','{line1}')[0]
+LoopOverLine	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/dna_vcf_rna_bam_list.txt
+outputpath	/nethome/bjchen/Projects/SOHN_neuroblastoma/data/rna_pileup/
+logpath	{outputpath}/log/
+prefix	{dnaSample}_{rnaSample}.rna.pileup
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q
+runThru	False
+
+

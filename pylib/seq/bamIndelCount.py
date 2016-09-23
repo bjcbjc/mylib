@@ -10,7 +10,7 @@ import bamseqquery
 __author__ = 'bjchen'
 
 class IndelCounter(object):
-    def __init__(self, refFn, exonFn, tmpDir, bedtools, samtools=None, minMQ=0, skipFlag=3852):
+    def __init__(self, refFn, exonFn, tmpDir, bedtools, samtools=None, minMQ=0, skipFlag=3852, ignoreEmptyMatchedSeq=False):
         self.refFn = refFn
         self.exonFn = exonFn
         self.ref = None
@@ -18,6 +18,7 @@ class IndelCounter(object):
         self.tmpDir = tmpDir
         self.bedtools = bedtools
         self.samtools = samtools
+        self.ignoreEmptyMatchedSeq = ignoreEmptyMatchedSeq
         self.samViewEngine = bamseqquery.SamtoolsView(samtools=samtools, minMQ=minMQ, skipFlag=skipFlag)
         # find fai
         fn = glob.glob('%s.fai'%self.refFn)
@@ -42,6 +43,11 @@ class IndelCounter(object):
             raise ValueError('%s not in reference'%chrm)
 
     def intersect_exon(self, indelRegions):
+        """
+
+        :param indelRegions:
+        :return: [(idx, (chrm, start, end))]
+        """
         firstLine = open(self.exonFn).readline().split()[0]
         if 'chr' in firstLine:
             chrmFormat = 'chr'
@@ -80,8 +86,16 @@ class IndelCounter(object):
                 f.write('\t'.join(map(str, line)) + '\n')
 
     def count_indel(self, bamFile, variantFile, maxMismatch):
-        # get indel regions in inputFile; [ [chrm, start, end, ref, alt], [originStart, originEnd, originRef, originAlt] ]
+        """
+
+        :param bamFile:
+        :param variantFile:
+        :param maxMismatch:
+        :return: [ [gene, chrm, original_start, original_end, original_ref, original_alt, start, end, ref, alt, count_ref, count_alt, count_incomp] ]
+        """
+        # get indel regions in inputFile; [ [chrm, start, end, ref, alt, gene], [originStart, originEnd, originRef, originAlt] ]
         indels = self.process_indel(variantFile)
+
 
         chrmFormat = self.get_chrm_format(bamFile)
         #filter to get exonic indels; [ [chrm, start, end, idx] ]
@@ -102,7 +116,7 @@ class IndelCounter(object):
             if ref == alt: #after exonic filtering, the sequences are the same, this just suggest it's outside exons
                 continue
             try:
-                counter = self.samViewEngine.count_seq(bamFile, chrm, start, [ref, alt], maxMismatch, '-' in ref)
+                counter = self.samViewEngine.count_seq(bamFile, chrm, start, [ref, alt], maxMismatch, '-' in ref, self.ignoreEmptyMatchedSeq)
             except:
                 print idx, reg
                 print ref0, alt0
@@ -123,7 +137,7 @@ class IndelCounter(object):
         result = list()
         #consolidate results
         for idx in xrange(len(indels)):
-            record = [indels[idx][0][-1], indels[idx][0][0]]
+            record = [indels[idx][0][-1], indels[idx][0][0]]  #[gene, chrm, original_start, original_end, original_ref, original_alt]
             record.extend(indels[idx][1])
             if idx in indelCount:
                 record.extend(indelCount[idx])
@@ -134,21 +148,43 @@ class IndelCounter(object):
 
     def process_indel(self, variantFile):
         """
-        return list of indels; for each element, it contains three lists
-        [chrm, matched_start, matched_end], [ref, alt], [original_start, original_end]]
+        return list of indels; for each element, it contains two lists
+        [chrm, matched_start, matched_end, ref, alt, gene], [original_start, original_end, original_ref, original_alt]]
         :param variantFile:
         :return:
         """
         indels = []
         if variantFile[-4:] == '.vcf':
-            print 'not supported yet'
-            exit()
-            # for line in open(inputFile):
-            #     if line[0] != '#':
-            #         line = line.strip().split('\t')
-            #         chrm, start, ref, alt = line[0], line[1], line[3], line[4]
-            #         if len(ref) > 1 or len(alt) > 1: #indel
-            #             indels.append( [[chrm, start], [ref, alt]] )
+            for line in open(variantFile):
+                if line.startswith('#'):
+                    continue
+                line = line.strip().split('\t')
+                chrm, start, ref, alts = line[0], int(line[1]), line[3], line[4]
+                alts = [x.strip() for x in alts.split(',')]
+                alts = [x for x in alts if len(x) != len(ref)]
+                refLen = len(ref)
+                for alt in alts:
+                    altLen = len(alt)
+                    if refLen > altLen: #deletion
+                        delLen = refLen - altLen
+                        delStart = start + altLen
+                        delEnd = delStart + delLen - 1
+                        start2, end2, ref2, alt2 = self.search_del_lookup(chrm, delStart, delEnd, ref[-delLen:])
+                        refOrigin = ref[-delLen:]
+                        altOrigin = '-'
+                        indels.append([[chrm, start2, end2, ref2, alt2, 'Unknown'], [start, start + max(refLen, altLen) - 1, ref, alt]])
+                        # same format as before:
+                        # indels.append([[chrm, start2, end2, ref2, alt2, 'Unknown'], [delStart, delEnd, refOrigin, altOrigin]])
+                    else: #insertion
+                        insLen = altLen - refLen
+                        insStart = start + refLen
+                        start2, end2, ref2, alt2 = self.search_ins_lookup(chrm, insStart, alt[-insLen:])
+                        refOrigin = '-'
+                        altOrigin = alt[-insLen:]
+                        indels.append([[chrm, start2, end2, ref2, alt2, 'Unknown'], [start, start + max(refLen, altLen) - 1, ref, alt]])
+                        # same format as before:
+                        # indels.append([[chrm, start2, end2, ref2, alt2, 'Unknown'], [insStart, insStart+1, refOrigin, altOrigin]])
+
         elif variantFile[-4:] == '.maf':
             with open(variantFile) as f:
                 header = f.readline()
@@ -270,6 +306,10 @@ if __name__ == '__main__':
     parser.add_argument('-samtools', type=str,
                         default='/nfs/sw/samtools/samtools-1.1/samtools',
                         help='path to samtools')
+    parser.add_argument('-countEmptyMatchedSeq', action='store_true',
+                        help='during search, count those sequences (matched by position) that are all "-". '
+                             'These are mostly intronic or very long deletion. If this flag is enabled, these reads will be'
+                             'counted as incompatible reads.')
     parser.add_argument('-minMQ', type=int, default=0, help='min mapping quality for a read to be counted')
     parser.add_argument('-maxMismatch', type=int, default=2, help='maximum number of mimatches allowed')
     parser.add_argument('-skipFlag', type=int, default=3852, help='sam flag to filter reads')
@@ -279,7 +319,7 @@ if __name__ == '__main__':
 
 
     counter = IndelCounter(args['reference'], args['exonAnnt'], args['tmpDir'], args['bedtools'],
-                           args['samtools'], args['minMQ'], args['skipFlag'])
+                           args['samtools'], args['minMQ'], args['skipFlag'], (not args['countEmptyMatchedSeq']))
 
     result = counter.count_indel(args['bamFile'], args['variantFile'], args['maxMismatch'])
     counter.output_indel_count_result(result, args['outputFile'])

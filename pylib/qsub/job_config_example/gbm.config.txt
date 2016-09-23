@@ -1,0 +1,39 @@
+
+##not used
+indel.rna.count: 
+cmd	runJobs
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/seq
+python	/data/NYGC/Software/python/bin/python2.7
+call	{python} {pyscript} -variantFile {maf} -bamFile {bam} -outputFile {outputpath}{sample}.indelCount.rna.txt; 
+pyscript	/nethome/bjchen/BJLib/pylib/seq/bamIndelCount.py
+outputpath	/data/analysis/DarnellR/Project_DAR_10635_WGS/Sample_G15-08T-D-run1/analysis/alleleCount/
+logpath	{outputpath}
+prefix	{sample}.indel.rna_count
+overwrite	True
+mem	8G
+time	24::
+sgeopt	-q prod.q,dev.q
+
+
+
+pileup.rna:
+toShell	export PYTHONPATH=/nethome/bjchen/BJLib/pylib/utils
+cmd	pileupCountMaf
+pyprog	/nethome/bjchen/BJLib/pylib/seq/pileupCount.py
+rnaprojectpath	/data/analysis/DarnellR/Project_DAR_10635_TXS_RNA/
+dnaprojectpath	/data/analysis/DarnellR/Project_DAR_10635_WGS/
+logpath	{dnaprojectpath}Sample_{dnaSample}/analysis/alleleCount/logs/
+outputpath	{dnaprojectpath}Sample_{dnaSample}/analysis/alleleCount/
+tmpoutpath	/scratch/BJC_TMP/
+-f	/data/NYGC/Resources/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
+-r	1
+-d	200000
+-q	50
+-o	{outputpath}{sample}.rnaAlleleCount.txt
+-tableformat
+-B
+prefix	pileupcount_with_indel
+inputlist	/nethome/bjchen/Projects/GBM/data/GBM_trial/dnamaf.rnabam.txt
+overwrite	True
+mem	4G
+time	24::

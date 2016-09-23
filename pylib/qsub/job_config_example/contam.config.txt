@@ -1,0 +1,1572 @@
+
+verifyBamID.crystal_spike.gencodev18_vcf:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.prefilteredvcf.sh
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/nfs/sw/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/phase3_intersect_gencode_v18_exon_UTR.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_spikein2_5.bamlist 
+outprefix	{outputpath}{sample}.omni3_gencodev18.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.crystal_spike.sselectv4_vcf:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.prefilteredvcf.sh
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/nfs/sw/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/phase3_intersect_sureselectv4_exon_UTR.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_spikein2_5.bamlist 
+outprefix	{outputpath}{sample}.omni3_ss4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+
+
+verifyBamID.Geuvadis_spike.gencodev18_vcf:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.prefilteredvcf.sh
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/nfs/sw/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/phase3_intersect_gencode_v18_exon_UTR.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Geuvadis_RNA_spikein.bamlist 
+outprefix	{outputpath}{sample}.omni3_gencodev18.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.Geuvadis_spike.sselectv4_vcf:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.prefilteredvcf.sh
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/nfs/sw/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/phase3_intersect_sureselectv4_exon_UTR.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Geuvadis_RNA_spikein.bamlist 
+outprefix	{outputpath}{sample}.omni3_ss4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+runVII.withBAF:
+cmd	runVII
+python	/data/NYGC/Software/python/Python-2.7.3/python
+pyscript	/nethome/bjchen/Projects/contamination/VII_wrapper/VII_report.py
+#LoopOverFile	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/Synthetic_Mixing_V4/Data/adpc.bin
+LoopOverFile	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/SyntheticContamination_HapMap/Data/adpc.bin
+LoopOverMode	pooled; single
+#outputpath	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/Synthetic_Mixing_V4/withBAF/
+outputpath	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/SyntheticContamination_HapMap/withBAF/
+#sampleSheet	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/Synthetic_Mixing_V4/09Mar2015_08Aug14_HapMaps_WAL10643_SynthV4.csv
+sampleSheet	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/SyntheticContamination_HapMap/09Mar2015_SyntheticCont_SampleSheet.csv
+baf	/nethome/bjchen/Projects/contamination/chip2vcf/HumanCoreExome-24v1-0_A.BAF.txt
+jobprefix	runVII.{LoopOverMode}.{basename}.{af}.withBAF
+sgeopt	-q prod_short.q,prod.q,reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+runVII.pure_and_control:
+cmd	runVII
+python	/data/NYGC/Software/python/Python-2.7.3/python
+pyscript	/nethome/bjchen/Projects/contamination/VII_wrapper/VII_report.py
+LoopOverFile	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/Synthetic_Mixing_V4/pure_and_control_reordered/pure_and_control.bin
+LoopOverMode	pooled; single
+sampleSheet	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/Synthetic_Mixing_V4/pure_and_control_reordered/pure_and_control.csv
+jobprefix	runVII.{LoopOverMode}.{basename}.{af}
+sgeopt	-q prod_short.q,prod.q,reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+runVII:
+cmd	runVII
+python	/data/NYGC/Software/python/Python-2.7.3/python
+pyscript	/nethome/bjchen/Projects/contamination/VII_wrapper/VII_report.py
+LoopOverFile	/data/sequence/ILLUMINA_HISCAN/GenomeStudio Projects/Synthetic_Mixing_V4/subset_reordered/*.bin
+LoopOverMode	pooled; single
+jobprefix	runVII.{LoopOverMode}.{basename}.{af}
+sgeopt	-q prod_short.q,prod.q,reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+verifyBamID.MOR_10539.omni_exome.chrm:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/nfs/sw/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/MOR_10539_Exome.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4_b37.interval_list.bed 
+outprefix	{outputpath}{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.MOR_10401.omni_exome.chrm:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/nfs/sw/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/MOR_10401_Exome.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4_b37.interval_list.bed 
+outprefix	{outputpath}{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+
+
+
+
+pileupDP.Crystal_RNA_random10.omni:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/omni25_1525_intersect_sselectv4utr.af0.01.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_random10.bamlist 
+reference	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+dpLadder	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+
+pileupDP.Crystal_RNA_spike2_5.omni:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/omni25_1525_intersect_sselectv4utr.af0.01.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_spikein2_5.bamlist 
+reference	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+dpLadder	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.Crystal_RNA_weirdaf.omni:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/omni25_1525_intersect_sselectv4utr.af0.01.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_weirdaf2.bamlist 
+reference	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+dpLadder	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.SYM_10366_RNA.omni:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/omni25_1525_intersect_sselectv4utr.af0.01.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SYM_10366_RNA.bamlist
+reference	/nethome/bjchen/Projects/Simon/h37_hg19_chrOnly.fa
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+dpLadder	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.PAZ_10123_RNA.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/PAZ_10123_RNA.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.SYM_10366_RNA.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SYM_10366_RNA.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.Crystal_spike2_5.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_spikein2_5.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.Crystal_weirdaf.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_weirdaf.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.Crystal_random10.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_random10.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.Crystal_spike.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Crystal_RNA_spikein.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.Geuvadis_spike.sselectv4:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.rna.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+samtools	/data/NYGC/Software/samtools/samtools-0.1.19/samtools
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Geuvadis_RNA_spikein.bamlist 
+outprefix	{outputpath}{sample}.omni1_exomeV4.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	6G
+time	1::
+
+
+verifyBamID.WAL.DP20:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+verifyBamID	/data/NYGC/Software/verifyBamId/verifyBamId-1.1.0/verifyBamID
+phase1	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+#phase3	/data/NYGC/Resources/1000genomes/Omni25_genotypes_2141_samples.b37.v2.no_genotype.biallelic_SNP.PASS.vcf
+vcf	{{{LoopOverVcf}}}
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Project_WAL_01403_WGS_100.bamlist
+outprefix	{outputpath}{sample}.{LoopOverVcf}.DP20
+minQ	13
+minMapQ	10
+maxDepth	20
+LoopOverVcf	phase1
+jobprefix	runVerifyBamID.{sample}.{LooOverVcf}.DP20
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.WAL:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+verifyBamID	/data/NYGC/Software/verifyBamId/verifyBamId-1.1.0/verifyBamID
+phase1	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+phase3	/data/NYGC/Resources/1000genomes/Omni25_genotypes_2141_samples.b37.v2.no_genotype.biallelic_SNP.PASS.vcf
+vcf	{{{LoopOverVcf}}}
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/Project_WAL_01403_WGS_100.bamlist
+outprefix	{outputpath}{sample}.{LoopOverVcf}
+minQ	13
+minMapQ	10
+maxDepth	150
+LoopOverVcf	phase1; phase3
+jobprefix	runVerifyBamID.{sample}.{LooOverVcf}
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.test_raw_recal_base_qual.dedup:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/NYGC/Software/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/test_raw_recal_base_qual.dedup.bamlist
+outprefix	{outputpath}{sample}.DP{maxDepth}
+minQ	13
+minMapQ	10
+maxDepth	{LoopOverMaxDepth}
+LoopOverMaxDepth	20
+jobprefix	runVerifyBamID.{sample}.DP{maxDepth}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.test_raw_recal_base_qual:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/NYGC/Software/verifyBamId/verifyBamId-1.1.0/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/test_raw_recal_base_qual.bamlist
+outprefix	{outputpath}{sample}.DP{maxDepth}
+minQ	13
+minMapQ	10
+maxDepth	{LoopOverMaxDepth}
+LoopOverMaxDepth	1000; 20
+jobprefix	runVerifyBamID.{sample}.DP{maxDepth}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+verifyBamID.CRY01381_spike_exome.omni3:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_2141_samples.b37.v2.no_genotype.biallelic_SNP.PASS.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.spike_in.bamlist
+outprefix	{outputpath}{sample}.omni3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.hapmap_spike_exome.omni3:
+cmd	runVerifyBamIDLoop
+outputpath	/nethome/bjchen/Projects/contamination/data/hapmap_spikein/
+logpath	/nethome/bjchen/Projects/contamination/data/hapmap_spikein/log/
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/NYGC/Resources/1000genomes/Omni25_genotypes_2141_samples.b37.v2.no_genotype.biallelic_SNP.PASS.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/hapmap_spikein.originalCov.bamlist 
+outprefix	{outputpath}{sample}.omni3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.SMO10091.omni:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/CRY01381.omni_exome.AF0.01.txt
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_10091_Exome.selected.bamlist
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.CRY01381.spike.omni:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/CRY01381.omni_exome.AF0.01.txt
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.spike_in.bamlist
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.CRY01381.spike.1kphase3:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/CRY01381.1kphase3_exome.AF0.01.txt
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.spike_in.bamlist
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+output	{outputpath}{sample}.1kphase3_exome.alleleCount.txt
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.1kphase3_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.exome.1kphase3_notOmni.DP1000:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.1kphase3_notOmni.exome.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_notOmni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.exome.1kphase3_omni_overlap.DP1000:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.1kphase3_omni_overlap.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.exome.rand_1kphase3.DP1000:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.1kphase3.exome.{LoopOverVcf}.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+LoopOverVcf	random1; random2; random3; random4; random5
+outprefix	{outputpath}{sample}.1kphase3_exome_{LoopOverVcf}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381_spike_exome.loop:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	{{{LoopOverVcf}}}
+omni	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+1kphase3	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.spike_in.bamlist
+outprefix	{outputpath}{sample}.{LoopOverVcf}_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	{LoopOverDepth}
+LoopOverVcf	1kphase3; omni
+LoopOverDepth	1000; 150
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+spike.CRY01381:
+cmd	mixSample
+logpath	/data/benchmark/Contamination/Project_Contamination_CRY_01381_Exome/log/
+scriptpath	/data/benchmark/Contamination/Project_Contamination_CRY_01381_Exome/scripts/
+inputlist	/nethome/bjchen/Projects/contamination/data/qsublist/mixing_cry01381.qsublist
+jobprefix	mix_{sample1}_{sample2}_{frac}
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.exome.chip_exome.DP1000AF0.2:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.AF.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.chip.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}AF{minAF}
+minQ	13
+minMapQ	10
+minAF	0.2
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}AF{minAF}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.exome.filterbed.DP1000MQ30:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	{{{LoopOverVcf}}}
+omni	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+1kphase3	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/{{{LoopOverBed}}}
+noHLA	SureSelect_All_Exon_V5_b37.interval_list.autosome.noHLA.bed
+noMap	SureSelect_All_Exon_V5_b37.interval_list.autosome.noMap.bed
+noMapHLA	SureSelect_All_Exon_V5_b37.interval_list.autosome.noMap.noHLA.bed
+LoopOverBed	noHLA; noMap; noMapHLA
+LoopOverVcf	1kphase3; omni
+outprefix	{outputpath}{sample}.{LoopOverVcf}_exome_{LoopOverBed}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	30
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.1kphase3_exome_NoHLA.chrm6.DP1000:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/SureSelect_All_Exon_V5_b37.interval_list.autosome.noHLA.bed
+outprefix	{outputpath}{sample}.1kphase3_exome_noHLA.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome_noHLA.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.hapmap_spike_exome.loop:
+cmd	runVerifyBamIDLoop
+outputpath	/nethome/bjchen/Projects/contamination/data/hapmap_spikein/
+logpath	/nethome/bjchen/Projects/contamination/data/hapmap_spikein/log/
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	{{{LoopOverVcf}}}
+omni	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+1kphase3	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/hapmap_spikein_batch2.original.bamlist 
+outprefix	{outputpath}{sample}.{LoopOverVcf}_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	{LoopOverDepth}
+LoopOverVcf	1kphase3; omni
+LoopOverDepth	1000; 150
+sgeopt	-q reanal.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.exome.filterbed.DP1000:
+cmd	runVerifyBamIDLoop
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	{{{LoopOverVcf}}}
+omni	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+1kphase3	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/{{{LoopOverBed}}}
+noHLA	SureSelect_All_Exon_V5_b37.interval_list.autosome.noHLA.bed
+noMap	SureSelect_All_Exon_V5_b37.interval_list.autosome.noMap.bed
+noMapHLA	SureSelect_All_Exon_V5_b37.interval_list.autosome.noMap.noHLA.bed
+LoopOverBed	noHLA; noMap; noMapHLA
+LoopOverVcf	1kphase3; omni
+outprefix	{outputpath}{sample}.{LoopOverVcf}_exome_{LoopOverBed}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+
+verifyBamID.VOL0000.omni_exome.chrm.DP150:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/VOL_0000_Exome.selected.subset.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.VOL0000.1kphase3_exome.chrm.DP150:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/VOL_0000_Exome.selected.subset.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.SMO10091.omni_exome.chrm.DP150:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_10091_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelectXT_All_Exon_V5+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.SMO10091.1kphase3_exome.chrm.DP150:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_10091_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelectXT_All_Exon_V5+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.omni_exome_auto.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK_CT.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/SureSelect_All_Exon_V5_b37.interval_list.autosome.bed
+outprefix	{outputpath}{sample}.omni_exome_auto.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome_auto.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.1kphase3_exome.chrm.DP150:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.1kphase3_exome.chrm.DP1000:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.omni_exome.chrm.DP1000:
+cmd	runVerifyBamIDByChrm
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.chrm.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.chr{chrm}.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.CRY01381.exome.omni_exome.selected:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/CRY01381.omni_exome.AF0.01.txt
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK.bamlist
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+output	{outputpath}{sample}.omni_exome.alleleCount.txt
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.omni_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.CRY01381.exome.1kphase3_exome.selected:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/CRY01381.1kphase3_exome.AF0.01.txt
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.MSK.bamlist
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+output	{outputpath}{sample}.1kphase3_exome.alleleCount.txt
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.1kphase3_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.omni_exomev4v5int.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/SureSelect_All_Exon_V4_intersect_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.omni_exomev4v5int.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/SureSelect_All_Exon_V4_intersect_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.1kphase3_exomev4v5int.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/SureSelect_All_Exon_V4_intersect_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.1kphase3_exomev4v5int.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/nethome/bjchen/Projects/contamination/data/SureSelect_All_Exon_V4_intersect_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exomev4v5int.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.all_10072014.1kphase3_exome_intersect.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/all.10072014.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exomeint.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exomeint.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+pileupDP.CRY01381.exome.chip_exome:
+cmd	pileup
+loc	/nethome/bjchen/Projects/contamination/data/CRY01381.chip_exom.AF0.01.txt
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+output	{outputpath}{sample}.chip_exome.alleleCount.txt
+sgeopt	-q reanal.q,res.q
+jobprefix	alleleCount.{sample}.chip_exome
+overwrite	True
+mem	4G
+time	1::
+
+
+pileup.CRY_01381_Exome.selected:
+cmd	pileup_selected
+inputpath	/nethome/bjchen/Projects/contamination/data/
+outputpath	/nethome/bjchen/Projects/contamination/data/alleleCount/
+reference	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37.fasta
+bam	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/{sample}.final.bam
+#sample	MSK_CSC_059_CT; MSK_CSC_062_CT; MSK_CSC_101_CT
+sample	NH_040_BLD_DNA; EC_003_AM_DNA; NH_133_SAE_DNA; DGM_12085_BLD_DNA; MSK_CSC_100_NT; AA_007_SAE_DNA; AA_015_BLD_DNA; AA_030_BLD_DNA; DGM_00416_BLD_DN
+maxDepth	1000
+vcf	1kphase3; omni
+loc	{inputpath}{vcf}_exome.AF0.01.vcf
+output	{outputpath}{sample}_{vcf}_DP{maxDepth}.alleleCount.txt
+prefix	{sample}_{vcf}_DP{maxDepth}.alleleCount
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	1G
+time	1::
+
+
+verifyBamID.CRY01381.exome.chip_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.chip.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+verifyBamID.CRY01381.exome.chip_exome.DP300:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.chip.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	300
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.exome.chip_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/CRY01381.chip.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CRY_01381_Exome.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.chip_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+verifyBamID.VOL0000_subset.1kphase3_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/VOL_0000_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.VOL0000_subset.1kphase3_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/VOL_0000_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.VOL0000_subset.omni_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/VOL_0000_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.VOL0000_subset.omni_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/VOL_0000_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+verifyBamID.SMO01020_subset.omni_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_01020_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelectXT_All_Exon_V5+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+#sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.SMO01020_subset.omni_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_01020_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelectXT_All_Exon_V5+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+#sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.SMO01020_subset.1kphase3_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_01020_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelectXT_All_Exon_V5+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+#sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.SMO01020_subset.1kphase3_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/SMO_01020_Exome.selected.bamlist 
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelectXT_All_Exon_V5+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+#sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CHU.exome.1kphase3_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CHU_00000_01294_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CHU.exome.1kphase3_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CHU_00000_01294_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CHU.exome.omni_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CHU_00000_01294_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CHU.exome.omni_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/CHU_00000_01294_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.hapmap.omni_all.DP20:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+outputpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/hapmap.nospike.bamlist
+outprefix	{outputpath}{sample}.omni_all.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	20
+jobprefix	runVerifyBamID.{cov}.{sample}.omni_all.DP{maxDepth}MQ{minMapQ}Q{minQ}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+verifyBamID.hapmap_spike_exome.omni_exome.DP200:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/hapmap_spikein_batch12.50x150x200x.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/test.bamlist
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	200
+jobprefix	runVerifyBamID.{cov}.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.hapmap_spike_exome.omni_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/hapmap_spikein_batch2.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/test.bamlist
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+jobprefix	runVerifyBamID.{cov}.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.hapmap_spike_exome.1kphase3_exome.DP200:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/hapmap_spikein_batch12.50x150x200x.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/test.bamlist
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	200
+jobprefix	runVerifyBamID.{cov}.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.hapmap_spike_exome.1kphase3_exome.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/benchmark/Contamination/Project_Contamination_Exomes/{cov}/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V4+UTR_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/hapmap_spikein_batch2.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/bamlist/test.bamlist
+outprefix	{outputpath}{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+jobprefix	runVerifyBamID.{cov}.{sample}.1kphase3_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+sgeopt	-q reanal.q,prod.q,res.q,dev.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+
+verifyBamID.CRY01381.exome.omni_exome.DP150:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/CRY_01381_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	150
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.exome.omni_exome:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/CRY_01381_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+outprefix	{outputpath}{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_exome.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+verifyBamID.CRY01381.exome.omni_all.DP1000:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+outputpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/log/
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/data/analysis/jpatel/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites.vcf.gz
+bamlist	/nethome/bjchen/Projects/contamination/data/CRY_01381_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+outprefix	{outputpath}{sample}.omni_all.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	1000
+sgeopt	-q reanal.q,prod.q,res.q
+jobprefix	runVerifyBamID.{sample}.omni_all.DP{maxDepth}MQ{minMapQ}Q{minQ}
+overwrite	True
+mem	4G
+time	1::
+
+
+
+verifyBamID.CRY01381.exome.1kphase_all:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.genome.template.sh
+outputpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/log/
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+bamlist	/nethome/bjchen/Projects/contamination/data/CRY_01381_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+outprefix	{outputpath}{sample}.1kphase3_all.DP{maxDepth}MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+maxDepth	20
+jobprefix	runVerifyBamID.{sample}.1kphase3_all.DP{maxDepth}MQ{minMapQ}Q{minQ}
+#sgeopt	-q reanal.q
+overwrite	True
+mem	4G
+time	1::
+
+lowRateSubsampling.hapmap:
+cmd	subSample
+logpath	/data/benchmark/Contamination/scripts/lowrate_log/
+scriptpath	/data/benchmark/Contamination/scripts/
+#inputlist	/nethome/bjchen/Projects/contamination/data/sampling_hapmap.100x.qsublist
+inputlist	/nethome/bjchen/Projects/contamination/data/sampling_hapmap.rest.qsublist
+jobprefix	sub_{sample1}_{sample2}_{frac}_{cov}
+sgeopt	-q reanal.q,res.q
+overwrite	True
+mem	4G
+time	1::
+
+lowRateMix.hapmap:
+cmd	mixSample
+logpath	/data/benchmark/Contamination/scripts/lowrate_log/
+scriptpath	/data/benchmark/Contamination/scripts/
+inputlist	/nethome/bjchen/Projects/contamination/data/mixing_hapmap.qsublist
+jobprefix	mix_{sample1}_{sample2}_{frac}
+sgeopt	-q reanal.q
+overwrite	True
+mem	4G
+time	1::
+
+
+
+
+verifyBamID.CRY01381.exome:
+cmd	runVerifyBamID
+template	/nethome/bjchen/Projects/contamination/shscript/verifyBamID.exome.template.sh
+outputpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/
+logpath	/data/analysis/CrystalR/Project_CRY_01381_Exome/Sample_{sample}/analysis/verifyBamID_results/log/
+bedtools	/data/NYGC/Software/bedtools/bedtools-2.17.0/bin/bedtools 
+verifyBamID	/data/analysis/jpatel/verifyBamID_1.1.0/verifyBamID/bin/verifyBamID
+#vcf	/data/NYGC/Resources/1000genomes/Phase_3_20130502/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.vcf.gz
+vcf	/nethome/bjchen/Projects/contamination/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated.20130502.sites.snponly.biallelic.pass.vcf
+exomebed	/data/NYGC/Resources/Annotation/exome_capture_intervals/sureselect/SureSelect_All_Exon_V5_b37.interval_list.bed
+bamlist	/nethome/bjchen/Projects/contamination/data/CRY_01381_Exome.bamlist
+#bamlist	/nethome/bjchen/Projects/contamination/data/test.bamlist
+outprefix	{outputpath}{sample}.MQ{minMapQ}Q{minQ}
+minQ	13
+minMapQ	10
+#maxDepth	1000
+jobprefix	runVerifyBamID.{sample}.MQ{minMapQ}Q{minQ}
+sgeopt	-q reanal.q
+overwrite	True
+mem	4G
+time	1::
+
+

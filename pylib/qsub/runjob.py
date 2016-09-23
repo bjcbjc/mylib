@@ -31,7 +31,7 @@ def runJobs(cmdset, runmode='test'):
 
     jobmanager = jobFactory.jobManager(mem=cmdset['mem'], time=cmdset['time'], overwrite=cmdset.pop('overwrite'))
     if 'sampleList' in cmdset:
-        cmdset['LoopOverSample'] = readSampleList(cmdset['sampleList'])
+        cmdset['LoopOverSample'] = readSampleList(cmdset['sampleList'].format(**cmdset))
     if 'LoopOverLine' in cmdset:
         cmdset['LoopOverLine'] = readInputList(cmdset['LoopOverLine'])
     loopVarName, loopList, cmdset = configRobot.getLoopOverList( cmdset )

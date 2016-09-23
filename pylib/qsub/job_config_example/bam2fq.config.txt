@@ -1,0 +1,187 @@
+
+compressReadNameQual.redun:
+cmd	runJobs
+call	zcat {LoopOverFile} | gawk -f {script} -v barcode="{barcode}" | gzip > {outputpath}{basename}.rmredun.txt.gz
+script	/data/benchmark/bam2fq/script/remove_redun_header_plus_qual.awk
+#LoopOverFile	/data/benchmark/bam2fq/TestSample/reduced_fastq/*.namequal.txt.gz
+LoopOverFile	/data/benchmark/bam2fq/NWD*/reduced_fastq/*.namequal.txt.gz
+sample	re.findall(r'(\w+)/reduced_fastq', '{LoopOverFile}')[0]
+basename	re.findall(r'([\.\w]+).txt.gz', '{LoopOverFile}')[0]
+barcode	re.findall(r'([a-zA-Z0-9]+)', re.findall(r'([\.\w]+).txt.gz', '{LoopOverFile}')[0])[1]
+outputpath	/data/benchmark/bam2fq/{sample}/reduced_fastq/
+logpath	/data/benchmark/bam2fq/{sample}/log/
+prefix	{sample}.compressReadNameQual.redun.{basename}
+overwrite	True
+mem	10G
+time	72::
+sgeopt	-q prod.q,dev.q
+trackcmd	False
+
+
+
+extractReadNameQual.fastq:
+cmd	runJobs
+call	zcat {LoopOverFile} | gawk 'NR%4==1 || NR%4==0' | gzip > {outputpath}{basename}.namequal.txt.gz
+#LoopOverFile	/data/benchmark/bam2fq/TestSample/fastq/*.fastq.gz
+LoopOverFile	/data/benchmark/bam2fq/NWD*/fastq/*.fastq.gz
+sample	re.findall(r'(\w+)/fastq', '{LoopOverFile}')[0]
+basename	re.findall(r'([\.\w]+).fastq.gz', '{LoopOverFile}')[0]
+outputpath	/data/benchmark/bam2fq/{sample}/reduced_fastq/
+logpath	/data/benchmark/bam2fq/{sample}/log/
+prefix	{sample}.extractReadNameQual.{basename}
+overwrite	True
+mem	10G
+time	72::
+sgeopt	-q prod.q,dev.q
+trackcmd	False
+
+
+compressReadInfo.redun:
+cmd	runJobs
+call	zcat {LoopOverFile} | gawk -f {script} -v barcode="{barcode}" | gzip > {outputpath}{basename}.rmredun.txt.gz
+script	/data/benchmark/bam2fq/script/remove_redun_header.awk
+#LoopOverFile	/data/benchmark/bam2fq/TestSample/reduced_fastq/*.readname.txt.gz
+LoopOverFile	/data/benchmark/bam2fq/NWD*/reduced_fastq/*.readname.txt.gz
+sample	re.findall(r'(\w+)/reduced_fastq', '{LoopOverFile}')[0]
+basename	re.findall(r'([\.\w]+).txt.gz', '{LoopOverFile}')[0]
+barcode	re.findall(r'([a-zA-Z0-9]+)', re.findall(r'([\.\w]+).txt.gz', '{LoopOverFile}')[0])[1]
+outputpath	/data/benchmark/bam2fq/{sample}/reduced_fastq/
+logpath	/data/benchmark/bam2fq/{sample}/log/
+prefix	{sample}.compressReadInfo.redun.{basename}
+overwrite	True
+mem	10G
+time	72::
+sgeopt	-q prod.q,dev.q
+trackcmd	False
+
+
+extractReadQual.fastq:
+cmd	runJobs
+call	zcat {LoopOverFile} | gawk 'NR%4==0' | gzip > {outputpath}{basename}.qual.txt.gz
+LoopOverFile	/data/benchmark/bam2fq/TestSample/fastq/*.fastq.gz
+#LoopOverFile	/data/benchmark/bam2fq/NWD*/fastq/*.fastq.gz
+sample	re.findall(r'(\w+)/fastq', '{LoopOverFile}')[0]
+basename	re.findall(r'([\.\w]+).fastq.gz', '{LoopOverFile}')[0]
+outputpath	/data/benchmark/bam2fq/{sample}/reduced_fastq/
+logpath	/data/benchmark/bam2fq/{sample}/log/
+prefix	{sample}.extractReadQual.{basename}
+overwrite	True
+mem	10G
+time	72::
+sgeopt	-q prod.q,dev.q
+trackcmd	False
+
+
+extractReadInfo.fastq:
+cmd	runJobs
+call	zcat {LoopOverFile} | gawk 'NR%4==1' | gzip > {outputpath}{basename}.txt.gz
+#LoopOverFile	/data/benchmark/bam2fq/TestSample/fastq/*.fastq.gz
+LoopOverFile	/data/benchmark/bam2fq/NWD*/fastq/*.fastq.gz
+sample	re.findall(r'(\w+)/fastq', '{LoopOverFile}')[0]
+basename	re.findall(r'([\.\w]+).fastq.gz', '{LoopOverFile}')[0]
+outputpath	/data/benchmark/bam2fq/{sample}/reduced_fastq/
+logpath	/data/benchmark/bam2fq/{sample}/log/
+prefix	{sample}.extractReadInfo.{basename}
+overwrite	True
+mem	10G
+time	72::
+sgeopt	-q prod.q,dev.q
+trackcmd	False
+
+
+gatk.printBQSR_RQ_only:
+cmd	runJobs
+call	{java} -Xmx24576m -Djava.io.tmpdir={tmppath} -jar {jar} -T {task} -nct 4 -rf BadCigar --disable_indel_quals -R {ref} -I {inputpath}{LoopOverSample}.realigned.bam -o {outputpath}{LoopOverSample}.BQSR_RQ.bam -BQSR {inputpath}{LoopOverSample}.recal.grp 
+java	/data/NYGC/software/java/jre1.7.0_25/bin/java
+jar	/data/NYGC/Software/GenomeAnalysisTK/GenomeAnalysisTK-3.2-2/GenomeAnalysisTK.jar
+task	PrintReads
+ref	/data/NYGC/Resources/Indexes/bwa/human_g1k_v37_decoy.fasta
+randstr	''
+#LoopOverSample	TestSample
+LoopOverSample	NWD248497; NWD353099; NWD498954
+tmppath	/scratch/bam2fq_{LoopOverSample}_{randstr}
+inputpath	/data/benchmark/bam2fq/{LoopOverSample}/original_bam/
+outputpath	/data/benchmark/bam2fq/{LoopOverSample}/reduced_bam/
+logpath	/data/benchmark/bam2fq/{LoopOverSample}/log/
+prefix	{LoopOverSample}.gatk.BQSR_RQ
+overwrite	True
+mem	36G
+time	72::
+sgeopt	-q prod.q,dev.q
+
+
+bamUtil.revert.stripOQ:
+cmd	runJobs
+call	{bamutil} revert --in {inputpath}{LoopOverSample}.final.bam --out {outputpath}{LoopOverSample}.bamUtil_revert_to_RQ.bam --rmtags OQ:Z --params --noPhoneHome; {samtools} index {outputpath}{LoopOverSample}.bamUtil_revert_to_RQ.bam
+bamutil	/data/benchmark/bam2fq/bamUtil_1.0.13/bamUtil/bin/bam
+samtools	/nfs/sw/samtools/samtools-1.1/samtools
+#LoopOverSample	TestSample
+LoopOverSample	NWD248497; NWD353099; NWD498954
+inputpath	/data/benchmark/bam2fq/{LoopOverSample}/original_bam/
+outputpath	/data/benchmark/bam2fq/{LoopOverSample}/reduced_bam/
+logpath	/data/benchmark/bam2fq/{LoopOverSample}/log/
+prefix	{LoopOverSample}.bamUtil.revert.stripOQ
+overwrite	True
+mem	30G
+time	72::
+sgeopt	-q prod.q,dev.q
+
+
+bamUtil.revert.revertOQ:
+cmd	runJobs
+call	{bamutil} revert --in {inputpath}{LoopOverSample}.final.bam --out {outputpath}{LoopOverSample}.bamUtil_revert_to_OQ.bam  --qual --params --noPhoneHome; {samtools} index {outputpath}{LoopOverSample}.bamUtil_revert_to_OQ.bam
+bamutil	/data/benchmark/bam2fq/bamUtil_1.0.13/bamUtil/bin/bam
+samtools	/nfs/sw/samtools/samtools-1.1/samtools
+#LoopOverSample	TestSample
+LoopOverSample	NWD248497; NWD353099; NWD498954
+inputpath	/data/benchmark/bam2fq/{LoopOverSample}/original_bam/
+outputpath	/data/benchmark/bam2fq/{LoopOverSample}/reduced_bam/
+logpath	/data/benchmark/bam2fq/{LoopOverSample}/log/
+prefix	{LoopOverSample}.bamUtil.revert.revertOQ
+overwrite	True
+mem	30G
+time	72::
+sgeopt	-q prod.q,dev.q
+
+
+
+
+
+
+#obsolete
+picard.revertSam.restoreOQ:
+cmd	runJobs
+call	{java} -Xmx24576m -Djava.io.tmpdir={tmppath} -jar {jar} VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true MAX_RECORDS_IN_RAM=2000000 INPUT={inputpath}{LoopOverSample}.final.bam OUTPUT={outputpath}{LoopOverSample}.revertSam_OQ.bam RESTORE_ORIGINAL_QUALITIES=true REMOVE_ALIGNMENT_INFORMATION=false REMOVE_DUPLICATE_INFORMATION=false SORT_ORDER=coordinate ATTRIBUTE_TO_CLEAR=null
+java	/data/NYGC/software/java/jre1.7.0_25/bin/java
+jar	/data/NYGC/Software/picard-tools/picard-tools-1.83/RevertSam.jar
+randstr	''
+LoopOverSample	TestSample
+tmppath	/scratch/bam2fq_{LoopOverSample}_{randstr}
+inputpath	/data/benchmark/bam2fq/{LoopOverSample}/original_bam/
+outputpath	/data/benchmark/bam2fq/{LoopOverSample}/reduced_bam/
+logpath	/data/benchmark/bam2fq/{LoopOverSample}/log/
+prefix	{LoopOverSample}.picard.revertSam.restoreOQ
+overwrite	True
+mem	30G
+time	72::
+sgeopt	-q prod.q,dev.q
+
+#obsolete
+picard.revertSam.stripOQ:
+cmd	runJobs
+call	{java} -Xmx24576m -Djava.io.tmpdir={tmppath} -jar {jar} VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true MAX_RECORDS_IN_RAM=2000000 INPUT={inputpath}{LoopOverSample}.final.bam OUTPUT={outputpath}{LoopOverSample}.revertSam_RQ.bam RESTORE_ORIGINAL_QUALITIES=false REMOVE_ALIGNMENT_INFORMATION=true REMOVE_DUPLICATE_INFORMATION=false SORT_ORDER=coordinate ATTRIBUTE_TO_CLEAR=null ATTRIBUTE_TO_CLEAR=OQ
+java	/data/NYGC/software/java/jre1.7.0_25/bin/java
+jar	/data/NYGC/Software/picard-tools/picard-tools-1.83/RevertSam.jar
+randstr	''
+LoopOverSample	TestSample
+tmppath	/scratch/bam2fq_{LoopOverSample}_{randstr}
+inputpath	/data/benchmark/bam2fq/{LoopOverSample}/original_bam/
+outputpath	/data/benchmark/bam2fq/{LoopOverSample}/reduced_bam/
+logpath	/data/benchmark/bam2fq/{LoopOverSample}/log/
+prefix	{LoopOverSample}.picard.revertSam.stripOQ
+overwrite	True
+mem	30G
+time	72::
+sgeopt	-q prod.q,dev.q
+
+

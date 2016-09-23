@@ -29,3 +29,9 @@ rnaUtils.getTPM = function(sampleCount, geneLength, pseudoCount = 0) {
     data = sweep(sampleCount, 1, geneLength, FUN='/')
     return( sweep(data, 2, colSums(data), FUN='/') * 1e6 )
 }
+
+rnaUtils.getRPKM = function(sampleCount, geneLength, pseudoCount = 0) {
+    sampleCount = sampleCount + pseudoCount
+    data = sweep(sampleCount, 2, colSums(sampleCount), FUN='/')
+    return( sweep(data, 1, geneLength, FUN='/') * 1e9 )
+}

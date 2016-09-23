@@ -73,13 +73,15 @@ class SamtoolsView(object):
     #         counterTable[key] = self.count_seq(bam, c, s, seqList)
     #     return counterTable
 
-    def count_seq(self, bam, chrm, start, seqList, maxMismatch, insertion):
+    def count_seq(self, bam, chrm, start, seqList, maxMismatch, insertion, ignoreEmptyMatchedSeq=False):
         """
 
         :param bam: string
         :param chrm: string
         :param start: int
         :param seqList: list/tuple of string
+        :param ignoreEmptyMatchedSeq: if the matched sequenced (by position) is all '-', ignore counting;
+            otherwise it would be counted as incompatible. This is likely due to intronic (spliced) regions
         :return: an instance of collections.Counter: key:seq, value:#reads support
         """
 
@@ -146,7 +148,14 @@ class SamtoolsView(object):
                         matchedLen = len(matchedCigar)
                         numMismatch = self._num_mismatch(query[:min(matchedLen, qLen)],  matchedSeq)
                         if matchedLen >= minDiffDist:
-                            validQuery = True
+                            if ignoreEmptyMatchedSeq:
+                                uniqChar = set(matchedSeq)
+                                if len(uniqChar) == 1 and '-' in uniqChar:
+                                    validQuery = False
+                                else:
+                                    validQuery = True
+                            else:
+                                validQuery = True
                         if matchedLen >= minDiffDist and numMismatch <= min(matchedLen-3, maxMismatch):
                             score = (matchedLen - numMismatch) / matchedLen
                             if score > bestMatch[0]:
@@ -155,6 +164,7 @@ class SamtoolsView(object):
                         # if self._num_mismatch(query[:min(matchedLen, qLen)],  matchedSeq) <= maxMismatch and matchedLen >= minDiffDist:
                         #     queryCounter[query] += 1
                         #     print query, matchedSeq, self._num_mismatch(query[:min(matchedLen, qLen)],  matchedSeq), matchedLen, line
+                        # print query, matchedLen, numMismatch, matchedCigar, matchedSeq, bestMatch
                     if bestMatch[1] is not None:
                         queryCounter[bestMatch[1]] += 1
                         # print bestMatch, line

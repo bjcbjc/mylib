@@ -79,7 +79,7 @@ GencodeIntersect <- function(list1, list2) {
 
 AddGeneName <- function(gencodeData, resultData) {
     gencodeIdx <- GencodeMatch( rownames(resultData), gencodeData[, 'gencode_id'])
-    resultData = cbind(data.frame(gene=gencodeData[gencodeIdx,'symbol']), resultData)
+    resultData = cbind(data.frame(Gene_name=gencodeData[gencodeIdx,'symbol']), resultData)
     return(resultData)
 }
 

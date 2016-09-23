@@ -1,6 +1,9 @@
 import subprocess
 import shlex
 import sys
+import os.path
+import getpass
+import smtplib
 
 __author__ = 'bjchen'
 
@@ -62,7 +65,102 @@ class QacctParser(object):
 
 
 class JobIdCollection(object):
-    def __init__(self, fn, addKeys = ('ru_wallclock', 'maxvmem')):
+    """
+    improve speed by query keyword (prefix) in qacct first, so only one qacct call
+    """
+    def __init__(self, fn, addKeys = ('ru_wallclock', 'maxvmem', 'cpu', 'failed', 'exit_status')):
+        self.fn = fn
+        self.addKeys = addKeys
+        self.keySet = set(self.addKeys)
+        self.data = list()
+        self.prefix = None
+        self.user = getpass.getuser()
+        self.jobStats = dict()
+        self.errorJobIds = list()
+
+        self.__read_job_id()
+
+
+    def __read_job_id(self):
+        """
+        read all data
+        :return:
+        """
+        for line in open(self.fn):
+            line = line.strip().split()  # name, job id, submission status
+            self.data.append(line)
+            self.jobStats[line[1]] = dict()
+
+        self.prefix = os.path.commonprefix([x[0] for x in self.data])
+        if len(self.prefix) == 0:
+            raise ValueError('cannot find common prefix among job names')
+
+    def collect_job_stats(self, outFn = None):
+        if outFn is None:
+            out = sys.stdout
+        else:
+            out = open(outFn, 'w')
+
+        self.get_job_stats()
+        for line in self.data:
+            if line[2] == 'submitted':
+                jobStat = self.jobStats[line[1]]
+                addData = [jobStat[key] if key in jobStat else 'NA' for key in self.addKeys]
+                newLine = '\t'.join(line + addData)
+                out.write(newLine + '\n')
+
+                if len(jobStat) > 0:
+                    if jobStat['failed'] != '0' or jobStat['exit_status'] != '0':
+                        self.errorJobIds.append(line[1])
+        if outFn is not None:
+            out.close()
+            if len(self.errorJobIds) > 0:
+                msg = []
+                for jobid in self.errorJobIds:
+                    jobInfo = 'jobname: {jobname}\njobnumber: {jobnumber}\nfailed: {failed}\nexit_status{exit_status}\n\n'
+                    jobInfo = jobInfo.format(self.jobStats[jobid])
+                    msg.append(jobInfo)
+
+                msg = ''.join(msg)
+                with open(outFn + 'errorjobs', 'w') as out:
+                    out.write(msg)
+                self.email_errors(msg)
+        return
+
+    def email_errors(self, errorMsg):
+        server = smtplib.SMTP('localhost')
+        emailAddr = self.user + '@nygenome.org'
+        msg = 'From: {emailAddr}\nTo: {emailAddr}\nSubject: Errors in jobs {prefix}*\n\n'
+        msg = msg.format(emailAddr=emailAddr, prefix=self.prefix)
+        problem = server.sendmail(emailAddr, emailAddr, msg + errorMsg)
+        print 'email problem:', problem
+        server.quit()
+
+    def get_job_stats(self):
+        p = subprocess.Popen(shlex.split('/opt/sge/bin/lx-amd64/qacct -u %s -j "%s*"' % (self.user, self.prefix)),
+                             stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+        jobStat = dict()
+        for line in p.stdout: #jobs are separated by ===
+            if line.startswith('====='): #new job
+                if len(jobStat) > 0:
+                    if jobStat['jobnumber'] in self.jobStats:
+                        self.jobStats[jobStat['jobnumber']] = jobStat
+                jobStat = dict()
+            else:
+                ## we don't need to store everything!
+                line = line.strip().split()
+                if line[0] in self.keySet or line[0] in {'jobnumber', 'jobname'}:
+                    jobStat[line[0]] = ' '.join(line[1:])
+        else:
+            if len(jobStat) > 0:
+                if jobStat['jobnumber'] in self.jobStats:
+                    self.jobStats[jobStat['jobnumber']] = jobStat
+        p.stdout.close()
+        return
+
+
+class JobIdCollectionOld(object):
+    def __init__(self, fn, addKeys = ('ru_wallclock', 'maxvmem', 'cpu')):
         self.fn = fn
         self.addKeys = addKeys
 
@@ -76,7 +174,7 @@ class JobIdCollection(object):
             line = line.strip().split() #name, job id, submission status
             if line[2] == 'submitted':
                 job_stat = self.get_job_stats(line[1])
-                addData = [job_stat[key] for key in self.addKeys]
+                addData = [job_stat[key] if key in job_stat else 'NA' for key in self.addKeys]
                 newLine = '\t'.join(line + addData)
                 out.write(newLine + '\n')
         if outFn is not None:

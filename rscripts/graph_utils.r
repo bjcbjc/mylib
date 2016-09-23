@@ -58,7 +58,7 @@ matrixHeatmap = function(mtx,
         scale_x_discrete(expand= c(0,0)) +
         scale_y_discrete(expand= c(0,0)) +
         theme(axis.ticks= element_blank(),
-              axis.text.x= element_text(angle = 90, hjust= 0),
+              axis.text.x= element_text(angle = 90, hjust= 0, vjust= 0.5),
               axis.title.x= element_blank(),
               axis.title.y= element_blank(),
               legend.title= element_blank(),
